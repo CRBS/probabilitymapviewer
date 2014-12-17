@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<!--
+COPYRIGHT AND LICENSE
+
+Copyright 2014 The Regents of the University of California All Rights Reserved
+
+Permission to copy, modify and distribute any part of this realtime-segmentation for 
+educational, research and non-profit purposes, without fee, and without a 
+written agreement is hereby granted, provided that the above copyright notice, 
+this paragraph and the following three paragraphs appear in all copies.
+
+Those desiring to incorporate this realtime-segmentation into commercial products
+or use for commercial purposes should contact the Technology Transfer Office, 
+University of California, San Diego, 9500 Gilman Drive, Mail Code 0910, 
+La Jolla, CA 92093-0910, Ph: (858) 534-5815, FAX: (858) 534-7345, 
+E-MAIL:invent@ucsd.edu.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR 
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES, INCLUDING 
+LOST PROFITS, ARISING OUT OF THE USE OF THIS realtime-segmentation, EVEN IF THE UNIVERSITY 
+OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+THE realtime-segmentation PROVIDED HEREIN IS ON AN "AS IS" BASIS, AND THE UNIVERSITY 
+OF CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, 
+ENHANCEMENTS, OR MODIFICATIONS. THE UNIVERSITY OF CALIFORNIA MAKES NO 
+REPRESENTATIONS AND EXTENDS NO WARRANTIES OF ANY KIND, EITHER IMPLIED OR 
+EXPRESS, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
+MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR THAT THE USE OF 
+THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS. 
+-->
+
+
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+  <title>Real time Segmentation via CHM</title>
+
+  <meta charset="utf-8" />
+
+  <meta http-equiv="cache-control" content="no-cache" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+</head>
+
+<body>
+  hello world
+  <div id="map" style="width: 1600px; height: 1200px;"></div>
+
+
+
+   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+  <script>
+
+   var baseLayer = L.tileLayer('images/{z}-r{y}_c{x}.png', {
+      maxZoom: 6,
+      minZoom: 1,
+      maxNativeZoom: 1,
+      continuousWorld: true,
+      tileSize: 128,
+      noWrap: true,
+      attribution: 'Map data is fake' +
+        ' so ' +
+        'there ',
+      id: 'images5'
+    });
+
+   var overLayer = L.tileLayer('probmaps/{z}-r{y}_c{x}.png', {
+      maxZoom: 6,
+      minZoom: 1,
+      maxNativeZoom: 1,
+      continuousWorld: true,
+      tileSize: 128,
+      noWrap: true,
+      opacity: 0.3,
+      attribution: 'Map data is fake' +
+        ' so ' +
+        'there ',
+      id: 'overlay'
+    });
+
+   var map = L.map('map', {
+       crs: L.CRS.Simple
+   });
+
+
+   var baseMaps = {
+     "Slice": baseLayer,
+   };
+
+   var overlayMaps = {
+     "Mitochondria": overLayer
+   };
+
+   L.control.layers(baseMaps,overlayMaps).addTo(map);
+
+   map.setView([-311, 400],1);
+  
+
+    L.marker([0, 0]).addTo(map)
+      .bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
+
+//    L.circle([42, 154], 1, {
+//      color: 'red',
+//      fillColor: '#f03',
+//      fillOpacity: 0.5
+//    }).addTo(map).bindPopup("I am a circle at 256x256 of size 256");
+
+     
+  
+    var xmlHttp = new XMLHttpRequest();
+
+    var popup = L.popup();
+
+    function onTileLoad(e) {
+         var theTile = e.url.slice(e.url.lastIndexOf("/")+1);
+         xmlHttp.open("POST","/process/"+theTile,true);
+         xmlHttp.send(null);
+//       popup
+//         .setLatLng(map.getBounds().getCenter())
+//         .setContent("Loading " + e.url)
+//         .openOn(map);
+    }
+
+    overLayer.on('tileloadstart',onTileLoad);
+
+    function onMapClick(e) {
+      popup
+        .setLatLng(e.latlng)
+        .setContent("Container location: (" 
+          + e.containerPoint.toString()+ ") Map Location: ("
+          +e.layerPoint.toString()+") LatLong: ("+e.latlng.toString()+")" )
+        .openOn(map);
+
+    }
+
+    map.on('click', onMapClick);
+// the interval function should ask the server if any new tiles have
+// appeared since last call and to update the layer if so otherwise
+// not to do anything
+    setInterval(function () {overLayer.redraw()}, 10000);
+
+  </script>
+</body>
+</html>
