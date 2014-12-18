@@ -30,8 +30,9 @@
 
 package edu.ucsd.crbs.realtimeseg.handler;
 
-import edu.ucsd.crbs.realtimeseg.App;
+import edu.ucsd.crbs.realtimeseg.util.ImageProcessor;
 import java.io.IOException;
+import java.util.HashSet;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -44,17 +45,30 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
  */
 public class CHMHandler extends AbstractHandler {
 
+    private ImageProcessor _processor;
+    private HashSet<String> _imagesToProcess = new HashSet<String>();
+    
+    public CHMHandler(ImageProcessor processor){
+        _processor = processor;
+    }
+    
     public void handle(String string, Request request, 
             HttpServletRequest servletRequest, 
             HttpServletResponse servletResponse) throws IOException, ServletException {
         
         int slashPos = servletRequest.getRequestURI().lastIndexOf('/');
-        //App.TILES_TO_PROCESS.addFirst(servletRequest.getRequestURI().substring(slashPos));
+        String imageToProcess = servletRequest.getRequestURI().substring(slashPos+1);
+        
+        //only process images with non negative positions
+        if (imageToProcess.matches("^[0-9]+-r[0-9]+_c[0-9]+\\.png$")){
+            if (!_imagesToProcess.contains(imageToProcess)){
+            //submit job
+                _processor.process(imageToProcess);
+                _imagesToProcess.add(imageToProcess);
+            }
+        }
         servletResponse.setContentType("text/html; charset=utf-8");
         servletResponse.setStatus(HttpServletResponse.SC_OK); 
         request.setHandled(true);
     }
-    
-    
-
 }
