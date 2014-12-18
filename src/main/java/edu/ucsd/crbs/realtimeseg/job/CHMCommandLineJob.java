@@ -33,6 +33,7 @@ package edu.ucsd.crbs.realtimeseg.job;
 import edu.ucsd.crbs.realtimeseg.util.RunCommandLineProcess;
 import edu.ucsd.crbs.realtimeseg.util.RunCommandLineProcessImpl;
 import java.io.File;
+import org.apache.commons.io.FileUtils;
 
 /**
  * Runs CHM on image to generate a probability map
@@ -66,24 +67,29 @@ public class CHMCommandLineJob implements Runnable {
         String result = null;
         System.out.println("Running chm on "+_inputImage);
         try {
+            int slashPos = _inputImage.lastIndexOf('/');
+            String fileName = _inputImage.substring(slashPos+1);
+            
+            File tempDir = new File(_outDir+File.separator+fileName+"dir");
+            tempDir.mkdirs();
+            
             long startTime = System.currentTimeMillis();
         
-            result = rclp.runCommandLineProcess(_binary,_inputImage,_outDir,
+            result = rclp.runCommandLineProcess(_binary,_inputImage,tempDir.getAbsolutePath(),
                     "-b",_tileSize,"-o",_overlap,"-t","1,1","-m",_trainedModel,"-M",
                     _matlabDir);
             long chmDuration = System.currentTimeMillis() - startTime;
-        System.out.println(result);
-        int slashPos = _inputImage.lastIndexOf('/');
-        String fileName = _inputImage.substring(slashPos+1);
+            System.out.println(result);
+        
         
             startTime = System.currentTimeMillis();
-            result = rclp.runCommandLineProcess("convert",_outDir+File.separator+fileName,"-threshold","30%","-transparent","black","-alpha",
+            result = rclp.runCommandLineProcess("convert",tempDir.getAbsolutePath()+File.separator+fileName,"-threshold","30%","-transparent","black","-alpha",
                    "set","-channel","A","-channel","Red,Blue","-threshold",
                    "100%",_outDir+File.separator+fileName);
              System.out.println(result);
              long convertDuration = System.currentTimeMillis() - startTime;
              System.out.println(_inputImage+"  CHM Took: "+chmDuration/1000+" seconds and conver took "+convertDuration/1000+" seconds");
-
+             FileUtils.deleteDirectory(tempDir);
         }
         catch(Exception ex){
             System.err.println("Caught exception trying to run chm: "+ex.getMessage());
