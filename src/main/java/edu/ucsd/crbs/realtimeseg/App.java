@@ -140,7 +140,9 @@ public class App {
             }
             
             server.stop();
-            es.shutdown();
+            es.shutdownNow();
+            System.out.println("Sleeping for 5 seconds to let things cool down");
+            threadSleep(5000);
             
         } catch (Exception ex) {
             ex.printStackTrace();
@@ -167,10 +169,42 @@ public class App {
     public static ImageProcessor getImageProcessor(ExecutorService es,
             File workingDir,OptionSet optionSet) throws Exception {
         
+        String chm = "chm-compiled-r2013a-2.1.362";
+        File chmBinDir = null;
+        if (!optionSet.has(CHM_BIN_ARG)){
+            //chm bin was not set.  Lets copy chm bin out of the resource path and into
+            //the working dir under bin
+            File workingDirBin = new File(workingDir.getAbsolutePath()+File.separator+"bin");
+            workingDirBin.mkdirs();
+            
+            File chmTest = new File(workingDirBin + File.separator + "CHM_test");
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+chm+"/CHM_test"),chmTest);
+            chmTest.setExecutable(true);
+            
+            File chmTestSh = new File(workingDirBin + File.separator + "CHM_test.sh");
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + chm + "/CHM_test.sh"), chmTestSh);
+            chmTestSh.setExecutable(true);
+            
+            File chmTrain = new File(workingDirBin + File.separator + "CHM_train");
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + chm + "/CHM_train"), chmTrain);
+            chmTrain.setExecutable(true);
+            
+            File chmTrainSh = new File(workingDirBin + File.separator + "CHM_train.sh");
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + chm + "/CHM_train.sh"), chmTrainSh);
+            chmTrainSh.setExecutable(true);
+            
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+chm+"/LICENSE.txt"), new File(workingDirBin+File.separator+"LICENSE.txt"));
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+chm+"/README.txt"), new File(workingDirBin+File.separator+"README.txt"));
+            chmBinDir = workingDirBin;
+        }
+        else {
+            chmBinDir = (File)optionSet.valueOf(App.CHM_BIN_ARG);
+        }
+        
         return new SimpleCHMImageProcessor(es,((File) optionSet.valueOf(INPUT_IMAGE_ARG)).getAbsolutePath(),
                     workingDir.getAbsolutePath()+File.separator+"mito",
                     ((File) optionSet.valueOf(TRAINED_MODEL_ARG)).getAbsolutePath(),
-                    ((File)optionSet.valueOf(App.CHM_BIN_ARG)).getAbsolutePath()+File.separator+"CHM_test.sh",
+                    chmBinDir.getAbsolutePath()+File.separator+"CHM_test.sh",
                     ((File) optionSet.valueOf(MATLAB_ARG)).getAbsolutePath());
     }
     
