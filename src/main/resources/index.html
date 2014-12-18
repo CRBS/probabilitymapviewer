@@ -71,7 +71,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
       id: 'images5'
     });
 
-   var overLayer = L.tileLayer('probmaps/{z}-r{y}_c{x}.png', {
+   var mitoLayer = L.tileLayer('mito/{z}-r{y}_c{x}.png', {
       maxZoom: 6,
       minZoom: 1,
       maxNativeZoom: 1,
@@ -96,7 +96,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
    };
 
    var overlayMaps = {
-     "Mitochondria": overLayer
+     "Mitochondria": mitoLayer
    };
 
    L.control.layers(baseMaps,overlayMaps).addTo(map);
@@ -119,7 +119,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
 
     var popup = L.popup();
 
-    function onTileLoad(e) {
+    function onMitoTileLoad(e) {
          var theTile = e.url.slice(e.url.lastIndexOf("/")+1);
          xmlHttp.open("POST","/process/"+theTile,true);
          xmlHttp.send(null);
@@ -129,7 +129,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
 //         .openOn(map);
     }
 
-    overLayer.on('tileloadstart',onTileLoad);
+    mitoLayer.on('tileloadstart',onMitoTileLoad);
 
     function onMapClick(e) {
       popup
@@ -145,7 +145,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
 // the interval function should ask the server if any new tiles have
 // appeared since last call and to update the layer if so otherwise
 // not to do anything
-    setInterval(function () {overLayer.redraw()}, 10000);
+    setInterval(function () {mitoLayer.redraw()}, 10000);
 
   </script>
 </body>
