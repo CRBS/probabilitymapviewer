@@ -273,7 +273,7 @@ public class App {
      * @return ExecutorService
      */
     static ExecutorService getExecutorService(int numCoresToUse) {
-
+        System.out.println("Using "+numCoresToUse+" cores");
         //Create a threadpool that is 90% size of number of processors on system
         //with a minimum size of 1.
         //int threadPoolSize = (int) Math.round((double) Runtime.getRuntime().availableProcessors()
