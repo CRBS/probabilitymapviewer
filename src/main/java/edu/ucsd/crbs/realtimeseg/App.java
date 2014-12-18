@@ -40,7 +40,8 @@ public class App {
     public static final String DIR_ARG = "dir";
     public static final String MATLAB_ARG = "matlab";
     public static final String HELP_ARG = "h";
-
+    public static final String NUM_CORES_ARG = "cores";
+    
     public static ConcurrentLinkedDeque<String> TILES_TO_PROCESS = new ConcurrentLinkedDeque<String>();
     public static boolean SIGNAL_RECEIVED = false;
     public static void main(String[] args) {
@@ -69,6 +70,7 @@ public class App {
                     accepts(PORT_ARG, "Port to run service").withRequiredArg().ofType(Integer.class).defaultsTo(8080);
                     accepts(TRAINED_MODEL_ARG, "Path to CHM trained model").withRequiredArg().ofType(File.class);
                     accepts(DIR_ARG, "Working/Temp directory for server").withRequiredArg().ofType(File.class).defaultsTo(new File(tempDirectory));
+                    accepts(NUM_CORES_ARG,"Number of concurrent CHM jobs to run.  Each job requires 1gb ram.").withRequiredArg().ofType(Integer.class).defaultsTo(1);
                     accepts(HELP_ARG).forHelp();
                 }
             };
@@ -110,17 +112,20 @@ public class App {
                 }
             }
             
-            File probmapsSubDir = new File(workingDir.getAbsolutePath()+File.separator+"probmaps");
+            File probmapsSubDir = new File(workingDir.getAbsolutePath()+File.separator+"mito");
             probmapsSubDir.mkdirs();
             
 
             generateIndexHtmlPage(workingDir.getAbsolutePath());
 
+            Integer numCores = new Integer(1);
+            if (optionSet.has(NUM_CORES_ARG)){
+                numCores = (Integer)optionSet.valueOf(NUM_CORES_ARG);
+            }
             
-            ExecutorService es = getExecutorService(90);
+            ExecutorService es = getExecutorService(numCores);
 
             ImageProcessor ip = getImageProcessor(es,workingDir,optionSet);
-            
             
             server = getWebServer(((File) optionSet.valueOf(INPUT_IMAGE_ARG)).getAbsolutePath(),
                     workingDir.getAbsolutePath(),
@@ -163,7 +168,7 @@ public class App {
             File workingDir,OptionSet optionSet) throws Exception {
         
         return new SimpleCHMImageProcessor(es,((File) optionSet.valueOf(INPUT_IMAGE_ARG)).getAbsolutePath(),
-                    workingDir.getAbsolutePath()+File.separator+"probmaps",
+                    workingDir.getAbsolutePath()+File.separator+"mito",
                     ((File) optionSet.valueOf(TRAINED_MODEL_ARG)).getAbsolutePath(),
                     ((File)optionSet.valueOf(App.CHM_BIN_ARG)).getAbsolutePath()+File.separator+"CHM_test.sh",
                     ((File) optionSet.valueOf(MATLAB_ARG)).getAbsolutePath());
@@ -233,16 +238,17 @@ public class App {
      * value between 0 and 1. For example 0.9 means 90%
      * @return ExecutorService
      */
-    static ExecutorService getExecutorService(double percentOfCoresToUse) {
+    static ExecutorService getExecutorService(int numCoresToUse) {
 
         //Create a threadpool that is 90% size of number of processors on system
         //with a minimum size of 1.
-        int threadPoolSize = (int) Math.round((double) Runtime.getRuntime().availableProcessors()
-                * percentOfCoresToUse);
-        if (threadPoolSize < 1) {
-            threadPoolSize = 1;
-        }
-        return Executors.newFixedThreadPool(12);
+        //int threadPoolSize = (int) Math.round((double) Runtime.getRuntime().availableProcessors()
+        //        * percentOfCoresToUse);
+        //if (threadPoolSize < 1) {
+        //    threadPoolSize = 1;
+        //}
+        //System.out.println
+        return Executors.newFixedThreadPool(numCoresToUse);
     }
 
     static int removeCompletedTasks(List<Future> taskList) {
