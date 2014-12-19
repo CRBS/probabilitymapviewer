@@ -37,7 +37,7 @@ package edu.ucsd.crbs.realtimeseg.io;
  *
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
-public interface ResourceToExecutableScriptWriter {
+public interface ResourceToFileWriter {
 
     /**
      * Writes a given resource to an executable script file.  The result is written to

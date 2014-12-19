@@ -59,9 +59,9 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
   <script>
 
    var baseLayer = L.tileLayer('images/{z}-r{y}_c{x}.png', {
-      maxZoom: 6,
-      minZoom: 1,
-      maxNativeZoom: 1,
+      maxZoom: 0,
+      minZoom: 0,
+      maxNativeZoom: 0,
       continuousWorld: true,
       tileSize: 128,
       noWrap: true,
@@ -72,9 +72,9 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
     });
 
    var mitoLayer = L.tileLayer('mito/{z}-r{y}_c{x}.png', {
-      maxZoom: 6,
-      minZoom: 1,
-      maxNativeZoom: 1,
+      maxZoom: 0,
+      minZoom: 0,
+      maxNativeZoom: 0,
       continuousWorld: true,
       tileSize: 128,
       noWrap: true,
@@ -101,35 +101,23 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
 
    L.control.layers(baseMaps,overlayMaps).addTo(map);
 
-   map.setView([-311, 400],1);
-  
-
-    //L.marker([0, 0]).addTo(map)
-    //  .bindPopup("<b>Hello world!</b><br />I am a popup.").openPopup();
-
-//    L.circle([42, 154], 1, {
-//      color: 'red',
-//      fillColor: '#f03',
-//      fillOpacity: 0.5
-//    }).addTo(map).bindPopup("I am a circle at 256x256 of size 256");
-
-     
+   map.setView([-311, 400],0);
   
     var xmlHttp = new XMLHttpRequest();
 
     var popup = L.popup();
 
+
+    
     function onMitoTileLoad(e) {
          var theTile = e.url.slice(e.url.lastIndexOf("/")+1);
-         xmlHttp.open("POST","/process/"+theTile,true);
+         xmlHttp.open("POST","/mitoprocess/"+theTile,true);
          xmlHttp.send(null);
-//       popup
-//         .setLatLng(map.getBounds().getCenter())
-//         .setContent("Loading " + e.url)
-//         .openOn(map);
     }
 
     mitoLayer.on('tileloadstart',onMitoTileLoad);
+
+
 
     function onMapClick(e) {
       popup

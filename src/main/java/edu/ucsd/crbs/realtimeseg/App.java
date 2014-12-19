@@ -1,8 +1,8 @@
 package edu.ucsd.crbs.realtimeseg;
 
 import edu.ucsd.crbs.realtimeseg.handler.CHMHandler;
-import edu.ucsd.crbs.realtimeseg.io.ResourceToExecutableScriptWriter;
-import edu.ucsd.crbs.realtimeseg.io.ResourceToExecutableScriptWriterImpl;
+import edu.ucsd.crbs.realtimeseg.io.ResourceToFileWriter;
+import edu.ucsd.crbs.realtimeseg.io.ResourceToFileWriterImpl;
 import edu.ucsd.crbs.realtimeseg.util.ImageProcessor;
 import edu.ucsd.crbs.realtimeseg.util.SimpleCHMImageProcessor;
 import java.io.File;
@@ -20,6 +20,7 @@ import joptsimple.OptionSet;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
@@ -68,7 +69,7 @@ public class App {
                     accepts(CHM_BIN_ARG, "Path to CHM bin directory").withRequiredArg().ofType(File.class);
                     accepts(MATLAB_ARG,"Path to Matlab base directory ie /../matlab2013a/v81").withRequiredArg().ofType(File.class);
                     accepts(PORT_ARG, "Port to run service").withRequiredArg().ofType(Integer.class).defaultsTo(8080);
-                    accepts(TRAINED_MODEL_ARG, "Path to CHM trained model").withRequiredArg().ofType(File.class);
+                    //accepts(TRAINED_MODEL_ARG, "Path to CHM trained model").withRequiredArg().ofType(File.class);
                     accepts(DIR_ARG, "Working/Temp directory for server").withRequiredArg().ofType(File.class).defaultsTo(new File(tempDirectory));
                     accepts(NUM_CORES_ARG,"Number of concurrent CHM jobs to run.  Each job requires 1gb ram.").withRequiredArg().ofType(Integer.class).defaultsTo(1);
                     accepts(HELP_ARG).forHelp();
@@ -125,13 +126,11 @@ public class App {
             
             ExecutorService es = getExecutorService(numCores);
 
-            ImageProcessor ip = getImageProcessor(es,workingDir,optionSet);
+            File chmBinDir = getCHMBinDir(workingDir,optionSet);
             
-            server = getWebServer(((File) optionSet.valueOf(INPUT_IMAGE_ARG)).getAbsolutePath(),
-                    workingDir.getAbsolutePath(),
-                    (Integer) optionSet.valueOf(PORT_ARG),
-                    ((File) optionSet.valueOf(TRAINED_MODEL_ARG)).getAbsolutePath(),ip);
-
+            server = getWebServer(es,workingDir,chmBinDir,
+                    ((File) optionSet.valueOf(INPUT_IMAGE_ARG)).getAbsolutePath(),
+                    (Integer) optionSet.valueOf(PORT_ARG),optionSet);
             
             server.start();
             
@@ -166,11 +165,30 @@ public class App {
         }
     }
 
-    public static ImageProcessor getImageProcessor(ExecutorService es,
-            File workingDir,OptionSet optionSet) throws Exception {
+    public static File getMitoTrainedModelDir(File workingDir) throws Exception {
         
+        File mitoModelDir = new File(workingDir.getAbsolutePath()+File.separator+"mitomodel");
+        mitoModelDir.mkdirs();
+        String mito = "mito";
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+mito+"/MODEL_level0_stage1.mat"),
+                new File(mitoModelDir.getAbsolutePath()+File.separator+"MODEL_level0_stage1.mat"));
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+mito+"/MODEL_level0_stage2.mat"),
+                new File(mitoModelDir.getAbsolutePath()+File.separator+"MODEL_level0_stage2.mat"));
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+mito+"/MODEL_level1_stage1.mat"),
+                new File(mitoModelDir.getAbsolutePath()+File.separator+"MODEL_level1_stage1.mat"));
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+mito+"/param.mat"),
+                new File(mitoModelDir.getAbsolutePath()+File.separator+"param.mat"));
+        
+        return mitoModelDir;
+    }
+    
+    public static File getCHMBinDir(File workingDir,OptionSet optionSet) throws Exception {
         String chm = "chm-compiled-r2013a-2.1.362";
-        File chmBinDir = null;
+         
         if (!optionSet.has(CHM_BIN_ARG)){
             //chm bin was not set.  Lets copy chm bin out of the resource path and into
             //the working dir under bin
@@ -195,22 +213,34 @@ public class App {
             
             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+chm+"/LICENSE.txt"), new File(workingDirBin+File.separator+"LICENSE.txt"));
             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+chm+"/README.txt"), new File(workingDirBin+File.separator+"README.txt"));
-            chmBinDir = workingDirBin;
+            return workingDirBin;
         }
-        else {
-            chmBinDir = (File)optionSet.valueOf(App.CHM_BIN_ARG);
-        }
+        return (File)optionSet.valueOf(App.CHM_BIN_ARG);
+    }
+    
+    
+    public static ImageProcessor getMitoImageProcessor(ExecutorService es,
+            File workingDir,File chmBinDir,OptionSet optionSet) throws Exception {
         
         return new SimpleCHMImageProcessor(es,((File) optionSet.valueOf(INPUT_IMAGE_ARG)).getAbsolutePath(),
                     workingDir.getAbsolutePath()+File.separator+"mito",
-                    ((File) optionSet.valueOf(TRAINED_MODEL_ARG)).getAbsolutePath(),
+                    getMitoTrainedModelDir(workingDir).getAbsolutePath(),
                     chmBinDir.getAbsolutePath()+File.separator+"CHM_test.sh",
-                    ((File) optionSet.valueOf(MATLAB_ARG)).getAbsolutePath());
+                    ((File) optionSet.valueOf(MATLAB_ARG)).getAbsolutePath(),"Red,Blue");
     }
     
-    public static Server getWebServer(final String inputImagePath, final String workingDirArg, Integer port,
-            final String trainedModel,
-            ImageProcessor ip) throws Exception {
+    public static ContextHandler getMitoHandler(ExecutorService es,
+            File workingDir,File chmBinDir,OptionSet optionSet) throws Exception {
+        
+        ImageProcessor ip = getMitoImageProcessor(es,workingDir,chmBinDir,optionSet);
+        CHMHandler chmHandler = new CHMHandler(ip);
+        ContextHandler chmContext = new ContextHandler("/mitoprocess");
+        chmContext.setHandler(chmHandler);
+        return chmContext;
+    }
+    
+    public static Server getWebServer(ExecutorService es,File workingDir,File chmBinDir,
+            final String inputImagePath,Integer port, OptionSet optionSet) throws Exception {
 
         // Create a basic Jetty server object that will listen on port 8080.  Note that if you set this to port 0
         // then a randomly available port will be assigned that you can either look in the logs for the port,
@@ -227,17 +257,15 @@ public class App {
 
         ResourceHandler workingDirHandler = new ResourceHandler();
         workingDirHandler.setDirectoriesListed(true);
-        workingDirHandler.setResourceBase(workingDirArg);
+        workingDirHandler.setResourceBase(workingDir.getAbsolutePath());
         workingDirHandler.setWelcomeFiles(new String[]{"index.html"});
         ContextHandler workingDirContext = new ContextHandler("/");
         workingDirContext.setHandler(workingDirHandler);
 
-        CHMHandler chmHandler = new CHMHandler(ip);
-        ContextHandler chmContext = new ContextHandler("/process");
-        chmContext.setHandler(chmHandler);
+        ContextHandler mitoContext = getMitoHandler(es,workingDir,chmBinDir,optionSet);
 
         ContextHandlerCollection contexts = new ContextHandlerCollection();
-        contexts.setHandlers(new Handler[]{imageContext, workingDirContext, chmContext});
+        contexts.setHandlers(new Handler[]{imageContext, workingDirContext, mitoContext});
 
         server.setHandler(contexts);
 
@@ -250,7 +278,7 @@ public class App {
     }
 
     public static void generateIndexHtmlPage(final String workingDir) throws Exception {
-        ResourceToExecutableScriptWriter scriptWriter = new ResourceToExecutableScriptWriterImpl();
+        ResourceToFileWriter scriptWriter = new ResourceToFileWriterImpl();
         scriptWriter.writeResourceToScript("/index.html", workingDir + File.separator + "index.html", null);
         FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/analyzing.png"), new File(workingDir+File.separator+"analyzing.png"));
     }

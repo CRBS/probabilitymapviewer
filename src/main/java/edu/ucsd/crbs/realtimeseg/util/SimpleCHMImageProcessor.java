@@ -46,16 +46,18 @@ public class SimpleCHMImageProcessor implements ImageProcessor{
     private String _trainedModel;
     private String _binary;
     private String _matlabDir;
+    private String _colorsToZeroOut;
     
     public SimpleCHMImageProcessor(ExecutorService ex,final String inputImageDir,
             final String workingDir,final String trainedModel,
-            final String binary,final String matlabDir){
+            final String binary,final String matlabDir,final String colorsToZeroOut){
         _executorService = ex;
         _inputImageDir = inputImageDir;
         _workingDir = workingDir;
         _trainedModel = trainedModel;
         _binary = binary;
         _matlabDir = matlabDir;
+        _colorsToZeroOut = colorsToZeroOut;
     }
 
     public void process(String image) {
@@ -65,7 +67,7 @@ public class SimpleCHMImageProcessor implements ImageProcessor{
         }
         
         CHMCommandLineJob job = new CHMCommandLineJob(_inputImageDir+File.separator+image,
-                _trainedModel,_binary,_matlabDir,_workingDir,"128x128");
+                _trainedModel,_binary,_matlabDir,_workingDir,"128x128",_colorsToZeroOut);
         System.out.println("Processing job: "+image);
         _executorService.submit(job);
     }

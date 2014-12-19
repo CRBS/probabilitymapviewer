@@ -49,15 +49,18 @@ public class CHMCommandLineJob implements Runnable {
     private String _tileSize;
     private String _outDir;
     private String _matlabDir;
+    private String _colorsToZeroOut;
     
     public CHMCommandLineJob(final String inputImage, final String trainedModel,
-            final String binary,final String matlabDir, final String outDir,final String tileSize){
+            final String binary,final String matlabDir, final String outDir,final String tileSize,
+            final String colorsToZeroOut){
         _inputImage = inputImage;
         _trainedModel = trainedModel;
         _binary = binary;
         _outDir = outDir;
         _tileSize = tileSize;
         _matlabDir = matlabDir;
+        _colorsToZeroOut = colorsToZeroOut;
     }
     
     @Override
@@ -83,9 +86,12 @@ public class CHMCommandLineJob implements Runnable {
         
         
             startTime = System.currentTimeMillis();
-            result = rclp.runCommandLineProcess("convert",tempDir.getAbsolutePath()+File.separator+fileName,"-threshold","30%","-transparent","black","-alpha",
-                   "set","-channel","A","-channel","Red,Blue","-threshold",
-                   "100%",_outDir+File.separator+fileName);
+            result = rclp.runCommandLineProcess("convert",
+                    tempDir.getAbsolutePath()+File.separator+fileName,
+                    "-threshold","30%","-transparent","black","-alpha","set",
+                    "-channel","A",
+                    "-channel",_colorsToZeroOut,"-evaluate","set","0",
+                    _outDir+File.separator+fileName);
              System.out.println(result);
              long convertDuration = System.currentTimeMillis() - startTime;
              System.out.println(_inputImage+"  CHM Took: "+chmDuration/1000+" seconds and conver took "+convertDuration/1000+" seconds");

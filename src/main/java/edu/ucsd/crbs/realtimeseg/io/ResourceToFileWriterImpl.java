@@ -42,7 +42,7 @@ import org.apache.commons.io.IOUtils;
  * 
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
-public class ResourceToExecutableScriptWriterImpl implements ResourceToExecutableScriptWriter {
+public class ResourceToFileWriterImpl implements ResourceToFileWriter {
     
    
     /**
