@@ -45,7 +45,7 @@ public class WorkingDirCreatorImpl implements WorkingDirCreator{
 
     
     @Override
-    public File createWorkingDir(Properties props,List<CustomLayer> layers) throws Exception {
+    public File createWorkingDir(Properties props) throws Exception {
         File workingDir = new File(props.getProperty(DIR_ARG));
 
         if (workingDir.exists() == false) {
@@ -56,18 +56,6 @@ public class WorkingDirCreatorImpl implements WorkingDirCreator{
             }
             props.setProperty(TEMP_DIR_CREATED_FLAG, "true");
         }
-        File probmapsSubDir = new File(workingDir.getAbsolutePath() + File.separator + MITO_DIR);
-        probmapsSubDir.mkdirs();
-        
-        if (layers != null && !layers.isEmpty()){
-            for (CustomLayer cl : layers){
-                File layerDir = new File(workingDir.getAbsolutePath() + File.separator+cl.getVarName());
-                layerDir.mkdirs();
-            }
-        }
-        
-        
-
         return workingDir;
     }
 

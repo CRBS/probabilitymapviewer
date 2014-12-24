@@ -30,9 +30,7 @@
 
 package edu.ucsd.crbs.realtimeseg.io;
 
-import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
 import java.io.File;
-import java.util.List;
 import java.util.Properties;
 
 /**
@@ -40,7 +38,5 @@ import java.util.Properties;
  */
 public interface WorkingDirCreator {
 
-    public static final String MITO_DIR = "mito";
-    
-    public File createWorkingDir(Properties props,List<CustomLayer> layers) throws Exception;
+    public File createWorkingDir(Properties props) throws Exception;
 }
