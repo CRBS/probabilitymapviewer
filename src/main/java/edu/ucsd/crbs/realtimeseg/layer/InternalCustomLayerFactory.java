@@ -48,6 +48,11 @@ public class InternalCustomLayerFactory {
         CustomLayer layer = new CustomLayer(getMitoTrainedModelDir(props.getProperty(App.DIR_ARG)),
         "Mitochondria","green","chm");
         layers.add(layer);
+        
+        layer = new CustomLayer(getLysoTrainedModelDir(props.getProperty(App.DIR_ARG)),
+        "Lysosome","blue","chm");
+        layers.add(layer);
+        
         return layers;
     }
     
@@ -71,4 +76,26 @@ public class InternalCustomLayerFactory {
         
         return mitoModelDir.getAbsolutePath();
     }
+    
+    private String getLysoTrainedModelDir(final String workingDir) throws Exception {
+        
+        File lysoModelDir = new File(workingDir+File.separator+"lysomodel");
+        lysoModelDir.mkdirs();
+        String lyso = "lyso";
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+lyso+"/MODEL_level0_stage1.mat"),
+                new File(lysoModelDir.getAbsolutePath()+File.separator+"MODEL_level0_stage1.mat"));
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+lyso+"/MODEL_level0_stage2.mat"),
+                new File(lysoModelDir.getAbsolutePath()+File.separator+"MODEL_level0_stage2.mat"));
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+lyso+"/MODEL_level1_stage1.mat"),
+                new File(lysoModelDir.getAbsolutePath()+File.separator+"MODEL_level1_stage1.mat"));
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+lyso+"/param.mat"),
+                new File(lysoModelDir.getAbsolutePath()+File.separator+"param.mat"));
+        
+        return lysoModelDir.getAbsolutePath();
+    }
+    
 }
