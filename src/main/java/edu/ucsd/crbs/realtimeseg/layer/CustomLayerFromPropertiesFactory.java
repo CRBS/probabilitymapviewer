@@ -46,6 +46,12 @@ public class CustomLayerFromPropertiesFactory {
         }
         ArrayList<CustomLayer> layers = new ArrayList<CustomLayer>();
         
+        InternalCustomLayerFactory internalLayerFac = new InternalCustomLayerFactory();
+        List<CustomLayer> internalLayers = internalLayerFac.getLayers(props);
+        if (internalLayers != null){
+            layers.addAll(internalLayers);
+        }
+        
         for (Object o : props.keySet()){
             String key = (String)o;
             if (!key.startsWith("custom")){
@@ -60,6 +66,8 @@ public class CustomLayerFromPropertiesFactory {
             System.out.println("adding layer");
             layers.add(new CustomLayer(splitLine[0],splitLine[1],splitLine[2],splitLine[3]));
         }
+        
+        
         return layers;
     }
 }
