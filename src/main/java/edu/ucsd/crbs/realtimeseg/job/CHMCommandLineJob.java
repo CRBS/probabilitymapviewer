@@ -94,7 +94,7 @@ public class CHMCommandLineJob implements Runnable {
                     _outDir+File.separator+fileName);
              System.out.println(result);
              long convertDuration = System.currentTimeMillis() - startTime;
-             System.out.println(_inputImage+"  CHM Took: "+chmDuration/1000+" seconds and conver took "+convertDuration/1000+" seconds");
+             System.out.println(_inputImage+"  CHM Took: "+chmDuration/1000+" seconds and convert took "+convertDuration/1000+" seconds");
              FileUtils.deleteDirectory(tempDir);
         }
         catch(Exception ex){
