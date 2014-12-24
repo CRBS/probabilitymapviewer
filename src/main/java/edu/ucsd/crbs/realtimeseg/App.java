@@ -123,16 +123,29 @@ public class App {
             }
             
             Properties props = getPropertiesFromCommandLine(optionSet);
+          
+            WorkingDirCreator wDirCreator = new WorkingDirCreatorImpl();
+            wDirCreator.createWorkingDir(props);
             
             CustomLayerFromPropertiesFactory layerFac = new CustomLayerFromPropertiesFactory();
             List<CustomLayer> layers = layerFac.getCustomLayers(props);
+                    
+            if (layers != null && !layers.isEmpty()){
+                for (CustomLayer cl : layers){
+                    File layerDir = new File(props.getProperty(DIR_ARG) + File.separator+cl.getVarName());
+                    if (!layerDir.exists()){
+                        layerDir.mkdirs();
+                    }
+                }
+            }
+
             
-            WorkingDirCreator wDirCreator = new WorkingDirCreatorImpl();
-            wDirCreator.createWorkingDir(props,layers);
 
             if (props.getProperty(TEMP_DIR_CREATED_FLAG,"false").equals("true")){
                 tempDirUsed = true;   
             }
+            
+            copyOverLeafletLibrary(props);
             
             setCHMBinDir(props);
 
@@ -155,7 +168,7 @@ public class App {
             server.stop();
             es.shutdownNow();
             
-            System.out.println("Sleeping for 5 seconds to let things cool down");
+            _log.log(Level.INFO,"Sleeping for 5 seconds to let things cool down");
             threadSleep(5000);
             
         } catch (Exception ex) {
@@ -169,11 +182,14 @@ public class App {
             if (tempDirUsed) {
                 File tempDir = new File(tempDirectory);
                 if (tempDir.exists()) {
-                    System.out.println("\n\nDeleting temp directory: "+tempDirectory+"\n");
+                    _log.log(Level.INFO,"\n\nDeleting temp directory: "
+                            +tempDirectory+"\n");
                     try {
                         FileUtils.deleteDirectory(tempDir);
                     } catch (IOException ioex) {
-                        System.err.println("Unable to delete" + tempDir.getAbsolutePath() + " : " + ioex.getMessage());
+                        _log.log(Level.WARNING, "Unable to delete{0} : {1}", 
+                                new Object[]{tempDir.getAbsolutePath(), 
+                                    ioex.getMessage()});
                     }
                 }
             }
@@ -220,7 +236,9 @@ public class App {
        
       
         if (!props.containsKey(CHM_BIN_ARG)){
-            System.out.println("--"+CHM_BIN_ARG+" not set using internal copy of CHM");
+            _log.log(Level.INFO,"--{0} not set using internal copy of CHM",
+                    CHM_BIN_ARG);
+            
             File workingDir = new File(props.getProperty(DIR_ARG));
             //chm bin was not set.  Lets copy chm bin out of the resource path and into
             //the working dir under bin
@@ -247,6 +265,24 @@ public class App {
             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+chm+"/README.txt"), new File(workingDirBin+File.separator+"README.txt"));
             props.setProperty(CHM_BIN_ARG,workingDirBin.getAbsolutePath());
         }
+    }
+    
+    public static void copyOverLeafletLibrary(Properties props) throws Exception {
+        String leaflet = "leaflet-0.7.3";
+        File leafletDir = new File(props.getProperty(DIR_ARG)+File.separator+leaflet);
+        
+        File leafletImagesDir = new File(leafletDir.getAbsolutePath()+File.separator+"images");
+        leafletImagesDir.mkdirs();
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + leaflet+ "/leaflet.js"), new File(leafletDir.getAbsolutePath()+File.separator+"leaflet.js"));
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + leaflet+ "/leaflet.css"), new File(leafletDir.getAbsolutePath()+File.separator+"leaflet.css"));
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + leaflet+ "/images/layers-2x.png"), new File(leafletImagesDir.getAbsolutePath()+File.separator+"layers-2x.png"));
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + leaflet+ "/images/layers.png"), new File(leafletImagesDir.getAbsolutePath()+File.separator+"layers.png"));
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + leaflet+ "/images/marker-icon-2x.png"), new File(leafletImagesDir.getAbsolutePath()+File.separator+"marker-icon-2x.png"));
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + leaflet+ "/images/marker-icon.png"), new File(leafletImagesDir.getAbsolutePath()+File.separator+"marker-icon.png"));
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + leaflet+ "/images/marker-shadow.png"), new File(leafletImagesDir.getAbsolutePath()+File.separator+"marker-shadow.png"));
+        
     }
     
     public static Server getWebServer(ExecutorService es,Properties props,List<CustomLayer> layers) throws Exception {
@@ -317,7 +353,7 @@ public class App {
      * @return ExecutorService
      */
     static ExecutorService getExecutorService(int numCoresToUse) {
-        System.out.println("Using "+numCoresToUse+" cores");
+        _log.log(Level.INFO,"Using {0} cores",numCoresToUse);
         return Executors.newFixedThreadPool(numCoresToUse);
     }
 }
