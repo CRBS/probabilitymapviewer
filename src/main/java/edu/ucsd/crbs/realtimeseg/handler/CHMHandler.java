@@ -40,7 +40,8 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 /**
- *
+ * Runs CHM on any requests that match the tile format
+ * 
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
 public class CHMHandler extends AbstractHandler {
@@ -51,7 +52,20 @@ public class CHMHandler extends AbstractHandler {
     public CHMHandler(ImageProcessor processor){
         _processor = processor;
     }
-    
+
+   /**
+    * Sends any tiles not already in the list to the {@link ImageProcessor} defined
+    * in the constructor of this object.  Only tiles that match the pattern
+    * <code>^[0-9]+-r[0-9]+_c[0-9]+\\.png$</code> are passed to the {@link ImageProcessor}
+    * This method does <b>NOT</b> handle the request at all or provide a response,
+    *  it is merely an observer
+    * @param string
+    * @param request
+    * @param servletRequest
+    * @param servletResponse
+    * @throws IOException
+    * @throws ServletException 
+    */ 
     public void handle(String string, Request request, 
             HttpServletRequest servletRequest, 
             HttpServletResponse servletResponse) throws IOException, ServletException {
@@ -67,8 +81,6 @@ public class CHMHandler extends AbstractHandler {
                 _imagesToProcess.add(imageToProcess);
             }
         }
-        servletResponse.setContentType("text/html; charset=utf-8");
-        servletResponse.setStatus(HttpServletResponse.SC_OK); 
-        request.setHandled(true);
+        request.setHandled(false);
     }
 }

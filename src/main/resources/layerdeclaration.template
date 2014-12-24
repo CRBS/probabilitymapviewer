@@ -1,0 +1,13 @@
+var @@LAYER_NAME@@ = L.tileLayer('@@LAYER_FILE_PATH@@', {
+                maxZoom: @@MAX_ZOOM@@,
+                minZoom: @@MIN_ZOOM@@,
+                maxNativeZoom: @@MAX_NATIVE_ZOOM@@,
+                continuousWorld: true,
+                tileSize: @@TILE_SIZE@@,
+                noWrap: true,
+                bounds: tileBounds,
+                opacity: @@OPACITY@@,
+                errorTileUrl: @@ERROR_TILE_URL@@,
+                attribution: @@ATTRIBUTION@@,
+                id: @@LAYER_ID@@
+            });

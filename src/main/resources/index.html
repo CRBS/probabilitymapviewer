@@ -34,107 +34,120 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
 
 <html>
 
-<head>
+    <head>
 
-  <title>Real time Segmentation via CHM</title>
+        <title>Real time Segmentation via CHM</title>
 
-  <meta charset="utf-8" />
+        <meta charset="utf-8" />
 
-  <meta http-equiv="cache-control" content="no-cache" />
+        <meta http-equiv="cache-control" content="no-cache" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-
-<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
-</head>
-
-<body>
-  hello world
-  <div id="map" style="width: 1600px; height: 1200px;"></div>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 
+        <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    </head>
 
-   <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
-  <script>
-
-   var baseLayer = L.tileLayer('images/{z}-r{y}_c{x}.png', {
-      maxZoom: 0,
-      minZoom: 0,
-      maxNativeZoom: 0,
-      continuousWorld: true,
-      tileSize: 128,
-      noWrap: true,
-      attribution: 'Map data is fake' +
-        ' so ' +
-        'there ',
-      id: 'images5'
-    });
-
-   var mitoLayer = L.tileLayer('mito/{z}-r{y}_c{x}.png', {
-      maxZoom: 0,
-      minZoom: 0,
-      maxNativeZoom: 0,
-      continuousWorld: true,
-      tileSize: 128,
-      noWrap: true,
-      opacity: 0.3,
-      errorTileUrl: '/analyzing.png',
-      attribution: 'Map data is fake' +
-        ' so ' +
-        'there ',
-      id: 'overlay'
-    });
-
-   var map = L.map('map', {
-       crs: L.CRS.Simple
-   });
-
-
-   var baseMaps = {
-     "Slice": baseLayer,
-   };
-
-   var overlayMaps = {
-     "Mitochondria": mitoLayer
-   };
-
-   L.control.layers(baseMaps,overlayMaps).addTo(map);
-
-   map.setView([-311, 400],0);
-  
-    var xmlHttp = new XMLHttpRequest();
-
-    var popup = L.popup();
-
-
-    
-    function onMitoTileLoad(e) {
-         var theTile = e.url.slice(e.url.lastIndexOf("/")+1);
-         xmlHttp.open("POST","/mitoprocess/"+theTile,true);
-         xmlHttp.send(null);
-    }
-
-    mitoLayer.on('tileloadstart',onMitoTileLoad);
+    <body>
+        hello world
+        
+        <div id="indent" style="padding: 25px;">
+            <div id="map" style="width: 1600px; height: 1200px;"></div>
+        </div>
 
 
 
-    function onMapClick(e) {
-      popup
-        .setLatLng(e.latlng)
-        .setContent("Container location: (" 
-          + e.containerPoint.toString()+ ") Map Location: ("
-          +e.layerPoint.toString()+") LatLong: ("+e.latlng.toString()+")" )
-        .openOn(map);
+        <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+        <script>
 
-    }
+        //need to subtract from all bounds otherwise the tiles in r-1 and c-1
+        //are requested
+      //  var southWest = L.latLng(-4479, 1);
+      //  var northEast = L.latLng(-1, 4351);
+        var southWest = L.latLng(@@IMAGE_HEIGHT_NEGATIVE@@, 1);
+        var northEast = L.latLng(-1, @@IMAGE_WIDTH@@);
+      
+        var tileBounds = L.latLngBounds(southWest, northEast);
 
-    map.on('click', onMapClick);
-// the interval function should ask the server if any new tiles have
-// appeared since last call and to update the layer if so otherwise
-// not to do anything
-    setInterval(function () {mitoLayer.redraw()}, 10000);
+        var paddedTileBounds = tileBounds.pad(0.05);
+        /**
+            var baseLayer = L.tileLayer('images/{z}-r{y}_c{x}.png', {
+                maxZoom: 2,
+                minZoom: 0,
+                maxNativeZoom: 0,
+                continuousWorld: true,
+                tileSize: 128,
+                noWrap: true,
+                bounds: tileBounds,
+                attribution: 'Base image',
+                id: 'images'
+            });
+        **/
+       
+        @@BASE_IMAGE_LAYER_DEC@@
+        
+        @@MITO_LAYER_DEC@@
+        
+        @@CUSTOM_LAYERS_DECS@@
+        
+        /**
+            var mitoLayer = L.tileLayer('mito/{z}-r{y}_c{x}.png', {
+                maxZoom: 2,
+                minZoom: 0,
+                maxNativeZoom: 0,
+                continuousWorld: true,
+                tileSize: 128,
+                noWrap: true,
+                opacity: 0.3,
+                bounds: tileBounds,
+                errorTileUrl: '/analyzing.png',
+                attribution: 'Mitochondria',
+                id: 'mitooverlay'
+            });
+        **/
+            var baseMaps = {
+                "@@BASE_MAP_NAME@@": @@BASE_LAYER_VAR_NAME@@,
+            };
 
-  </script>
-</body>
+            var overlayMaps = {
+                "Mitochondria": @@MITO_LAYER_VAR_NAME@@,
+                @@CUSTOM_LAYERS_OVERLAYS@@
+            };
+
+
+            var map = L.map('map', {
+                crs: L.CRS.Simple,
+                maxBounds: paddedTileBounds
+                
+            });
+
+            L.control.layers(baseMaps, overlayMaps).addTo(map);
+
+            map.setView([-311, 400], 0);
+
+            var popup = L.popup();
+
+            function onMapClick(e) {
+                popup
+                        .setLatLng(e.latlng)
+                        .setContent("Container location: ("
+                                + e.containerPoint.toString() + ") Map Location: ("
+                                + e.layerPoint.toString() + ") LatLong: (" + e.latlng.toString() + ")")
+                        .openOn(map);
+
+            }
+
+            map.on('click', onMapClick);
+
+            // the interval function should ask the server if any new tiles have
+            // appeared since last call and to update the layer if so otherwise
+            // not to do anything
+            setInterval(function() {
+                @@MITO_LAYER_VAR_NAME@@.redraw();
+                @@CUSTOM_LAYERS_REDRAWS@@
+            }, 10000);
+
+        </script>
+    </body>
 </html>

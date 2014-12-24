@@ -42,7 +42,7 @@ import org.apache.commons.io.IOUtils;
  * 
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
-public class ResourceToFileWriterImpl implements ResourceToFileWriter {
+public class ResourceToFileImpl implements ResourceToFile {
     
    
     /**
@@ -58,7 +58,7 @@ public class ResourceToFileWriterImpl implements ResourceToFileWriter {
      */
     @Override
     public void writeResourceToScript(final String resourcePath,final String destinationScript,StringReplacer replacer) throws Exception {
-         if (resourcePath == null){
+        if (resourcePath == null){
             throw new IllegalArgumentException("resourcePath method parameter cannot be null");
         }
          

@@ -1,26 +1,29 @@
 package edu.ucsd.crbs.realtimeseg;
 
 import edu.ucsd.crbs.realtimeseg.handler.CHMHandler;
-import edu.ucsd.crbs.realtimeseg.io.ResourceToFileWriter;
-import edu.ucsd.crbs.realtimeseg.io.ResourceToFileWriterImpl;
+import edu.ucsd.crbs.realtimeseg.html.HtmlPageGenerator;
+import edu.ucsd.crbs.realtimeseg.html.SingleImageIndexHtmlPageGenerator;
+import edu.ucsd.crbs.realtimeseg.io.WorkingDirCreator;
+import edu.ucsd.crbs.realtimeseg.io.WorkingDirCreatorImpl;
+import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
+import edu.ucsd.crbs.realtimeseg.layer.CustomLayerFromPropertiesFactory;
 import edu.ucsd.crbs.realtimeseg.util.ImageProcessor;
 import edu.ucsd.crbs.realtimeseg.util.SimpleCHMImageProcessor;
 import java.io.File;
 import java.io.IOException;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import org.eclipse.jetty.server.handler.ResourceHandler;
@@ -37,14 +40,22 @@ public class App {
     public static final String INPUT_IMAGE_ARG = "inputimage";
     public static final String CHM_BIN_ARG = "chmbin";
     public static final String PORT_ARG = "port";
-    public static final String TRAINED_MODEL_ARG = "trainedmodel";
     public static final String DIR_ARG = "dir";
     public static final String MATLAB_ARG = "matlab";
-    public static final String HELP_ARG = "h";
     public static final String NUM_CORES_ARG = "cores";
+    public static final String CUSTOM_ARG = "custom";
+    public static final String IMAGE_WIDTH_ARG = "imagewidth";
+    public static final String IMAGE_HEIGHT_ARG = "imageheight";
+    public static final String OVERLAY_OPACITY_ARG = "overlayopacity";
+    public static final String TILE_SIZE_ARG = "tilesize";
+    public static final String TEMP_DIR_CREATED_FLAG="TEMP_DIR_CREATED";
     
     public static ConcurrentLinkedDeque<String> TILES_TO_PROCESS = new ConcurrentLinkedDeque<String>();
     public static boolean SIGNAL_RECEIVED = false;
+    
+   
+    
+    
     public static void main(String[] args) {
         
         
@@ -55,24 +66,39 @@ public class App {
                 SIGNAL_RECEIVED = true;
             }
         });
-        
+       
         
         final String tempDirectory = System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID().toString();
 
         Server server = null;
         boolean tempDirUsed = false;
         
+        final List<String> helpArgs = Arrays.asList("h","help","?");
         try {
             OptionParser parser = new OptionParser() {
+               
                 {
-                    accepts(INPUT_IMAGE_ARG, "Tiled input image directory").withRequiredArg().ofType(File.class);
+                    accepts(INPUT_IMAGE_ARG, "Tiled input image directory.  "
+                            + "Tiles must have name in following format: 0-r#_c#.png"
+                            + " where r# is the 0 offset row number and c# is "
+                            + "the 0 offset column number.  Ex: 0-r0_c0.png  "
+                            + "Tiles must also be size 128x128").withRequiredArg().ofType(File.class).required();
+                    accepts(IMAGE_WIDTH_ARG,"Width of image in pixels").withRequiredArg().ofType(Integer.class).defaultsTo(50000);
+                    accepts(IMAGE_HEIGHT_ARG,"Height of image in pixels").withRequiredArg().ofType(Integer.class).defaultsTo(50000);
+                    accepts(OVERLAY_OPACITY_ARG,"Opacity of segmentation layers 0-1").withRequiredArg().ofType(Double.class).defaultsTo(0.3);
                     accepts(CHM_BIN_ARG, "Path to CHM bin directory").withRequiredArg().ofType(File.class);
-                    accepts(MATLAB_ARG,"Path to Matlab base directory ie /../matlab2013a/v81").withRequiredArg().ofType(File.class);
+                    accepts(MATLAB_ARG,"Path to Matlab base directory ie /../matlab2013a/v81").withRequiredArg().ofType(File.class).required();
                     accepts(PORT_ARG, "Port to run service").withRequiredArg().ofType(Integer.class).defaultsTo(8080);
-                    //accepts(TRAINED_MODEL_ARG, "Path to CHM trained model").withRequiredArg().ofType(File.class);
                     accepts(DIR_ARG, "Working/Temp directory for server").withRequiredArg().ofType(File.class).defaultsTo(new File(tempDirectory));
+                    accepts(TILE_SIZE_ARG,"Size of tiles in pixels ie 128 means 128x128").withRequiredArg().ofType(Integer.class).defaultsTo(128);
                     accepts(NUM_CORES_ARG,"Number of concurrent CHM jobs to run.  Each job requires 1gb ram.").withRequiredArg().ofType(Integer.class).defaultsTo(1);
-                    accepts(HELP_ARG).forHelp();
+                    accepts(CUSTOM_ARG,"Custom Segmentation layer (comma delimited)\n"
+                            + " *trained model - path to chm trained model\n"
+                            + " *name - Name to display in overlay menu\n"
+                            + " *color - can be one of the following: red,green,"
+                            + "blue,yellow,magenta,cyan\n"
+                            + " *binary - Set to 'chm' for now\n").withRequiredArg().ofType(String.class).describedAs("trained model,name,color,binary");
+                    acceptsAll(helpArgs,"Show Help").forHelp();
                 }
             };
 
@@ -85,52 +111,34 @@ public class App {
                 System.exit(1);
             }
 
-            if (optionSet.has(HELP_ARG)) {
-                System.out.println("Help\n");
-                parser.printHelpOn(System.out);
-                System.exit(2);
-            }
-
-            if (!optionSet.has(INPUT_IMAGE_ARG)) {
-                System.err.println("\n\nERROR --" + INPUT_IMAGE_ARG + " is required to run this program. Invoke with -h for more information\n\n");
-                System.exit(1);
-            }
-
-            File workingDir = null;
-            if (optionSet.has(DIR_ARG)) {
-                workingDir = (File) optionSet.valueOf(DIR_ARG);
-            } else {
-                workingDir = new File(tempDirectory);
-                System.out.println("\n--" + DIR_ARG + " not set using " + tempDirectory);
-                tempDirUsed = true;
-            }
-
-            if (workingDir.exists() == false) {
-                System.out.println("--dir "+workingDir.getAbsolutePath()+" does not exist.  Creating directory");
-                if (workingDir.mkdirs() == false) {
-                    System.err.println("Unable to create " + workingDir.getAbsolutePath());
-                    System.exit(1);
+            //help check
+            for (String helpArgName : helpArgs){
+                if (optionSet.has(helpArgName)) {
+                    System.out.println("\n\nHelp\n\n");
+                    parser.printHelpOn(System.out);
+                    System.exit(2);
                 }
             }
             
-            File probmapsSubDir = new File(workingDir.getAbsolutePath()+File.separator+"mito");
-            probmapsSubDir.mkdirs();
+            Properties props = getPropertiesFromCommandLine(optionSet);
             
+            CustomLayerFromPropertiesFactory layerFac = new CustomLayerFromPropertiesFactory();
+            List<CustomLayer> layers = layerFac.getCustomLayers(props);
+            
+            WorkingDirCreator wDirCreator = new WorkingDirCreatorImpl();
+            wDirCreator.createWorkingDir(props,layers);
 
-            generateIndexHtmlPage(workingDir.getAbsolutePath());
-
-            Integer numCores = new Integer(1);
-            if (optionSet.has(NUM_CORES_ARG)){
-                numCores = (Integer)optionSet.valueOf(NUM_CORES_ARG);
+            if (props.getProperty(TEMP_DIR_CREATED_FLAG,"false").equals("true")){
+                tempDirUsed = true;   
             }
             
-            ExecutorService es = getExecutorService(numCores);
+            setCHMBinDir(props);
 
-            File chmBinDir = getCHMBinDir(workingDir,optionSet);
+            generateIndexHtmlPage(props,layers);
             
-            server = getWebServer(es,workingDir,chmBinDir,
-                    ((File) optionSet.valueOf(INPUT_IMAGE_ARG)).getAbsolutePath(),
-                    (Integer) optionSet.valueOf(PORT_ARG),optionSet);
+            ExecutorService es = getExecutorService(Integer.parseInt(props.getProperty(NUM_CORES_ARG)));
+            
+            server = getWebServer(es,props,layers);
             
             server.start();
             
@@ -140,6 +148,7 @@ public class App {
             
             server.stop();
             es.shutdownNow();
+            
             System.out.println("Sleeping for 5 seconds to let things cool down");
             threadSleep(5000);
             
@@ -151,7 +160,7 @@ public class App {
                 server.destroy();
             }
 
-            if (tempDirUsed == true) {
+            if (tempDirUsed) {
                 File tempDir = new File(tempDirectory);
                 if (tempDir.exists()) {
                     System.out.println("\n\nDeleting temp directory: "+tempDirectory+"\n");
@@ -164,10 +173,46 @@ public class App {
             }
         }
     }
+    
+    /**
+     * Converts <b>optionSet</b> to a {@link Properties} object
+     * @param optionSet
+     * @return {@link Properties} set to values from command line and or configuration file
+     * @throws Exception 
+     */
+    public static Properties getPropertiesFromCommandLine(OptionSet optionSet) throws Exception {
 
-    public static File getMitoTrainedModelDir(File workingDir) throws Exception {
+        Properties props = new Properties();
+
+        List<String> customList = (List<String>) optionSet.valuesOf(CUSTOM_ARG);
+        int counter = 1;
+        for (String s : customList) {
+            props.setProperty(CUSTOM_ARG+"." + counter, s);
+            counter++;
+        }
+        props.setProperty(TILE_SIZE_ARG, ((Integer)optionSet.valueOf(TILE_SIZE_ARG)).toString());
+        props.setProperty(OVERLAY_OPACITY_ARG, ((Double)optionSet.valueOf(OVERLAY_OPACITY_ARG)).toString());
+        props.setProperty(IMAGE_WIDTH_ARG, ((Integer)optionSet.valueOf(IMAGE_WIDTH_ARG)).toString());
+        props.setProperty(IMAGE_HEIGHT_ARG, ((Integer)optionSet.valueOf(IMAGE_HEIGHT_ARG)).toString());
+        props.setProperty(NUM_CORES_ARG,((Integer)optionSet.valueOf(NUM_CORES_ARG)).toString());
+        props.setProperty(INPUT_IMAGE_ARG,((File)optionSet.valueOf(INPUT_IMAGE_ARG)).getAbsolutePath());
+        props.setProperty(PORT_ARG,((Integer) optionSet.valueOf(PORT_ARG)).toString());
+        props.setProperty(DIR_ARG, ((File)optionSet.valueOf(DIR_ARG)).getAbsolutePath());
         
-        File mitoModelDir = new File(workingDir.getAbsolutePath()+File.separator+"mitomodel");
+        if (optionSet.has(CHM_BIN_ARG)){
+            props.setProperty(CHM_BIN_ARG,((File)optionSet.valueOf(CHM_BIN_ARG)).getAbsolutePath());
+        }
+        
+        props.setProperty(MATLAB_ARG,((File)optionSet.valueOf(MATLAB_ARG)).getAbsolutePath());
+        
+        System.out.println(props.toString());
+        return props;
+    }
+    
+    
+    public static File getMitoTrainedModelDir(final String workingDir) throws Exception {
+        
+        File mitoModelDir = new File(workingDir+File.separator+"mitomodel");
         mitoModelDir.mkdirs();
         String mito = "mito";
         
@@ -186,10 +231,13 @@ public class App {
         return mitoModelDir;
     }
     
-    public static File getCHMBinDir(File workingDir,OptionSet optionSet) throws Exception {
+    public static void setCHMBinDir(Properties props) throws Exception {
         String chm = "chm-compiled-r2013a-2.1.362";
-         
-        if (!optionSet.has(CHM_BIN_ARG)){
+       
+      
+        if (!props.containsKey(CHM_BIN_ARG)){
+            System.out.println("--"+CHM_BIN_ARG+" not set using internal copy of CHM");
+            File workingDir = new File(props.getProperty(DIR_ARG));
             //chm bin was not set.  Lets copy chm bin out of the resource path and into
             //the working dir under bin
             File workingDirBin = new File(workingDir.getAbsolutePath()+File.separator+"bin");
@@ -213,74 +261,101 @@ public class App {
             
             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+chm+"/LICENSE.txt"), new File(workingDirBin+File.separator+"LICENSE.txt"));
             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+chm+"/README.txt"), new File(workingDirBin+File.separator+"README.txt"));
-            return workingDirBin;
+            props.setProperty(CHM_BIN_ARG,workingDirBin.getAbsolutePath());
         }
-        return (File)optionSet.valueOf(App.CHM_BIN_ARG);
     }
     
     
     public static ImageProcessor getMitoImageProcessor(ExecutorService es,
-            File workingDir,File chmBinDir,OptionSet optionSet) throws Exception {
+            Properties props) throws Exception {
         
-        return new SimpleCHMImageProcessor(es,((File) optionSet.valueOf(INPUT_IMAGE_ARG)).getAbsolutePath(),
-                    workingDir.getAbsolutePath()+File.separator+"mito",
-                    getMitoTrainedModelDir(workingDir).getAbsolutePath(),
-                    chmBinDir.getAbsolutePath()+File.separator+"CHM_test.sh",
-                    ((File) optionSet.valueOf(MATLAB_ARG)).getAbsolutePath(),"Red,Blue");
+        return new SimpleCHMImageProcessor(es,props.getProperty(INPUT_IMAGE_ARG),
+                    props.getProperty(DIR_ARG)+File.separator+WorkingDirCreator.MITO_DIR,
+                    getMitoTrainedModelDir(props.getProperty(DIR_ARG)).getAbsolutePath(),
+                    props.getProperty(CHM_BIN_ARG)+File.separator+"CHM_test.sh",
+                    props.getProperty(MATLAB_ARG),"Red,Blue");
     }
     
     public static ContextHandler getMitoHandler(ExecutorService es,
-            File workingDir,File chmBinDir,OptionSet optionSet) throws Exception {
+            Properties props) throws Exception {
         
-        ImageProcessor ip = getMitoImageProcessor(es,workingDir,chmBinDir,optionSet);
+        ImageProcessor ip = getMitoImageProcessor(es,props);
         CHMHandler chmHandler = new CHMHandler(ip);
-        ContextHandler chmContext = new ContextHandler("/mitoprocess");
+        ContextHandler chmContext = new ContextHandler("/"+WorkingDirCreator.MITO_DIR);
         chmContext.setHandler(chmHandler);
         return chmContext;
     }
     
-    public static Server getWebServer(ExecutorService es,File workingDir,File chmBinDir,
-            final String inputImagePath,Integer port, OptionSet optionSet) throws Exception {
+    public static List<ContextHandler> getCustomHandlers(ExecutorService es,Properties props, List<CustomLayer> layers) throws Exception {
+        if (layers == null || layers.isEmpty()){
+            return null;
+        }
+        ArrayList<ContextHandler> cHandlers = new ArrayList<ContextHandler>();
+        for (CustomLayer cl : layers){
+            ImageProcessor imageProc = new SimpleCHMImageProcessor(es,props.getProperty(INPUT_IMAGE_ARG),
+                    props.getProperty(DIR_ARG)+File.separator+cl.getVarName(),
+                    cl.getTrainedModelDir(),
+                    props.getProperty(CHM_BIN_ARG)+File.separator+"CHM_test.sh",
+                    props.getProperty(MATLAB_ARG),cl.getConvertColor());
+            CHMHandler chmHandler = new CHMHandler(imageProc);
+            ContextHandler chmContext = new ContextHandler("/"+cl.getVarName());
+            chmContext.setHandler(chmHandler);
+            cHandlers.add(chmContext);
+        }
+        return cHandlers;
+    }
+    
+    public static Server getWebServer(ExecutorService es,Properties props,List<CustomLayer> layers) throws Exception {
 
         // Create a basic Jetty server object that will listen on port 8080.  Note that if you set this to port 0
         // then a randomly available port will be assigned that you can either look in the logs for the port,
         // or programmatically obtain it for use in test cases.
-        Server server = new Server(port);
+        Server server = new Server(Integer.parseInt(props.getProperty(PORT_ARG)));
 
+        ContextHandlerCollection contexts = new ContextHandlerCollection();
+        
         // Create the ResourceHandler. It is the object that will actually handle the request for a given file. It is
         // a Jetty Handler object so it is suitable for chaining with other handlers as you will see in other examples.
         ResourceHandler inputImageHandler = new ResourceHandler();
         inputImageHandler.setDirectoriesListed(true);
-        inputImageHandler.setResourceBase(inputImagePath);
+        inputImageHandler.setResourceBase(props.getProperty(INPUT_IMAGE_ARG));
         ContextHandler imageContext = new ContextHandler("/images");
         imageContext.setHandler(inputImageHandler);
-
+        contexts.addHandler(imageContext);
+        
         ResourceHandler workingDirHandler = new ResourceHandler();
         workingDirHandler.setDirectoriesListed(true);
-        workingDirHandler.setResourceBase(workingDir.getAbsolutePath());
+        workingDirHandler.setResourceBase(props.getProperty(DIR_ARG));
         workingDirHandler.setWelcomeFiles(new String[]{"index.html"});
         ContextHandler workingDirContext = new ContextHandler("/");
         workingDirContext.setHandler(workingDirHandler);
+        contexts.addHandler(workingDirContext);
+        
+        ContextHandler mitoContext = getMitoHandler(es,props);
 
-        ContextHandler mitoContext = getMitoHandler(es,workingDir,chmBinDir,optionSet);
-
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
-        contexts.setHandlers(new Handler[]{imageContext, workingDirContext, mitoContext});
-
+        contexts.addHandler(mitoContext);
+        
+        List<ContextHandler> handlers = getCustomHandlers(es,props,layers);
+        if (handlers != null && !handlers.isEmpty()){
+            for (ContextHandler ch : handlers){
+                contexts.addHandler(ch);
+            }
+        }
         server.setHandler(contexts);
 
-        // Start things up! By using the server.join() the server thread will join with the current thread.
-        // See "http://docs.oracle.com/javase/1.5.0/docs/api/java/lang/Thread.html#join()" for more details.
-        System.out.println("\n\n\tOpen a browser to this URL: http://localhost:" + port + "\n\n");
+        System.out.println("\n\n\tOpen a browser to this URL: http://localhost:" 
+                + props.getProperty(PORT_ARG) + "\n\n");
         server.start();
 
         return server;
     }
 
-    public static void generateIndexHtmlPage(final String workingDir) throws Exception {
-        ResourceToFileWriter scriptWriter = new ResourceToFileWriterImpl();
-        scriptWriter.writeResourceToScript("/index.html", workingDir + File.separator + "index.html", null);
-        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/analyzing.png"), new File(workingDir+File.separator+"analyzing.png"));
+    public static void generateIndexHtmlPage(Properties props,List<CustomLayer> layers) throws Exception {
+      
+        HtmlPageGenerator pageGenerator = new SingleImageIndexHtmlPageGenerator(props,layers);
+        pageGenerator.generateHtmlPage(props.getProperty(DIR_ARG));
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/analyzing.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"analyzing.png"));
     }
 
     static void threadSleep(long millis) {
@@ -302,28 +377,6 @@ public class App {
      */
     static ExecutorService getExecutorService(int numCoresToUse) {
         System.out.println("Using "+numCoresToUse+" cores");
-        //Create a threadpool that is 90% size of number of processors on system
-        //with a minimum size of 1.
-        //int threadPoolSize = (int) Math.round((double) Runtime.getRuntime().availableProcessors()
-        //        * percentOfCoresToUse);
-        //if (threadPoolSize < 1) {
-        //    threadPoolSize = 1;
-        //}
-        //System.out.println
         return Executors.newFixedThreadPool(numCoresToUse);
-    }
-
-    static int removeCompletedTasks(List<Future> taskList) {
-        Future f;
-        int removeCount = 0;
-        Iterator<Future> itr = taskList.iterator();
-        while (itr.hasNext()) {
-            f = itr.next();
-            if (f.isDone() || f.isCancelled()) {
-                removeCount++;
-                itr.remove();
-            }
-        }
-        return removeCount;
     }
 }
