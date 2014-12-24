@@ -1,17 +1,14 @@
 package edu.ucsd.crbs.realtimeseg;
 
-import edu.ucsd.crbs.realtimeseg.handler.CHMHandler;
+import edu.ucsd.crbs.realtimeseg.handler.ContextHandlerFactory;
 import edu.ucsd.crbs.realtimeseg.html.HtmlPageGenerator;
 import edu.ucsd.crbs.realtimeseg.html.SingleImageIndexHtmlPageGenerator;
 import edu.ucsd.crbs.realtimeseg.io.WorkingDirCreator;
 import edu.ucsd.crbs.realtimeseg.io.WorkingDirCreatorImpl;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayerFromPropertiesFactory;
-import edu.ucsd.crbs.realtimeseg.util.ImageProcessor;
-import edu.ucsd.crbs.realtimeseg.util.SimpleCHMImageProcessor;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -19,6 +16,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
@@ -37,6 +36,9 @@ import sun.misc.SignalHandler;
  */
 public class App {
 
+    
+    private static final Logger _log = Logger.getLogger(App.class.getName());
+    
     public static final String INPUT_IMAGE_ARG = "inputimage";
     public static final String CHM_BIN_ARG = "chmbin";
     public static final String PORT_ARG = "port";
@@ -62,7 +64,7 @@ public class App {
         Signal.handle(new Signal("INT"), new SignalHandler() {
             // Signal handler method
             public void handle(Signal signal) {
-                System.out.println("Got signal" + signal + " exiting");
+                _log.log(Level.INFO, "Got signal{0} exiting", signal);
                 SIGNAL_RECEIVED = true;
             }
         });
@@ -143,6 +145,10 @@ public class App {
             server.start();
             
             while (SIGNAL_RECEIVED == false && (server.isStarting() || server.isRunning())){
+                //one idea is to have all the image processors dump to a single list
+                //and to have this loop track the completed job list and running job list
+                //we can then just grab the newest items from the list and pass them to the
+                //executor service
                 threadSleep(1000);
             }
             
@@ -209,28 +215,6 @@ public class App {
         return props;
     }
     
-    
-    public static File getMitoTrainedModelDir(final String workingDir) throws Exception {
-        
-        File mitoModelDir = new File(workingDir+File.separator+"mitomodel");
-        mitoModelDir.mkdirs();
-        String mito = "mito";
-        
-        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+mito+"/MODEL_level0_stage1.mat"),
-                new File(mitoModelDir.getAbsolutePath()+File.separator+"MODEL_level0_stage1.mat"));
-        
-        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+mito+"/MODEL_level0_stage2.mat"),
-                new File(mitoModelDir.getAbsolutePath()+File.separator+"MODEL_level0_stage2.mat"));
-        
-        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+mito+"/MODEL_level1_stage1.mat"),
-                new File(mitoModelDir.getAbsolutePath()+File.separator+"MODEL_level1_stage1.mat"));
-        
-        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+mito+"/param.mat"),
-                new File(mitoModelDir.getAbsolutePath()+File.separator+"param.mat"));
-        
-        return mitoModelDir;
-    }
-    
     public static void setCHMBinDir(Properties props) throws Exception {
         String chm = "chm-compiled-r2013a-2.1.362";
        
@@ -265,46 +249,6 @@ public class App {
         }
     }
     
-    
-    public static ImageProcessor getMitoImageProcessor(ExecutorService es,
-            Properties props) throws Exception {
-        
-        return new SimpleCHMImageProcessor(es,props.getProperty(INPUT_IMAGE_ARG),
-                    props.getProperty(DIR_ARG)+File.separator+WorkingDirCreator.MITO_DIR,
-                    getMitoTrainedModelDir(props.getProperty(DIR_ARG)).getAbsolutePath(),
-                    props.getProperty(CHM_BIN_ARG)+File.separator+"CHM_test.sh",
-                    props.getProperty(MATLAB_ARG),"Red,Blue");
-    }
-    
-    public static ContextHandler getMitoHandler(ExecutorService es,
-            Properties props) throws Exception {
-        
-        ImageProcessor ip = getMitoImageProcessor(es,props);
-        CHMHandler chmHandler = new CHMHandler(ip);
-        ContextHandler chmContext = new ContextHandler("/"+WorkingDirCreator.MITO_DIR);
-        chmContext.setHandler(chmHandler);
-        return chmContext;
-    }
-    
-    public static List<ContextHandler> getCustomHandlers(ExecutorService es,Properties props, List<CustomLayer> layers) throws Exception {
-        if (layers == null || layers.isEmpty()){
-            return null;
-        }
-        ArrayList<ContextHandler> cHandlers = new ArrayList<ContextHandler>();
-        for (CustomLayer cl : layers){
-            ImageProcessor imageProc = new SimpleCHMImageProcessor(es,props.getProperty(INPUT_IMAGE_ARG),
-                    props.getProperty(DIR_ARG)+File.separator+cl.getVarName(),
-                    cl.getTrainedModelDir(),
-                    props.getProperty(CHM_BIN_ARG)+File.separator+"CHM_test.sh",
-                    props.getProperty(MATLAB_ARG),cl.getConvertColor());
-            CHMHandler chmHandler = new CHMHandler(imageProc);
-            ContextHandler chmContext = new ContextHandler("/"+cl.getVarName());
-            chmContext.setHandler(chmHandler);
-            cHandlers.add(chmContext);
-        }
-        return cHandlers;
-    }
-    
     public static Server getWebServer(ExecutorService es,Properties props,List<CustomLayer> layers) throws Exception {
 
         // Create a basic Jetty server object that will listen on port 8080.  Note that if you set this to port 0
@@ -330,12 +274,9 @@ public class App {
         ContextHandler workingDirContext = new ContextHandler("/");
         workingDirContext.setHandler(workingDirHandler);
         contexts.addHandler(workingDirContext);
-        
-        ContextHandler mitoContext = getMitoHandler(es,props);
-
-        contexts.addHandler(mitoContext);
-        
-        List<ContextHandler> handlers = getCustomHandlers(es,props,layers);
+       
+        ContextHandlerFactory chf = new ContextHandlerFactory();
+        List<ContextHandler> handlers = chf.getContextHandlers(es, props, layers);
         if (handlers != null && !handlers.isEmpty()){
             for (ContextHandler ch : handlers){
                 contexts.addHandler(ch);
