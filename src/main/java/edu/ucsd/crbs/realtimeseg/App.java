@@ -5,17 +5,22 @@ import edu.ucsd.crbs.realtimeseg.html.HtmlPageGenerator;
 import edu.ucsd.crbs.realtimeseg.html.SingleImageIndexHtmlPageGenerator;
 import edu.ucsd.crbs.realtimeseg.io.WorkingDirCreator;
 import edu.ucsd.crbs.realtimeseg.io.WorkingDirCreatorImpl;
+import edu.ucsd.crbs.realtimeseg.job.CHMCommandLineJob;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayerFromPropertiesFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import joptsimple.OptionException;
@@ -52,11 +57,10 @@ public class App {
     public static final String TILE_SIZE_ARG = "tilesize";
     public static final String TEMP_DIR_CREATED_FLAG="TEMP_DIR_CREATED";
     
-    public static ConcurrentLinkedDeque<String> TILES_TO_PROCESS = new ConcurrentLinkedDeque<String>();
+    public static ConcurrentLinkedDeque<CHMCommandLineJob> tilesToProcess = new ConcurrentLinkedDeque<CHMCommandLineJob>();
     public static boolean SIGNAL_RECEIVED = false;
     
-   
-    
+    public static List<Future> futureTaskList = Collections.synchronizedList(new LinkedList<Future>());
     
     public static void main(String[] args) {
         
@@ -150,18 +154,34 @@ public class App {
             setCHMBinDir(props);
 
             generateIndexHtmlPage(props,layers);
-            
-            ExecutorService es = getExecutorService(Integer.parseInt(props.getProperty(NUM_CORES_ARG)));
+            int numCores = Integer.parseInt(props.getProperty(NUM_CORES_ARG));
+            ExecutorService es = getExecutorService(numCores);
             
             server = getWebServer(es,props,layers);
             
             server.start();
+            int totalProcessedCount = 0;
+            int desiredLoad = numCores + (int)((double)numCores*0.5);
             
             while (SIGNAL_RECEIVED == false && (server.isStarting() || server.isRunning())){
                 //one idea is to have all the image processors dump to a single list
                 //and to have this loop track the completed job list and running job list
                 //we can then just grab the newest items from the list and pass them to the
                 //executor service
+                totalProcessedCount += removeCompletedTasks(futureTaskList);
+                _log.log(Level.INFO, "Total Processed Count is {0}, Future Task List Size: {1}, and desired load is {2} and tiles to process is {3}",
+                        new Object[]{totalProcessedCount,futureTaskList.size(),desiredLoad,
+                        tilesToProcess.size()});
+                int size = futureTaskList.size();
+               
+                if (size < desiredLoad){
+                    
+                    while (!tilesToProcess.isEmpty() && size < desiredLoad){                        
+                        _log.log(Level.INFO,"Submitting task");
+                        futureTaskList.add(es.submit(tilesToProcess.removeFirst()));
+                        size++;
+                    }
+                }
                 threadSleep(1000);
             }
             
@@ -355,5 +375,22 @@ public class App {
     static ExecutorService getExecutorService(int numCoresToUse) {
         _log.log(Level.INFO,"Using {0} cores",numCoresToUse);
         return Executors.newFixedThreadPool(numCoresToUse);
+    }
+    
+    static int removeCompletedTasks(List<Future> taskList){
+        if (taskList == null){
+            return 0;
+        }
+        Future f;
+        int removeCount = 0;
+        Iterator<Future> itr = taskList.iterator();
+        while(itr.hasNext()){
+            f = itr.next();
+            if (f.isDone() || f.isCancelled()){
+                removeCount++;
+                itr.remove();
+            }
+        }
+        return removeCount;
     }
 }
