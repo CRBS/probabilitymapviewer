@@ -30,9 +30,12 @@
 
 package edu.ucsd.crbs.realtimeseg.util;
 
+import edu.ucsd.crbs.realtimeseg.App;
 import edu.ucsd.crbs.realtimeseg.job.CHMCommandLineJob;
 import java.io.File;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -40,6 +43,9 @@ import java.util.concurrent.ExecutorService;
  */
 public class SimpleCHMImageProcessor implements ImageProcessor{
 
+     private static final Logger _log = Logger.getLogger(SimpleCHMImageProcessor.class.getName());
+    
+    
     private ExecutorService _executorService;
     private String _inputImageDir;
     private String _workingDir;
@@ -63,6 +69,7 @@ public class SimpleCHMImageProcessor implements ImageProcessor{
         _tileSize = tileSize+"x"+tileSize;
     }
 
+     @Override
     public void process(String image) {
         File checkForFile = new File(_inputImageDir+File.separator+image);
         if (checkForFile.exists() == false){
@@ -71,7 +78,9 @@ public class SimpleCHMImageProcessor implements ImageProcessor{
         
         CHMCommandLineJob job = new CHMCommandLineJob(_inputImageDir+File.separator+image,
                 _trainedModel,_binary,_matlabDir,_workingDir,_tileSize,_colorsToZeroOut);
-        System.out.println("Processing job: "+image);
-        _executorService.submit(job);
+        _log.log(Level.INFO,"Submitting image {0} for processing and writing output to {1}",
+                new Object[]{image,_workingDir});
+        
+        App.tilesToProcess.add(job);
     }
 }
