@@ -67,6 +67,7 @@ public class SimpleCHMImageProcessor implements ImageProcessor{
         _matlabDir = matlabDir;
         _colorsToZeroOut = colorsToZeroOut;
         _tileSize = tileSize+"x"+tileSize;
+        _log.log(Level.INFO,"Image Processor colors to zero out: {0}",_colorsToZeroOut);
     }
 
      @Override
