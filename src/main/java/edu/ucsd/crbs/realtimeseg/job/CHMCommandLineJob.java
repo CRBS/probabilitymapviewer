@@ -33,6 +33,7 @@ package edu.ucsd.crbs.realtimeseg.job;
 import edu.ucsd.crbs.realtimeseg.util.RunCommandLineProcess;
 import edu.ucsd.crbs.realtimeseg.util.RunCommandLineProcessImpl;
 import java.io.File;
+import java.util.concurrent.Callable;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -40,7 +41,7 @@ import org.apache.commons.io.FileUtils;
  * 
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
-public class CHMCommandLineJob implements Runnable {
+public class CHMCommandLineJob implements Callable {
 
     private String _inputImage;
     private String _trainedModel;
@@ -64,11 +65,13 @@ public class CHMCommandLineJob implements Runnable {
     }
     
     @Override
-    public void run() {
+    public JobResult call() {
         RunCommandLineProcess rclp = new RunCommandLineProcessImpl();
         rclp.setWorkingDirectory(_outDir);
         String result = null;
         System.out.println("Running chm on "+_inputImage);
+        JobResult jobResult = new JobResult();
+        
         try {
             int slashPos = _inputImage.lastIndexOf('/');
             String fileName = _inputImage.substring(slashPos+1);
@@ -94,12 +97,16 @@ public class CHMCommandLineJob implements Runnable {
                     _outDir+File.separator+fileName);
              System.out.println(result);
              long convertDuration = System.currentTimeMillis() - startTime;
+             
+             jobResult.setRunTimeInMilliseconds(chmDuration+convertDuration);
+             
              System.out.println(_inputImage+"  CHM Took: "+chmDuration/1000+" seconds and convert took "+convertDuration/1000+" seconds");
              FileUtils.deleteDirectory(tempDir);
         }
         catch(Exception ex){
             System.err.println("Caught exception trying to run chm: "+ex.getMessage());
         }
+        return jobResult;
     }
 
 }
