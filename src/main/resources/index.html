@@ -46,84 +46,100 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
 
 
         <link rel="stylesheet" href="leaflet-0.7.3/leaflet.css" />
+
+        <style>
+           html,body {
+             height: 99%;
+             width: 99%;
+             position: relative;
+           }
+           #status {
+             background-color:#8F8F8F;
+             width:200px;
+             height: 100%;
+             padding:10px;
+             position: fixed;
+             top: 0px;
+             left: 0px;
+             border: 1px solid #8F8F8F;
+           }
+           #map {
+             border: 1px solid black;
+             width:99%;
+             height: 99%;
+             padding:10px;
+             position: fixed;
+             top: 0px;
+             left: 220px;
+           }
+        </style>
+        
     </head>
 
     <body>
-        hello world
         
-        <div id="indent" style="padding: 25px;">
-            <div id="map" style="width: 1600px; height: 1200px;"></div>
+                
+        <div id="status">
+           Realtime Segmentation<p/>
+           <div style="display: inline-block">&nbsp;</div><br/>
+           # Tiles to Process: <div id="tilestoprocess" style="display: inline-block;">?</div></br>
+           Est. Time (minutes): <div id="esttimehours" style="display: inline-block;">?</div><br/>
+           Est. CPU (hours): <div id="estcpuhours" style="display: inline-block;">?</div><br/>
+           <br/>
+           # Tiles Processed: <div id="tilesprocessed" style="display: inline-block;">?</div><br/>
+           # Cores in Use:  <div id="numcoresinuse" style="display: inline-block;">?</div><br/>
+           CPU Consumed (hours): <div id="cpuconsumedhours" style="display: inline-block;">?</div><br/>
+           Avg. Time per tile (secs): <div id="avgtimepertile" style="display: inline-block;">?</div><br/>
+           <br/>
+           <button type="button" onclick="refreshOverlays()">Refresh Map</button>
         </div>
+        
+        <div id="map"></div>
 
-
-
+        
         <script src="leaflet-0.7.3/leaflet.js"></script>
         <script>
 
         //need to subtract from all bounds otherwise the tiles in r-1 and c-1
         //are requested
-      //  var southWest = L.latLng(-4479, 1);
-      //  var northEast = L.latLng(-1, 4351);
         var southWest = L.latLng(@@IMAGE_HEIGHT_NEGATIVE@@, 1);
         var northEast = L.latLng(-1, @@IMAGE_WIDTH@@);
       
         var tileBounds = L.latLngBounds(southWest, northEast);
 
         var paddedTileBounds = tileBounds.pad(0.05);
-        /**
-            var baseLayer = L.tileLayer('images/{z}-r{y}_c{x}.png', {
-                maxZoom: 2,
-                minZoom: 0,
-                maxNativeZoom: 0,
-                continuousWorld: true,
-                tileSize: 128,
-                noWrap: true,
-                bounds: tileBounds,
-                attribution: 'Base image',
-                id: 'images'
-            });
-        **/
        
         @@BASE_IMAGE_LAYER_DEC@@
         
-        @@MITO_LAYER_DEC@@
-        
         @@CUSTOM_LAYERS_DECS@@
-        
-        /**
-            var mitoLayer = L.tileLayer('mito/{z}-r{y}_c{x}.png', {
-                maxZoom: 2,
-                minZoom: 0,
-                maxNativeZoom: 0,
-                continuousWorld: true,
-                tileSize: 128,
-                noWrap: true,
-                opacity: 0.3,
-                bounds: tileBounds,
-                errorTileUrl: '/analyzing.png',
-                attribution: 'Mitochondria',
-                id: 'mitooverlay'
-            });
-        **/
+       
             var baseMaps = {
                 "@@BASE_MAP_NAME@@": @@BASE_LAYER_VAR_NAME@@,
             };
 
             var overlayMaps = {
-                "Mitochondria": @@MITO_LAYER_VAR_NAME@@,
                 @@CUSTOM_LAYERS_OVERLAYS@@
             };
 
 
             var map = L.map('map', {
                 crs: L.CRS.Simple,
-                maxBounds: paddedTileBounds
+                maxBounds: paddedTileBounds,
+                zoomControl: false,
+                attributionControl: false
                 
             });
+            var attribution = L.control.attribution({
+                position: 'topleft',
+                prefix: 'Display powered by <a href="http://leafletjs.com">Leaflet</a>'
+            });
+            
+            map.addControl(attribution);
+            
+            L.control.layers(baseMaps, overlayMaps,
+            { position: 'topleft'}).addTo(map);
 
-            L.control.layers(baseMaps, overlayMaps).addTo(map);
-
-            map.setView([-311, 400], 0);
+            map.setView([-500, 740], 0);
 
             var popup = L.popup();
 
@@ -138,13 +154,38 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
             }
 
             map.on('click', onMapClick);
-
+            
+            var xmlhttp = new XMLHttpRequest();
+            
+            var tilesToProcessElement = document.getElementById("tilestoprocess");
+            var estTimeHoursElement = document.getElementById("esttimehours");
+            var estCpuHoursElement = document.getElementById("estcpuhours");
+            var tilesProcessedElement = document.getElementById("tilesprocessed");
+            var cpuConsumedHoursElement = document.getElementById("cpuconsumedhours");
+            var avgTimePerTileElement = document.getElementById("avgtimepertile");
+            var numCoresInUseElement = document.getElementById("numcoresinuse");
+            
+            function refreshOverlays() {
+                 @@CUSTOM_LAYERS_REDRAWS@@
+            }
+            
             // the interval function should ask the server if any new tiles have
             // appeared since last call and to update the layer if so otherwise
             // not to do anything
             setInterval(function() {
-                @@MITO_LAYER_VAR_NAME@@.redraw();
-                @@CUSTOM_LAYERS_REDRAWS@@
+                xmlhttp.open("GET","/status",false);
+                xmlhttp.send();
+                var myres = JSON.parse(xmlhttp.responseText);
+                tilesToProcessElement.innerHTML = myres.tilestoprocess;
+                estTimeHoursElement.innerHTML = myres.esttimehours;
+                tilesProcessedElement.innerHTML = myres.tilesprocessed;
+                cpuConsumedHoursElement.innerHTML = myres.cpuconsumedhours;
+                avgTimePerTileElement.innerHTML = myres.avgtimepertile;
+                estCpuHoursElement.innerHTML = myres.estcpuhours;
+                numCoresInUseElement.innerHTML = myres.numcoresinuse;
+                if (myres.tilestoprocess > 0 || myres.futuretasklistsize > 0){
+                   refreshOverlays();
+                }
             }, 10000);
 
         </script>
