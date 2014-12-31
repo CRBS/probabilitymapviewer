@@ -66,6 +66,8 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
     public static final String CUSTOM_LAYERS_OVERLAYS_TOKEN = "@@CUSTOM_LAYERS_OVERLAYS@@";
 
     public static final String CUSTOM_LAYERS_REDRAW_TOKEN = "@@CUSTOM_LAYERS_REDRAWS@@";
+    
+
 
     private String _baseLayerDeclaration;
     private String _mitoLayerDeclaration;
@@ -77,6 +79,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
     private String _customLayersOverlays;
     private String _customLayersRedraws;
 
+
     private List<CustomLayer> _layers;
 
     public SingleImageIndexHtmlPageGenerator(Properties props, List<CustomLayer> layers) {
@@ -87,6 +90,8 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         _overlayOpacity = props.getProperty(App.OVERLAY_OPACITY_ARG, "0.3");
         _tileSize = props.getProperty(App.TILE_SIZE_ARG, "128");
         _layers = layers;
+
+
     }
 
     @Override
@@ -95,7 +100,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
             return line;
         }
 
-        return line.replaceAll(BASE_MAP_NAME_TOKEN, "Slice")
+        return line.replaceAll(BASE_MAP_NAME_TOKEN, "Base image")
                 .replaceAll(BASE_IMAGE_LAYER_DEC_TOKEN, _baseLayerDeclaration)
                 .replaceAll(MITO_LAYER_DEC_TOKEN, _mitoLayerDeclaration)
                 .replaceAll(IMAGE_HEIGHT_NEGATIVE_TOKEN, _imageHeight)
@@ -105,6 +110,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
                 .replaceAll(CUSTOM_LAYERS_DECS_TOKEN, _customLayersDescs)
                 .replaceAll(CUSTOM_LAYERS_OVERLAYS_TOKEN, _customLayersOverlays)
                 .replaceAll(CUSTOM_LAYERS_REDRAW_TOKEN, _customLayersRedraws);
+
     }
 
     @Override
@@ -121,7 +127,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
 
         //generate mito layer declarations
         decGenerator = new TemplateLayerDeclarationGenerator(MITO_LAYER_VAR_NAME,
-                _tileSize, "'Mitochondria'", "'mito'", "mito/{z}-r{y}_c{x}.png", "'/analyzing.png'", _overlayOpacity);
+                _tileSize, "'Mitochondria'", "'mito'", "mito/{z}-r{y}_c{x}.png", "'/analyzing_green.png'", _overlayOpacity);
 
         _mitoLayerDeclaration = decGenerator.getLayerDeclaration();
 
@@ -148,11 +154,11 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         for (CustomLayer cl : _layers) {
 
             decGenerator = new TemplateLayerDeclarationGenerator(cl.getVarName(),
-                    _tileSize, "'" + cl.getName() + "'", "'" + cl.getVarName() + "'",
-                    cl.getImagesPath(), "'/analyzing.png'", _overlayOpacity);
+                    _tileSize, "'<div style=\""+cl.getBackgroundColorCSS()+"color: "+cl.getColor()+";display: inline-block;\">" + cl.getName() + "</div>'", "'" + cl.getVarName() + "'",
+                    cl.getImagesPath(), "'/analyzing_"+cl.getColor()+".png'", _overlayOpacity);
             decs.append(decGenerator.getLayerDeclaration()).append('\n');
 
-            overlays.append('"').append(cl.getName()).append("\": ").append(cl.getVarName()).append(",\n");
+            overlays.append("\"<div style='").append(cl.getBackgroundColorCSS()).append("color: ").append(cl.getColor()).append(";display:inline-block;'>").append(cl.getName()).append("</div>\": ").append(cl.getVarName()).append(",\n");
             redraws.append(cl.getVarName()).append(".redraw();\n");
         }
         _customLayersDescs = decs.toString();
