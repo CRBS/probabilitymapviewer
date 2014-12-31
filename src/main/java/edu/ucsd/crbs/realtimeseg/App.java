@@ -1,11 +1,13 @@
 package edu.ucsd.crbs.realtimeseg;
 
 import edu.ucsd.crbs.realtimeseg.handler.ContextHandlerFactory;
+import edu.ucsd.crbs.realtimeseg.handler.StatusHandler;
 import edu.ucsd.crbs.realtimeseg.html.HtmlPageGenerator;
 import edu.ucsd.crbs.realtimeseg.html.SingleImageIndexHtmlPageGenerator;
 import edu.ucsd.crbs.realtimeseg.io.WorkingDirCreator;
 import edu.ucsd.crbs.realtimeseg.io.WorkingDirCreatorImpl;
 import edu.ucsd.crbs.realtimeseg.job.CHMCommandLineJob;
+import edu.ucsd.crbs.realtimeseg.job.JobResult;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayerFromPropertiesFactory;
 import java.io.File;
@@ -53,6 +55,8 @@ public class App {
     public static final String CUSTOM_ARG = "custom";
     public static final String IMAGE_WIDTH_ARG = "imagewidth";
     public static final String IMAGE_HEIGHT_ARG = "imageheight";
+
+    
     public static final String OVERLAY_OPACITY_ARG = "overlayopacity";
     public static final String TILE_SIZE_ARG = "tilesize";
     public static final String TEMP_DIR_CREATED_FLAG="TEMP_DIR_CREATED";
@@ -61,6 +65,13 @@ public class App {
     public static boolean SIGNAL_RECEIVED = false;
     
     public static List<Future> futureTaskList = Collections.synchronizedList(new LinkedList<Future>());
+    
+    public static int totalProcessedCount = 0;
+    
+    public static long totalJobsRun = 0;
+    public static long totalRunTimeOfJobs = 0;
+    
+    public static double overloadFactor = 0.5;
     
     public static void main(String[] args) {
         
@@ -160,8 +171,7 @@ public class App {
             server = getWebServer(es,props,layers);
             
             server.start();
-            int totalProcessedCount = 0;
-            int desiredLoad = numCores + (int)((double)numCores*0.5);
+            int desiredLoad = numCores + (int)((double)numCores*overloadFactor);
             
             while (SIGNAL_RECEIVED == false && (server.isStarting() || server.isRunning())){
                 //one idea is to have all the image processors dump to a single list
@@ -330,6 +340,12 @@ public class App {
         ContextHandler workingDirContext = new ContextHandler("/");
         workingDirContext.setHandler(workingDirHandler);
         contexts.addHandler(workingDirContext);
+        
+        
+        StatusHandler statusHandler = new StatusHandler(Integer.parseInt(props.getProperty(App.NUM_CORES_ARG)));
+        ContextHandler statusContext = new ContextHandler("/status");
+        statusContext.setHandler(statusHandler);
+        contexts.addHandler(statusContext);
        
         ContextHandlerFactory chf = new ContextHandlerFactory();
         List<ContextHandler> handlers = chf.getContextHandlers(es, props, layers);
@@ -353,6 +369,25 @@ public class App {
         pageGenerator.generateHtmlPage(props.getProperty(DIR_ARG));
         FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/analyzing.png"), 
                 new File(props.getProperty(DIR_ARG)+File.separator+"analyzing.png"));
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/analyzing_red.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"analyzing_red.png"));
+        
+         FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/analyzing_blue.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"analyzing_blue.png"));
+         
+          FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/analyzing_green.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"analyzing_green.png"));
+          
+           FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/analyzing_cyan.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"analyzing_cyan.png"));
+           
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/analyzing_yellow.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"analyzing_yellow.png"));
+            
+             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/analyzing_magenta.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"analyzing_magenta.png"));
+            
     }
 
     static void threadSleep(long millis) {
@@ -383,14 +418,30 @@ public class App {
         }
         Future f;
         int removeCount = 0;
+        JobResult jobResult = null;
         Iterator<Future> itr = taskList.iterator();
         while(itr.hasNext()){
             f = itr.next();
             if (f.isDone() || f.isCancelled()){
+                if (f.isDone()){
+                    try {
+                        jobResult = (JobResult)f.get(); 
+                        if (jobResult != null){
+                            App.totalJobsRun++;
+                            App.totalRunTimeOfJobs += jobResult.getRunTimeInMilliseconds();
+                        }
+                    }
+                    catch(Exception ex){
+                        
+                    }
+                    
+                }
                 removeCount++;
                 itr.remove();
+                
             }
         }
         return removeCount;
     }
+    
 }
