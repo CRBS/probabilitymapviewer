@@ -31,12 +31,16 @@
 package edu.ucsd.crbs.realtimeseg.layer;
 
 import java.util.UUID;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
 public class CustomLayer {
+    
+    private static final Logger _log = Logger.getLogger(CustomLayer.class.getName());
     
     private String _trainedModelDir;
     private String _name;
@@ -82,8 +86,19 @@ public class CustomLayer {
         return _internalDir+"/{z}-r{y}_c{x}.png";
     }
     
+    public String getBackgroundColorCSS(){
+        if (_color == null){
+            return "";
+        }
+        if (_color.equalsIgnoreCase("yellow")){
+            return "background-color: darkgray;";
+        }
+        return "";
+    }
+    
     public String getConvertColor(){
         if (_color == null){
+            _log.log(Level.WARNING,"No color was set");
             return "Red,Blue";
         }
         if (_color.equalsIgnoreCase("green")){
@@ -93,7 +108,7 @@ public class CustomLayer {
             return "Red,Green";
         }
         else if (_color.equalsIgnoreCase("yellow")){
-            return "Red";
+            return "Blue";
         }
         else if (_color.equalsIgnoreCase("magenta")){
             return "Green";
@@ -102,7 +117,7 @@ public class CustomLayer {
             return "Blue,Green";
         }
         else if (_color.equalsIgnoreCase("cyan")){
-            return "Blue";
+            return "Red";
         }
         return "Red";
     }
