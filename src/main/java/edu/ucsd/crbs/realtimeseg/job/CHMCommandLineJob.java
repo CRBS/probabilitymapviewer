@@ -34,6 +34,8 @@ import edu.ucsd.crbs.realtimeseg.util.RunCommandLineProcess;
 import edu.ucsd.crbs.realtimeseg.util.RunCommandLineProcessImpl;
 import java.io.File;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -43,6 +45,8 @@ import org.apache.commons.io.FileUtils;
  */
 public class CHMCommandLineJob implements Callable {
 
+    
+    private static final Logger _log = Logger.getLogger(CHMCommandLineJob.class.getName());
     private String _inputImage;
     private String _trainedModel;
     private String _binary;
@@ -51,6 +55,7 @@ public class CHMCommandLineJob implements Callable {
     private String _outDir;
     private String _matlabDir;
     private String _colorsToZeroOut;
+    private RunCommandLineProcess _runCommandLineProcess;
     
     public CHMCommandLineJob(final String inputImage, final String trainedModel,
             final String binary,final String matlabDir, final String outDir,final String tileSize,
@@ -62,16 +67,19 @@ public class CHMCommandLineJob implements Callable {
         _tileSize = tileSize;
         _matlabDir = matlabDir;
         _colorsToZeroOut = colorsToZeroOut;
+        _runCommandLineProcess = new RunCommandLineProcessImpl();
+    }
+    
+    public void setRunCommandLineProcess(RunCommandLineProcess rclp){
+        _runCommandLineProcess = rclp;
     }
     
     @Override
     public JobResult call() {
-        RunCommandLineProcess rclp = new RunCommandLineProcessImpl();
-        rclp.setWorkingDirectory(_outDir);
+        _runCommandLineProcess.setWorkingDirectory(_outDir);
         String result = null;
-        System.out.println("Running chm on "+_inputImage);
+        _log.log(Level.INFO, "Running chm on {0}",_inputImage);
         JobResult jobResult = new JobResult();
-        
         try {
             int slashPos = _inputImage.lastIndexOf('/');
             String fileName = _inputImage.substring(slashPos+1);
@@ -81,30 +89,33 @@ public class CHMCommandLineJob implements Callable {
             
             long startTime = System.currentTimeMillis();
         
-            result = rclp.runCommandLineProcess(_binary,_inputImage,tempDir.getAbsolutePath(),
-                    "-b",_tileSize,"-o",_overlap,"-t","1,1","-m",_trainedModel,"-M",
+            result = _runCommandLineProcess.runCommandLineProcess(_binary,
+                    _inputImage,tempDir.getAbsolutePath(),
+                    "-b",_tileSize,"-o",_overlap,"-t","1,1","-m",_trainedModel,
+                    "-M",
                     _matlabDir);
             long chmDuration = System.currentTimeMillis() - startTime;
-            System.out.println(result);
-        
+            _log.log(Level.FINE,"chm output: {0}", result);
         
             startTime = System.currentTimeMillis();
-            result = rclp.runCommandLineProcess("convert",
+            result = _runCommandLineProcess.runCommandLineProcess("convert",
                     tempDir.getAbsolutePath()+File.separator+fileName,
                     "-threshold","30%","-transparent","black","-alpha","set",
                     "-channel","A",
                     "-channel",_colorsToZeroOut,"-evaluate","set","0",
                     _outDir+File.separator+fileName);
-             System.out.println(result);
+            _log.log(Level.FINE,"convert output: {0}", result);
+            
              long convertDuration = System.currentTimeMillis() - startTime;
              
              jobResult.setRunTimeInMilliseconds(chmDuration+convertDuration);
-             
-             System.out.println(_inputImage+"  CHM Took: "+chmDuration/1000+" seconds and convert took "+convertDuration/1000+" seconds");
+             _log.log(Level.INFO,"{0} CHM Took: {1} seconds and convert took {2} seconds",
+                     new Object[]{_inputImage,chmDuration/1000,convertDuration/1000});
              FileUtils.deleteDirectory(tempDir);
         }
         catch(Exception ex){
-            System.err.println("Caught exception trying to run chm: "+ex.getMessage());
+            _log.log(Level.WARNING, "Caught exception trying to run chm {0}",
+                    ex.getMessage());
         }
         return jobResult;
     }
