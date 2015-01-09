@@ -315,6 +315,17 @@ public class App {
         
     }
     
+    public static void copyOverJqueryLibrary(Properties props) throws Exception {
+        String jquery = "jquery-1.11.2";
+        String jqueryFileName = jquery+".min.js";
+        File jqueryDir = new File(props.getProperty(DIR_ARG)+File.separator+jquery);
+        jqueryDir.mkdirs();
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" 
+                +jquery+"/"+jqueryFileName),new File(jqueryDir.getAbsolutePath()+
+                        File.separator+jqueryFileName));
+        
+    }
+    
     public static Server getWebServer(ExecutorService es,Properties props,List<CustomLayer> layers) throws Exception {
 
         // Create a basic Jetty server object that will listen on port 8080.  Note that if you set this to port 0
