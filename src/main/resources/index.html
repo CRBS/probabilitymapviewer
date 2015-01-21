@@ -36,14 +36,18 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
 
     <head>
 
-        <title>Real time Segmentation via CHM</title>
+        <title>@@TITLE@@</title>
 
         <meta charset="utf-8" />
 
         <meta http-equiv="cache-control" content="no-cache" />
 
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ 
+        <link rel="stylesheet" href="jquery-ui-1.11.2/jquery-ui.min.css">
+        <script src="jquery-1.11.2/jquery-1.11.2.min.js"></script>
 
+        <script src="jquery-ui-1.11.2/jquery-ui.min.js"></script>
 
         <link rel="stylesheet" href="leaflet-0.7.3/leaflet.css" />
 
@@ -72,15 +76,20 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
              top: 0px;
              left: 220px;
            }
+           
+            #feedback { font-size: 1.2em; }
+            #selectable .ui-selecting { background: #FECA40; }
+            #selectable .ui-selected { background: #F39814; color: white; }
+            #selectable { list-style-type: none; margin: 0; padding: 0; width: 60%; }
+            #selectable li { margin: 3px; padding: 0.4em; font-size: 1.2em; height: 18px; }
         </style>
-        
     </head>
 
     <body>
         
                 
         <div id="status">
-           Realtime Segmentation<p/>
+           @@TITLE@@<p/>
            <div style="display: inline-block">&nbsp;</div><br/>
            # Tiles to Process: <div id="tilestoprocess" style="display: inline-block;">?</div></br>
            Est. Time (minutes): <div id="esttimehours" style="display: inline-block;">?</div><br/>
@@ -91,11 +100,24 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
            CPU Consumed (hours): <div id="cpuconsumedhours" style="display: inline-block;">?</div><br/>
            Avg. Time per tile (secs): <div id="avgtimepertile" style="display: inline-block;">?</div><br/>
            <br/>
+           <button type="button" onclick="addLayer()">Add Layer</button><p/>
            <button type="button" onclick="refreshOverlays()">Refresh Map</button>
+           
         </div>
         
         <div id="map"></div>
 
+        <div id="addLayer" title="Add Layer">
+           <p id="feedback">
+                <span>You've selected:</span> <span id="select-result">none</span>.
+           </p>
+             <ul id="menu">
+                <li>Item 1</li>
+                <li>Item 2</li>
+                <li>Item 3
+             </ul>
+        </div>
+ 
         
         <script src="leaflet-0.7.3/leaflet.js"></script>
         <script>
@@ -169,6 +191,24 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
                  @@CUSTOM_LAYERS_REDRAWS@@
             }
             
+            function addLayer() {
+                
+                $( "#menu" ).menu();
+                
+                $(function() {
+                    $( "#addLayer" ).dialog({
+                        width: 400,
+                        height: 400,
+                        modal: true,
+                        buttons: {
+                            Cancel: function() {
+                                $( this ).dialog("close");
+                            }
+                        }
+                    });
+                  });
+            }
+            
             // the interval function should ask the server if any new tiles have
             // appeared since last call and to update the layer if so otherwise
             // not to do anything
@@ -189,5 +229,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
             }, 10000);
 
         </script>
+        
+        
     </body>
 </html>
