@@ -56,6 +56,7 @@ public class App {
     public static final String IMAGE_WIDTH_ARG = "imagewidth";
     public static final String IMAGE_HEIGHT_ARG = "imageheight";
 
+    public static final String TITLE_ARG = "title";
     
     public static final String OVERLAY_OPACITY_ARG = "overlayopacity";
     public static final String TILE_SIZE_ARG = "tilesize";
@@ -100,6 +101,7 @@ public class App {
                             + " where r# is the 0 offset row number and c# is "
                             + "the 0 offset column number.  Ex: 0-r0_c0.png  "
                             + "Tiles must also be size 128x128").withRequiredArg().ofType(File.class).required();
+                    accepts(TITLE_ARG,"Title for app").withRequiredArg().ofType(String.class).defaultsTo("Realtime Segmentation");
                     accepts(IMAGE_WIDTH_ARG,"Width of image in pixels").withRequiredArg().ofType(Integer.class).defaultsTo(50000);
                     accepts(IMAGE_HEIGHT_ARG,"Height of image in pixels").withRequiredArg().ofType(Integer.class).defaultsTo(50000);
                     accepts(OVERLAY_OPACITY_ARG,"Opacity of segmentation layers 0-1").withRequiredArg().ofType(Double.class).defaultsTo(0.3);
@@ -161,6 +163,8 @@ public class App {
             }
             
             copyOverLeafletLibrary(props);
+            
+            copyOverJqueryLibrary(props);
             
             setCHMBinDir(props);
 
@@ -242,6 +246,7 @@ public class App {
             props.setProperty(CUSTOM_ARG+"." + counter, s);
             counter++;
         }
+        props.setProperty(TITLE_ARG, (String)optionSet.valueOf(TITLE_ARG));
         props.setProperty(TILE_SIZE_ARG, ((Integer)optionSet.valueOf(TILE_SIZE_ARG)).toString());
         props.setProperty(OVERLAY_OPACITY_ARG, ((Double)optionSet.valueOf(OVERLAY_OPACITY_ARG)).toString());
         props.setProperty(IMAGE_WIDTH_ARG, ((Integer)optionSet.valueOf(IMAGE_WIDTH_ARG)).toString());
@@ -324,6 +329,88 @@ public class App {
                 +jquery+"/"+jqueryFileName),new File(jqueryDir.getAbsolutePath()+
                         File.separator+jqueryFileName));
         
+        String jqueryUI = "jquery-ui-1.11.2";
+        String  jqueryUIPrefix = "jquery-ui";
+        
+        File jqueryUIDir = new File(props.getProperty(DIR_ARG)+File.separator+jqueryUI);
+        
+        jqueryUIDir.mkdirs();
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" 
+                +jqueryUI+"/"+jqueryUIPrefix+".min.css"),new File(jqueryUIDir.getAbsolutePath()+
+                        File.separator+jqueryUIPrefix+".min.css"));
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" 
+                +jqueryUI+"/"+jqueryUIPrefix+".min.js"),new File(jqueryUIDir.getAbsolutePath()+
+                        File.separator+jqueryUIPrefix+".min.js"));
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" 
+                +jqueryUI+"/"+jqueryUIPrefix+".structure.min.css"),new File(jqueryUIDir.getAbsolutePath()+
+                        File.separator+jqueryUIPrefix+".structure.min.css"));
+        
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" 
+                +jqueryUI+"/"+jqueryUIPrefix+".theme.min.css"),new File(jqueryUIDir.getAbsolutePath()+
+                        File.separator+jqueryUIPrefix+".theme.min.css"));
+        
+        File imagesDir = new File(jqueryUIDir.getAbsolutePath()+File.separator+"images");
+        imagesDir.mkdirs();
+        String jqueryUIImages = jqueryUI+"/images";
+        
+         FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" 
+                +jqueryUIImages+"/ui-bg_diagonals-thick_18_b81900_40x40.png"),new File(imagesDir.getAbsolutePath()+
+                        File.separator+"ui-bg_diagonals-thick_18_b81900_40x40.png"));
+        
+         FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" 
+                +jqueryUIImages+"/ui-bg_diagonals-thick_20_666666_40x40.png"),new File(imagesDir.getAbsolutePath()+
+                        File.separator+"ui-bg_diagonals-thick_20_666666_40x40.png"));
+
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"
+                + jqueryUIImages + "/ui-bg_flat_10_000000_40x100.png"), new File(imagesDir.getAbsolutePath()
+                        + File.separator + "ui-bg_flat_10_000000_40x100.png"));
+
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"
+                + jqueryUIImages + "/ui-bg_glass_100_f6f6f6_1x400.png"), new File(imagesDir.getAbsolutePath()
+                        + File.separator + "ui-bg_glass_100_f6f6f6_1x400.png"));
+
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"
+                + jqueryUIImages + "/ui-bg_glass_100_fdf5ce_1x400.png"), new File(imagesDir.getAbsolutePath()
+                        + File.separator + "ui-bg_glass_100_fdf5ce_1x400.png"));
+
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"
+                + jqueryUIImages + "/ui-bg_glass_65_ffffff_1x400.png"), new File(imagesDir.getAbsolutePath()
+                        + File.separator + "ui-bg_glass_65_ffffff_1x400.png"));
+
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"
+                + jqueryUIImages + "/ui-bg_gloss-wave_35_f6a828_500x100.png"), new File(imagesDir.getAbsolutePath()
+                        + File.separator + "ui-bg_gloss-wave_35_f6a828_500x100.png"));
+
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"
+                + jqueryUIImages + "/ui-bg_highlight-soft_100_eeeeee_1x100.png"), new File(imagesDir.getAbsolutePath()
+                        + File.separator + "ui-bg_highlight-soft_100_eeeeee_1x100.png"));
+
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"
+                + jqueryUIImages + "/ui-bg_highlight-soft_75_ffe45c_1x100.png"), new File(imagesDir.getAbsolutePath()
+                        + File.separator + "ui-bg_highlight-soft_75_ffe45c_1x100.png"));
+
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"
+                + jqueryUIImages + "/ui-icons_222222_256x240.png"), new File(imagesDir.getAbsolutePath()
+                        + File.separator + "ui-icons_222222_256x240.png"));
+
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"
+                + jqueryUIImages + "/ui-icons_228ef1_256x240.png"), new File(imagesDir.getAbsolutePath()
+                        + File.separator + "ui-icons_228ef1_256x240.png"));
+
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"
+                + jqueryUIImages + "/ui-icons_ef8c08_256x240.png"), new File(imagesDir.getAbsolutePath()
+                        + File.separator + "ui-icons_ef8c08_256x240.png"));
+
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"
+                + jqueryUIImages + "/ui-icons_ffd27a_256x240.png"), new File(imagesDir.getAbsolutePath()
+                        + File.separator + "ui-icons_ffd27a_256x240.png"));
+
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"
+                + jqueryUIImages + "/ui-icons_ffffff_256x240.png"), new File(imagesDir.getAbsolutePath()
+                        + File.separator + "ui-icons_ffffff_256x240.png"));
+
     }
     
     public static Server getWebServer(ExecutorService es,Properties props,List<CustomLayer> layers) throws Exception {
