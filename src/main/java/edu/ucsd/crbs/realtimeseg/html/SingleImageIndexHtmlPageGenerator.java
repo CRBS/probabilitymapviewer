@@ -67,6 +67,8 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
 
     public static final String CUSTOM_LAYERS_REDRAW_TOKEN = "@@CUSTOM_LAYERS_REDRAWS@@";
     
+    public static final String TITLE_TOKEN = "@@TITLE@@";
+    
 
 
     private String _baseLayerDeclaration;
@@ -78,6 +80,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
     private String _customLayersDescs;
     private String _customLayersOverlays;
     private String _customLayersRedraws;
+    private String _title;
 
 
     private List<CustomLayer> _layers;
@@ -90,8 +93,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         _overlayOpacity = props.getProperty(App.OVERLAY_OPACITY_ARG, "0.3");
         _tileSize = props.getProperty(App.TILE_SIZE_ARG, "128");
         _layers = layers;
-
-
+        _title = props.getProperty(App.TITLE_ARG,"Realtime Segmentation");
     }
 
     @Override
@@ -109,7 +111,8 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
                 .replaceAll(MITO_LAYER_VAR_NAME_TOKEN, MITO_LAYER_VAR_NAME)
                 .replaceAll(CUSTOM_LAYERS_DECS_TOKEN, _customLayersDescs)
                 .replaceAll(CUSTOM_LAYERS_OVERLAYS_TOKEN, _customLayersOverlays)
-                .replaceAll(CUSTOM_LAYERS_REDRAW_TOKEN, _customLayersRedraws);
+                .replaceAll(CUSTOM_LAYERS_REDRAW_TOKEN, _customLayersRedraws)
+                .replaceAll(TITLE_TOKEN,_title);
 
     }
 
