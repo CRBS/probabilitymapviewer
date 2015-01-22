@@ -81,6 +81,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
     private String _customLayersOverlays;
     private String _customLayersRedraws;
     private String _title;
+    private String _imageName;
 
 
     private List<CustomLayer> _layers;
@@ -94,6 +95,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         _tileSize = props.getProperty(App.TILE_SIZE_ARG, "128");
         _layers = layers;
         _title = props.getProperty(App.TITLE_ARG,"Realtime Segmentation");
+        _imageName = props.getProperty(App.IMAGE_NAME_ARG,"Base image");
     }
 
     @Override
@@ -102,7 +104,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
             return line;
         }
 
-        return line.replaceAll(BASE_MAP_NAME_TOKEN, "Base image")
+        return line.replaceAll(BASE_MAP_NAME_TOKEN,_imageName)
                 .replaceAll(BASE_IMAGE_LAYER_DEC_TOKEN, _baseLayerDeclaration)
                 .replaceAll(MITO_LAYER_DEC_TOKEN, _mitoLayerDeclaration)
                 .replaceAll(IMAGE_HEIGHT_NEGATIVE_TOKEN, _imageHeight)
@@ -111,7 +113,6 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
                 .replaceAll(MITO_LAYER_VAR_NAME_TOKEN, MITO_LAYER_VAR_NAME)
                 .replaceAll(CUSTOM_LAYERS_DECS_TOKEN, _customLayersDescs)
                 .replaceAll(CUSTOM_LAYERS_OVERLAYS_TOKEN, _customLayersOverlays)
-                .replaceAll(CUSTOM_LAYERS_REDRAW_TOKEN, _customLayersRedraws)
                 .replaceAll(TITLE_TOKEN,_title);
 
     }
@@ -121,7 +122,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
 
         //generate base layer declaration
         LayerDeclarationGenerator decGenerator = new TemplateLayerDeclarationGenerator(BASE_LAYER_VAR_NAME,
-                _tileSize, "'Base image'", "'images'", "images/{z}-r{y}_c{x}.png", "'/analyzing.png'", "1.0");
+                _tileSize, "'"+_imageName+"'", "'images'", "images/{z}-r{y}_c{x}.png", "'/analyzing.png'", "1.0");
         _baseLayerDeclaration = decGenerator.getLayerDeclaration();
 
         if (_baseLayerDeclaration == null) {
@@ -153,7 +154,6 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         LayerDeclarationGenerator decGenerator = null;
         StringBuilder decs = new StringBuilder();
         StringBuilder overlays = new StringBuilder();
-        StringBuilder redraws = new StringBuilder();
         for (CustomLayer cl : _layers) {
 
             decGenerator = new TemplateLayerDeclarationGenerator(cl.getVarName(),
@@ -162,11 +162,9 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
             decs.append(decGenerator.getLayerDeclaration()).append('\n');
 
             overlays.append("\"<div style='").append(cl.getBackgroundColorCSS()).append("color: ").append(cl.getColor()).append(";display:inline-block;'>").append(cl.getName()).append("</div>\": ").append(cl.getVarName()).append(",\n");
-            redraws.append(cl.getVarName()).append(".redraw();\n");
         }
         _customLayersDescs = decs.toString();
         _customLayersOverlays = overlays.toString();
-        _customLayersRedraws = redraws.toString();
 
     }
 }
