@@ -100,8 +100,8 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
            CPU Consumed (hours): <div id="cpuconsumedhours" style="display: inline-block;">?</div><br/>
            Avg. Time per tile (secs): <div id="avgtimepertile" style="display: inline-block;">?</div><br/>
            <br/>
-           <button type="button" onclick="addSegmenterDialog()">Add Segmenter from CCDB</button><p/>
-           <button type="button" onclick="refreshOverlays()">Add Segmenter from File system</button><p/>
+           <button type="button" style="display: none;" onclick="addSegmenterDialog()">Add Segmenter from CCDB</button><p/>
+           <button type="button" style="display: none;" onclick="refreshOverlays()">Add Segmenter from File system</button><p/>
            <button type="button" onclick="refreshOverlays()">Refresh Map</button><p/>
            <div id="debugbox"></div>
            
@@ -301,6 +301,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
             setInterval(function() {
                 xmlhttp.open("GET","/status",false);
                 xmlhttp.send();
+                //switch the set of html to jquery from innerHTML
                 var myres = JSON.parse(xmlhttp.responseText);
                 tilesToProcessElement.innerHTML = myres.tilestoprocess;
                 estTimeHoursElement.innerHTML = myres.esttimehours;
