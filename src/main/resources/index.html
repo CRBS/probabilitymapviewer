@@ -100,24 +100,27 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
            CPU Consumed (hours): <div id="cpuconsumedhours" style="display: inline-block;">?</div><br/>
            Avg. Time per tile (secs): <div id="avgtimepertile" style="display: inline-block;">?</div><br/>
            <br/>
-           <button type="button" onclick="addLayer()">Add Layer</button><p/>
-           <button type="button" onclick="refreshOverlays()">Refresh Map</button>
+           <button type="button" onclick="addSegmenterDialog()">Add Segmenter from CCDB</button><p/>
+           <button type="button" onclick="refreshOverlays()">Add Segmenter from File system</button><p/>
+           <button type="button" onclick="refreshOverlays()">Refresh Map</button><p/>
+           <div id="debugbox"></div>
            
         </div>
         
         <div id="map"></div>
 
-        <div id="addLayer" title="Add Layer">
-           <p id="feedback">
-                <span>You've selected:</span> <span id="select-result">none</span>.
-           </p>
-             <ul id="menu">
-                <li>Item 1</li>
-                <li>Item 2</li>
-                <li>Item 3
-             </ul>
+        <div id="addSegmenter" title="Add segmenter">
+            Select segmenter from CCDB to add<br/>
+            <select id="layerselect" size="6" style="width: 80%;">
+                
+            </select>
+            <p/>
+            
+            Choose color for segmenter
+            <form action="" id="colorlist">
+             
+            </form>
         </div>
- 
         
         <script src="leaflet-0.7.3/leaflet.js"></script>
         <script>
@@ -158,8 +161,12 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
             
             map.addControl(attribution);
             
-            L.control.layers(baseMaps, overlayMaps,
-            { position: 'topleft'}).addTo(map);
+            //need a variable for the layers control
+            // cause we need to add custom layers at a later point
+            var oLayers = L.control.layers(baseMaps, overlayMaps,{ position: 'topleft'});
+            oLayers.addTo(map);
+            //L.control.layers(baseMaps, overlayMaps,
+            //{ position: 'topleft'}).addTo(map);
 
             map.setView([-500, 740], 0);
 
@@ -188,23 +195,102 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
             var numCoresInUseElement = document.getElementById("numcoresinuse");
             
             function refreshOverlays() {
-                 @@CUSTOM_LAYERS_REDRAWS@@
+                //iterate through the layers in the overlayMaps and invoke refresh
+                for (var i in overlayMaps){
+                    overlayMaps[i].redraw();
+                }
+                 
             }
             
-            function addLayer() {
+            function addNewLayerFromCCDB(ccdbLayerVal,ccdbLayerName,ccdbLayerColor) {
                 
-                $( "#menu" ).menu();
+                //$( "#debugbox" ).append("------<p/>");
+                //$( "#debugbox" ).append(ccdbLayerColor);
+                //$( "#debugbox" ).append("<br/>");
+                //$( "#debugbox" ).append(ccdbLayerName);
+                //$( "#debugbox" ).append("<br/>");
+                //$( "#debugbox" ).append(ccdbLayerVal);
+                //$( "#debugbox" ).append("<br/>");
+                
+                
+                //example layer I must add
+                var uh = L.tileLayer(ccdbLayerVal+'/{z}-r{y}_c{x}.png', {
+                 maxZoom: 0,
+                 minZoom: 0,
+                 maxNativeZoom: 0,
+                 continuousWorld: true,
+                 tileSize: 256,
+                 noWrap: true,
+                 bounds: tileBounds,
+                 opacity: 0.3,
+                 errorTileUrl: '/analyzing_'+ccdbLayerColor+'.png',
+                 attribution: '<div style="color: '+ccdbLayerColor+';display: inline-block;">'+ccdbLayerName+'</div>',
+                 id: ccdbLayerVal
+                });
+
+                var prettyLayerName = '<div style="color: '+ccdbLayerColor+';display: inline-block;">'+ccdbLayerName+'</div>';
+                
+                //add the layer to the overlayMaps variable which is used by refreshOverlays
+                //to redraw the layer
+                overlayMaps[prettyLayerName] = uh;
+                
+                //add the layer to leaflet so it can be displayed
+                oLayers.addOverlay(uh,prettyLayerName);
+            }
+            
+            
+            function addSegmenterDialog() {
+                //update color list and 
+                $( "#colorlist" ).empty();
+                $( "#colorlist" ).append("<span style=\"color: blue;\"><input type=\"radio\" name=\"layerColor\" value=\"blue\">Blue</input></span><br/>");  
+                $( "#colorlist" ).append("<span style=\"color: cyan;\"><input type=\"radio\" name=\"layerColor\" value=\"cyan\">Cyan</input></span><br/>");  
+                $( "#colorlist" ).append("<span style=\"color: green;\"><input type=\"radio\" name=\"layerColor\" value=\"green\">Green</input></span><br/>");                  
+                $( "#colorlist" ).append("<span style=\"color: magenta;\"><input type=\"radio\" name=\"layerColor\" value=\"magenta\">Magenta</input></span><br/>");                  
+                $( "#colorlist" ).append("<span style=\"color: red;\"><input type=\"radio\" name=\"layerColor\" value=\"red\">Red</input></span><br/>");  
+                $( "#colorlist" ).append("<span style=\"color: yellow;\"><input type=\"radio\" name=\"layerColor\" value=\"yellow\" checked=\"checked\">Yellow</input></span><br/>");  
+              
+                //layers that can be added
+                //display dialog
+                $( "#layerselect" ).empty();
+                $( "#layerselect" ).append("<option value=\"layer1\" selected=\"selected\">Some Layer</option>");
+                $( "#layerselect" ).append("<option value=\"layer2\">Another Layer</option>");
                 
                 $(function() {
-                    $( "#addLayer" ).dialog({
-                        width: 400,
-                        height: 400,
+                    $( "#addSegmenter" ).dialog({
                         modal: true,
-                        buttons: {
-                            Cancel: function() {
-                                $( this ).dialog("close");
-                            }
-                        }
+                        buttons: [
+                            {
+                              id: "button-add",
+                              text: "Add",
+                              click: function() {
+                                  //$( "#debugbox" ).empty();
+                                 // $( "#debugbox" ).append("hello");
+                                 // $( "#debugbox" ).append("<br/>");
+                                 
+                                //  $( "#debugbox" ).append($( "#layerselect" ).val());
+                                 // $( "#debugbox" ).append("<br/>");
+                                 // $( "#layerselect" ).val();  //for value
+                                 // $( "#layerselect option:selected" ).text() //for for text
+                                // $( "#debugbox" ).append($( "#layerselect option:selected" ).text());
+                                // $( "#debugbox" ).append("<br/>");
+                                // $( "#debugbox" ).append($( "input[name=layerColor]:checked").val());
+                                 addNewLayerFromCCDB($( "#layerselect" ).val(),
+                                 $( "#layerselect option:selected" ).text(),
+                                 $( "input[name=layerColor]:checked").val());
+                                 
+                                 $( this ).dialog("close");
+                              }
+                            },
+                            {
+                              id: "button-cancel",
+                              text: "Cancel",
+                              click: function() {
+                                 $( this ).dialog("close");
+                              }
+                            },
+
+                        ]
+                        
                     });
                   });
             }
