@@ -58,6 +58,8 @@ public class App {
 
     public static final String TITLE_ARG = "title";
     
+    public static final String IMAGE_NAME_ARG = "inputimagename";
+    
     public static final String OVERLAY_OPACITY_ARG = "overlayopacity";
     public static final String TILE_SIZE_ARG = "tilesize";
     public static final String TEMP_DIR_CREATED_FLAG="TEMP_DIR_CREATED";
@@ -102,6 +104,7 @@ public class App {
                             + "the 0 offset column number.  Ex: 0-r0_c0.png  "
                             + "Tiles must also be size 128x128").withRequiredArg().ofType(File.class).required();
                     accepts(TITLE_ARG,"Title for app").withRequiredArg().ofType(String.class).defaultsTo("Realtime Segmentation");
+                    accepts(IMAGE_NAME_ARG,"Name of input image").withRequiredArg().ofType(String.class).defaultsTo("Base image");
                     accepts(IMAGE_WIDTH_ARG,"Width of image in pixels").withRequiredArg().ofType(Integer.class).defaultsTo(50000);
                     accepts(IMAGE_HEIGHT_ARG,"Height of image in pixels").withRequiredArg().ofType(Integer.class).defaultsTo(50000);
                     accepts(OVERLAY_OPACITY_ARG,"Opacity of segmentation layers 0-1").withRequiredArg().ofType(Double.class).defaultsTo(0.3);
@@ -246,6 +249,7 @@ public class App {
             props.setProperty(CUSTOM_ARG+"." + counter, s);
             counter++;
         }
+        props.setProperty(IMAGE_NAME_ARG,(String)optionSet.valueOf(IMAGE_NAME_ARG));
         props.setProperty(TITLE_ARG, (String)optionSet.valueOf(TITLE_ARG));
         props.setProperty(TILE_SIZE_ARG, ((Integer)optionSet.valueOf(TILE_SIZE_ARG)).toString());
         props.setProperty(OVERLAY_OPACITY_ARG, ((Double)optionSet.valueOf(OVERLAY_OPACITY_ARG)).toString());
