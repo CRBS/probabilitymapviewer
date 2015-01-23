@@ -46,7 +46,6 @@ public class SimpleCHMImageProcessor implements ImageProcessor{
      private static final Logger _log = Logger.getLogger(SimpleCHMImageProcessor.class.getName());
     
     
-    private ExecutorService _executorService;
     private String _inputImageDir;
     private String _workingDir;
     private String _trainedModel;
@@ -55,11 +54,10 @@ public class SimpleCHMImageProcessor implements ImageProcessor{
     private String _colorsToZeroOut;
     private String _tileSize;
     
-    public SimpleCHMImageProcessor(ExecutorService ex,final String inputImageDir,
+    public SimpleCHMImageProcessor(final String inputImageDir,
             final String workingDir,final String trainedModel,
             final String binary,final String matlabDir,final String colorsToZeroOut,
             final String tileSize){
-        _executorService = ex;
         _inputImageDir = inputImageDir;
         _workingDir = workingDir;
         _trainedModel = trainedModel;
