@@ -1,12 +1,12 @@
 package edu.ucsd.crbs.realtimeseg;
 
 import edu.ucsd.crbs.realtimeseg.handler.ContextHandlerFactory;
+import edu.ucsd.crbs.realtimeseg.handler.SGEContextHandlerFactory;
 import edu.ucsd.crbs.realtimeseg.handler.StatusHandler;
 import edu.ucsd.crbs.realtimeseg.html.HtmlPageGenerator;
 import edu.ucsd.crbs.realtimeseg.html.SingleImageIndexHtmlPageGenerator;
 import edu.ucsd.crbs.realtimeseg.io.WorkingDirCreator;
 import edu.ucsd.crbs.realtimeseg.io.WorkingDirCreatorImpl;
-import edu.ucsd.crbs.realtimeseg.job.CHMCommandLineJob;
 import edu.ucsd.crbs.realtimeseg.job.JobResult;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayerFromPropertiesFactory;
@@ -19,6 +19,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -63,8 +64,11 @@ public class App {
     public static final String OVERLAY_OPACITY_ARG = "overlayopacity";
     public static final String TILE_SIZE_ARG = "tilesize";
     public static final String TEMP_DIR_CREATED_FLAG="TEMP_DIR_CREATED";
+    public static final String USE_SGE_ARG = "usesge";
+    public static final String SGE_QUEUE_ARG = "sgequeue";
+    public static final String CONVERT_ARG = "convertbinary";
     
-    public static ConcurrentLinkedDeque<CHMCommandLineJob> tilesToProcess = new ConcurrentLinkedDeque<CHMCommandLineJob>();
+    public static ConcurrentLinkedDeque<Callable> tilesToProcess = new ConcurrentLinkedDeque<Callable>();
     public static boolean SIGNAL_RECEIVED = false;
     
     public static List<Future> futureTaskList = Collections.synchronizedList(new LinkedList<Future>());
@@ -114,6 +118,10 @@ public class App {
                     accepts(DIR_ARG, "Working/Temp directory for server").withRequiredArg().ofType(File.class).defaultsTo(new File(tempDirectory));
                     accepts(TILE_SIZE_ARG,"Size of tiles in pixels ie 128 means 128x128").withRequiredArg().ofType(Integer.class).defaultsTo(128);
                     accepts(NUM_CORES_ARG,"Number of concurrent CHM jobs to run.  Each job requires 1gb ram.").withRequiredArg().ofType(Integer.class).defaultsTo(1);
+                    accepts(USE_SGE_ARG,"Use Sun/Oracle Grid Engine (SGE) to run CHM.  If used then --"
+                            +DIR_ARG+" must be set to a path on a shared filesystem accessible to all compute nodes");
+                    accepts(SGE_QUEUE_ARG,"Sets the SGE queue to use.  Only relevant with --"+USE_SGE_ARG).withRequiredArg().ofType(String.class).defaultsTo("all.q");
+                    accepts(CONVERT_ARG,"Sets path to convert command (only works with --"+USE_SGE_ARG+")").withRequiredArg().ofType(String.class).defaultsTo("convert");
                     accepts(CUSTOM_ARG,"Custom Segmentation layer (comma delimited)\n"
                             + " *trained model - path to chm trained model\n"
                             + " *name - Name to display in overlay menu\n"
@@ -213,6 +221,7 @@ public class App {
             System.exit(1);
         } finally {
             if (server != null){
+                _log.log(Level.INFO,"Shutting down webserver");
                 server.destroy();
             }
 
@@ -249,6 +258,15 @@ public class App {
             props.setProperty(CUSTOM_ARG+"." + counter, s);
             counter++;
         }
+        
+        if (optionSet.has(USE_SGE_ARG)){
+            props.setProperty(USE_SGE_ARG, "true");
+        }
+        else {
+            props.setProperty(USE_SGE_ARG, "false");
+        }
+        props.setProperty(CONVERT_ARG,(String)optionSet.valueOf(CONVERT_ARG));
+        props.setProperty(SGE_QUEUE_ARG, (String)optionSet.valueOf(SGE_QUEUE_ARG));
         props.setProperty(IMAGE_NAME_ARG,(String)optionSet.valueOf(IMAGE_NAME_ARG));
         props.setProperty(TITLE_ARG, (String)optionSet.valueOf(TITLE_ARG));
         props.setProperty(TILE_SIZE_ARG, ((Integer)optionSet.valueOf(TILE_SIZE_ARG)).toString());
@@ -449,11 +467,22 @@ public class App {
         statusContext.setHandler(statusHandler);
         contexts.addHandler(statusContext);
        
-        ContextHandlerFactory chf = new ContextHandlerFactory();
-        List<ContextHandler> handlers = chf.getContextHandlers(es, props, layers);
-        if (handlers != null && !handlers.isEmpty()){
-            for (ContextHandler ch : handlers){
-                contexts.addHandler(ch);
+        if (props.getProperty(USE_SGE_ARG).equals("false")){
+            ContextHandlerFactory chf = new ContextHandlerFactory();
+            List<ContextHandler> handlers = chf.getContextHandlers(es, props, layers);
+            if (handlers != null && !handlers.isEmpty()){
+                for (ContextHandler ch : handlers){
+                    contexts.addHandler(ch);
+                }
+            }
+        }
+        else {
+            SGEContextHandlerFactory sgeChf = new SGEContextHandlerFactory();
+            List<ContextHandler> handlers = sgeChf.getContextHandlers(es, props, layers);
+            if (handlers != null && !handlers.isEmpty()){
+                for (ContextHandler ch : handlers){
+                    contexts.addHandler(ch);
+                }
             }
         }
         server.setHandler(contexts);
