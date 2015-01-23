@@ -55,7 +55,7 @@ public class ContextHandlerFactory {
         
         ArrayList<ContextHandler> cHandlers = new ArrayList<ContextHandler>();
         for (CustomLayer cl : layers){
-            ImageProcessor imageProc = new SimpleCHMImageProcessor(es,props.getProperty(App.INPUT_IMAGE_ARG),
+            ImageProcessor imageProc = new SimpleCHMImageProcessor(props.getProperty(App.INPUT_IMAGE_ARG),
                     props.getProperty(App.DIR_ARG)+File.separator+cl.getVarName(),
                     cl.getTrainedModelDir(),
                     props.getProperty(App.CHM_BIN_ARG)+File.separator+"CHM_test.sh",
