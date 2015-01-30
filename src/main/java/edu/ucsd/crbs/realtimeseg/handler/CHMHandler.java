@@ -33,6 +33,8 @@ package edu.ucsd.crbs.realtimeseg.handler;
 import edu.ucsd.crbs.realtimeseg.util.ImageProcessor;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,6 +48,8 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
  */
 public class CHMHandler extends AbstractHandler {
 
+    
+    private static final Logger _log = Logger.getLogger(CHMHandler.class.getName());
     private ImageProcessor _processor;
     private HashSet<String> _imagesToProcess = new HashSet<String>();
     
@@ -53,6 +57,15 @@ public class CHMHandler extends AbstractHandler {
         _processor = processor;
     }
 
+    public void setImageProcessor(ImageProcessor processor){
+        _processor = processor;
+    }
+
+    public void clearProcessedImages(){
+        _imagesToProcess.clear();
+    }
+    
+    
    /**
     * Sends any tiles not already in the list to the {@link ImageProcessor} defined
     * in the constructor of this object.  Only tiles that match the pattern
@@ -69,6 +82,13 @@ public class CHMHandler extends AbstractHandler {
     public void handle(String string, Request request, 
             HttpServletRequest servletRequest, 
             HttpServletResponse servletResponse) throws IOException, ServletException {
+
+        _log.log(Level.INFO, servletRequest.getRequestURI());
+
+        if (_processor == null){
+            request.setHandled(false);
+            return;
+        }
         
         int slashPos = servletRequest.getRequestURI().lastIndexOf('/');
         String imageToProcess = servletRequest.getRequestURI().substring(slashPos+1);
