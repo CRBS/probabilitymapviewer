@@ -48,7 +48,7 @@ public class EmptyContextHandlersFactory {
         ArrayList<ContextHandler> cHandlers = new ArrayList<ContextHandler>();
         for (int i  = 1 ; i <= 10; i++){
             ContextHandler chmContext = new ContextHandler("/"+App.LAYER_HANDLER_BASE_DIR+"/"+i);
-            chmContext.setHandler(new CHMHandler(null));
+            chmContext.setHandler(new ImageProcessorHandler(null));
             cHandlers.add(chmContext);
         }
         return cHandlers;
