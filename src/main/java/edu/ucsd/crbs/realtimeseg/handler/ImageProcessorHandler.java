@@ -30,41 +30,54 @@
 
 package edu.ucsd.crbs.realtimeseg.handler;
 
-import edu.ucsd.crbs.realtimeseg.util.ImageProcessor;
+import edu.ucsd.crbs.realtimeseg.processor.ImageProcessor;
 import java.io.IOException;
 import java.util.HashSet;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.handler.ContextHandler;
 
 /**
  * Runs CHM on any requests that match the tile format
  * 
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
-public class CHMHandler extends AbstractHandler {
+public class ImageProcessorHandler extends AbstractHandler {
 
     
-    private static final Logger _log = Logger.getLogger(CHMHandler.class.getName());
+    private static final Logger _log = Logger.getLogger(ImageProcessorHandler.class.getName());
     private ImageProcessor _processor;
+    private ContextHandler _contextHandler;
+    
     private HashSet<String> _imagesToProcess = new HashSet<String>();
     
-    public CHMHandler(ImageProcessor processor){
+    public ImageProcessorHandler(ImageProcessor processor){
         _processor = processor;
     }
 
     public void setImageProcessor(ImageProcessor processor){
         _processor = processor;
     }
+    
+    public ImageProcessor getImageProcessor(){
+        return _processor;
+    }
 
     public void clearProcessedImages(){
         _imagesToProcess.clear();
     }
     
+    public void setContextHandler(ContextHandler cHandler){
+        _contextHandler = cHandler;
+    }
+    
+    public ContextHandler getContextHandler(){
+        return _contextHandler;
+    }
     
    /**
     * Sends any tiles not already in the list to the {@link ImageProcessor} defined
@@ -82,8 +95,6 @@ public class CHMHandler extends AbstractHandler {
     public void handle(String string, Request request, 
             HttpServletRequest servletRequest, 
             HttpServletResponse servletResponse) throws IOException, ServletException {
-
-        _log.log(Level.INFO, servletRequest.getRequestURI());
 
         if (_processor == null){
             request.setHandled(false);
