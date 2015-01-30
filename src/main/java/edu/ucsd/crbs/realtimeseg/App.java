@@ -1,5 +1,7 @@
 package edu.ucsd.crbs.realtimeseg;
 
+import edu.ucsd.crbs.realtimeseg.handler.ccdb.CcdbAddChmTrainedModelHandler;
+import edu.ucsd.crbs.realtimeseg.handler.ccdb.CcdbChmTrainedModelListHandler;
 import edu.ucsd.crbs.realtimeseg.handler.ContextHandlerFactory;
 import edu.ucsd.crbs.realtimeseg.handler.SGEContextHandlerFactory;
 import edu.ucsd.crbs.realtimeseg.handler.StatusHandler;
@@ -79,6 +81,10 @@ public class App {
     public static long totalRunTimeOfJobs = 0;
     
     public static double overloadFactor = 0.5;
+    
+    public static String LAYER_HANDLER_BASE_DIR = "layerhandlers";
+    public static String LAYER_MODEL_BASE_DIR = "layermodels";
+    
     
     public static void main(String[] args) {
         
@@ -160,7 +166,7 @@ public class App {
                     
             if (layers != null && !layers.isEmpty()){
                 for (CustomLayer cl : layers){
-                    File layerDir = new File(props.getProperty(DIR_ARG) + File.separator+cl.getVarName());
+                    File layerDir = new File(props.getProperty(LAYER_HANDLER_BASE_DIR) + File.separator+cl.getVarName());
                     if (!layerDir.exists()){
                         layerDir.mkdirs();
                     }
@@ -284,6 +290,10 @@ public class App {
         
         props.setProperty(MATLAB_ARG,((File)optionSet.valueOf(MATLAB_ARG)).getAbsolutePath());
         
+        props.setProperty(LAYER_HANDLER_BASE_DIR, props.getProperty(DIR_ARG)+File.separator+LAYER_HANDLER_BASE_DIR);
+        
+        props.setProperty(LAYER_MODEL_BASE_DIR, props.getProperty(DIR_ARG)+File.separator+LAYER_MODEL_BASE_DIR);
+
         System.out.println(props.toString());
         return props;
     }
@@ -466,6 +476,16 @@ public class App {
         ContextHandler statusContext = new ContextHandler("/status");
         statusContext.setHandler(statusHandler);
         contexts.addHandler(statusContext);
+        
+        CcdbChmTrainedModelListHandler ccdbHandler = new CcdbChmTrainedModelListHandler("http://elephanta.crbs.ucsd.edu:8080/");
+        ContextHandler ccdbContext = new ContextHandler("/ccdb/chm_models");
+        ccdbContext.setHandler(ccdbHandler);
+        contexts.addHandler(ccdbContext);
+        
+        CcdbAddChmTrainedModelHandler ccdbAddHandler = new CcdbAddChmTrainedModelHandler("http://elephanta.crbs.ucsd.edu:8080/");
+        ContextHandler ccdbAddContext = new ContextHandler("/ccdb/add_chm_layer");
+        ccdbAddContext.setHandler(ccdbAddHandler);
+        contexts.addHandler(ccdbAddContext);
        
         if (props.getProperty(USE_SGE_ARG).equals("false")){
             ContextHandlerFactory chf = new ContextHandlerFactory();
