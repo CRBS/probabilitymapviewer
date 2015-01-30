@@ -30,6 +30,7 @@
 package edu.ucsd.crbs.realtimeseg.html;
 
 import edu.ucsd.crbs.realtimeseg.App;
+import static edu.ucsd.crbs.realtimeseg.App.LAYER_HANDLER_BASE_DIR;
 import edu.ucsd.crbs.realtimeseg.io.ResourceToFile;
 import edu.ucsd.crbs.realtimeseg.io.ResourceToFileImpl;
 import edu.ucsd.crbs.realtimeseg.io.StringReplacer;
@@ -106,7 +107,6 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
 
         return line.replaceAll(BASE_MAP_NAME_TOKEN,_imageName)
                 .replaceAll(BASE_IMAGE_LAYER_DEC_TOKEN, _baseLayerDeclaration)
-                .replaceAll(MITO_LAYER_DEC_TOKEN, _mitoLayerDeclaration)
                 .replaceAll(IMAGE_HEIGHT_NEGATIVE_TOKEN, _imageHeight)
                 .replaceAll(IMAGE_WIDTH_TOKEN, _imageWidth)
                 .replaceAll(BASE_LAYER_VAR_NAME_TOKEN, BASE_LAYER_VAR_NAME)
@@ -128,12 +128,6 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         if (_baseLayerDeclaration == null) {
             throw new Exception("something is wrong we got null back for base layer declaration");
         }
-
-        //generate mito layer declarations
-        decGenerator = new TemplateLayerDeclarationGenerator(MITO_LAYER_VAR_NAME,
-                _tileSize, "'Mitochondria'", "'mito'", "mito/{z}-r{y}_c{x}.png", "'/analyzing_green.png'", _overlayOpacity);
-
-        _mitoLayerDeclaration = decGenerator.getLayerDeclaration();
 
         //generate custom layer info
         generateCustomLayersReplacementValues();
@@ -157,11 +151,25 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         for (CustomLayer cl : _layers) {
 
             decGenerator = new TemplateLayerDeclarationGenerator(cl.getVarName(),
-                    _tileSize, "'<div style=\""+cl.getBackgroundColorCSS()+"color: "+cl.getColor()+";display: inline-block;\">" + cl.getName() + "</div>'", "'" + cl.getVarName() + "'",
-                    cl.getImagesPath(), "'/analyzing_"+cl.getColor()+".png'", _overlayOpacity);
+                    _tileSize, "'<div style=\""
+                            +cl.getBackgroundColorCSS()
+                            +"color: "+cl.getColor()
+                            +";display: inline-block;\">" 
+                            + cl.getName() + "</div>'", "'" 
+                                    + cl.getVarName() + "'",
+                    App.LAYER_HANDLER_BASE_DIR+"/"+cl.getImagesPath(), 
+                    "'/analyzing_"+cl.getColor()+".png'",
+                    _overlayOpacity);
+            
             decs.append(decGenerator.getLayerDeclaration()).append('\n');
 
-            overlays.append("\"<div style='").append(cl.getBackgroundColorCSS()).append("color: ").append(cl.getColor()).append(";display:inline-block;'>").append(cl.getName()).append("</div>\": ").append(cl.getVarName()).append(",\n");
+            overlays.append("\"<div style='")
+                    .append(cl.getBackgroundColorCSS())
+                    .append("color: ")
+                    .append(cl.getColor())
+                    .append(";display:inline-block;'>")
+                    .append(cl.getName()).append("</div>\": ")
+                    .append(cl.getVarName()).append(",\n");
         }
         _customLayersDescs = decs.toString();
         _customLayersOverlays = overlays.toString();
