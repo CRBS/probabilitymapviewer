@@ -4,6 +4,7 @@ import edu.ucsd.crbs.realtimeseg.handler.ccdb.CcdbAddChmTrainedModelHandler;
 import edu.ucsd.crbs.realtimeseg.handler.ccdb.CcdbChmTrainedModelListHandler;
 import edu.ucsd.crbs.realtimeseg.handler.ContextHandlerFactory;
 import edu.ucsd.crbs.realtimeseg.handler.SGEContextHandlerFactory;
+import edu.ucsd.crbs.realtimeseg.handler.ShutdownHandler;
 import edu.ucsd.crbs.realtimeseg.handler.StatusHandler;
 import edu.ucsd.crbs.realtimeseg.html.HtmlPageGenerator;
 import edu.ucsd.crbs.realtimeseg.html.SingleImageIndexHtmlPageGenerator;
@@ -193,6 +194,7 @@ public class App {
             
             server.start();
             int desiredLoad = numCores + (int)((double)numCores*overloadFactor);
+            int prevTotalProcessedCount = -1;
             
             while (SIGNAL_RECEIVED == false && (server.isStarting() || server.isRunning())){
                 //one idea is to have all the image processors dump to a single list
@@ -200,9 +202,13 @@ public class App {
                 //we can then just grab the newest items from the list and pass them to the
                 //executor service
                 totalProcessedCount += removeCompletedTasks(futureTaskList);
-                _log.log(Level.INFO, "Total Processed Count is {0}, Future Task List Size: {1}, and desired load is {2} and tiles to process is {3}",
-                        new Object[]{totalProcessedCount,futureTaskList.size(),desiredLoad,
-                        tilesToProcess.size()});
+                
+                if (totalProcessedCount != prevTotalProcessedCount){
+                    _log.log(Level.INFO, "Total Processed Count is {0}, Future Task List Size: {1}, and desired load is {2} and tiles to process is {3}",
+                            new Object[]{totalProcessedCount,futureTaskList.size(),desiredLoad,
+                            tilesToProcess.size()});
+                }
+                prevTotalProcessedCount = totalProcessedCount;
                 int size = futureTaskList.size();
                
                 if (size < desiredLoad){
@@ -451,7 +457,7 @@ public class App {
         // then a randomly available port will be assigned that you can either look in the logs for the port,
         // or programmatically obtain it for use in test cases.
         Server server = new Server(Integer.parseInt(props.getProperty(PORT_ARG)));
-
+        
         ContextHandlerCollection contexts = new ContextHandlerCollection();
         
         // Create the ResourceHandler. It is the object that will actually handle the request for a given file. It is
@@ -477,6 +483,13 @@ public class App {
         statusContext.setHandler(statusHandler);
         contexts.addHandler(statusContext);
         
+        
+        ShutdownHandler shutdownHandler = new ShutdownHandler();
+        ContextHandler shutdownContext = new ContextHandler("/shutdown");
+        shutdownContext.setHandler(shutdownHandler);
+        
+        contexts.addHandler(shutdownContext);
+        
         CcdbChmTrainedModelListHandler ccdbHandler = new CcdbChmTrainedModelListHandler("http://elephanta.crbs.ucsd.edu:8080/");
         ContextHandler ccdbContext = new ContextHandler("/ccdb/chm_models");
         ccdbContext.setHandler(ccdbHandler);
@@ -491,6 +504,7 @@ public class App {
             ContextHandlerFactory chf = new ContextHandlerFactory();
             List<ContextHandler> handlers = chf.getContextHandlers(es, props, layers);
             if (handlers != null && !handlers.isEmpty()){
+                ccdbAddHandler.setProcessingContextHandlers(handlers);
                 for (ContextHandler ch : handlers){
                     contexts.addHandler(ch);
                 }
@@ -500,13 +514,14 @@ public class App {
             SGEContextHandlerFactory sgeChf = new SGEContextHandlerFactory();
             List<ContextHandler> handlers = sgeChf.getContextHandlers(es, props, layers);
             if (handlers != null && !handlers.isEmpty()){
+                ccdbAddHandler.setProcessingContextHandlers(handlers);
                 for (ContextHandler ch : handlers){
                     contexts.addHandler(ch);
                 }
             }
         }
         server.setHandler(contexts);
-
+        
         System.out.println("\n\n\tOpen a browser to this URL: http://localhost:" 
                 + props.getProperty(PORT_ARG) + "\n\n");
         server.start();
