@@ -1,7 +1,7 @@
 /*
  * COPYRIGHT AND LICENSE
  * 
- * Copyright 2015 The Regents of the University of California All Rights Reserved
+ * Copyright 2014 The Regents of the University of California All Rights Reserved
  * 
  * Permission to copy, modify and distribute any part of this realtime-segmentation for 
  * educational, research and non-profit purposes, without fee, and without a 
@@ -28,14 +28,13 @@
  * THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS. 
  */
 
-package edu.ucsd.crbs.realtimeseg.util;
+package edu.ucsd.crbs.realtimeseg.processor.chm;
 
+import edu.ucsd.crbs.realtimeseg.processor.ImageProcessor;
 import edu.ucsd.crbs.realtimeseg.App;
-import edu.ucsd.crbs.realtimeseg.io.ResourceToFile;
-import edu.ucsd.crbs.realtimeseg.io.ResourceToFileImpl;
-import edu.ucsd.crbs.realtimeseg.io.StringReplacer;
-import edu.ucsd.crbs.realtimeseg.job.CHMCommandLineJobViaSGE;
+import edu.ucsd.crbs.realtimeseg.job.CHMCommandLineJob;
 import java.io.File;
+import java.util.concurrent.ExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -43,19 +42,10 @@ import java.util.logging.Logger;
  *
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
-public class SGECHMImageProcessor implements ImageProcessor,StringReplacer {
+public class SimpleCHMImageProcessor implements ImageProcessor{
+
+     private static final Logger _log = Logger.getLogger(SimpleCHMImageProcessor.class.getName());
     
-    public static final String OUTPUT_DIR_TOKEN = "@@OUTPUT_DIR@@";
-    public static final String CHM_BINARY_TOKEN = "@@CHM_BINARY@@";
-    public static final String TILE_SIZE_TOKEN = "@@TILE_SIZE@@";
-    public static final String OVERLAP_TOKEN = "@@OVERLAP@@";
-    public static final String TRAINED_MODEL_TOKEN = "@@TRAINED_MODEL@@";
-    public static final String MATLAB_DIR_TOKEN = "@@MATLAB_DIR@@";
-    public static final String CONVERT_BINARY_TOKEN = "@@CONVERT_BINARY@@";
-    public static final String COLORS_TO_ZERO_OUT_TOKEN = "@@COLORS_TO_ZERO_OUT@@";
-    
-    
-    private static final Logger _log = Logger.getLogger(SGECHMImageProcessor.class.getName());
     
     private String _inputImageDir;
     private String _workingDir;
@@ -64,16 +54,11 @@ public class SGECHMImageProcessor implements ImageProcessor,StringReplacer {
     private String _matlabDir;
     private String _colorsToZeroOut;
     private String _tileSize;
-    private String _script;
-    private String _queue;
-    private String _convert;
     
-     public SGECHMImageProcessor(final String inputImageDir,
+    public SimpleCHMImageProcessor(final String inputImageDir,
             final String workingDir,final String trainedModel,
             final String binary,final String matlabDir,final String colorsToZeroOut,
-            final String tileSize,
-            final String queue,
-            final String convert){
+            final String tileSize){
         _inputImageDir = inputImageDir;
         _workingDir = workingDir;
         _trainedModel = trainedModel;
@@ -81,62 +66,21 @@ public class SGECHMImageProcessor implements ImageProcessor,StringReplacer {
         _matlabDir = matlabDir;
         _colorsToZeroOut = colorsToZeroOut;
         _tileSize = tileSize+"x"+tileSize;
-        _queue = queue;
-        _convert = convert;
         _log.log(Level.INFO,"Image Processor colors to zero out: {0}",_colorsToZeroOut);
-        createCommandLineScript();
     }
 
-    @Override
-    public String replace(String line) {
-        if (line == null){
-            return null;
-        }
-        return line.replaceAll(OUTPUT_DIR_TOKEN, _workingDir)
-                   .replaceAll(CHM_BINARY_TOKEN, _binary)
-                   .replaceAll(TILE_SIZE_TOKEN, _tileSize)
-                   .replaceAll(OVERLAP_TOKEN, "0x0")
-                   .replaceAll(TRAINED_MODEL_TOKEN, _trainedModel)
-                   .replaceAll(MATLAB_DIR_TOKEN, _matlabDir)
-                   .replaceAll(CONVERT_BINARY_TOKEN, _convert)
-                   .replaceAll(COLORS_TO_ZERO_OUT_TOKEN, _colorsToZeroOut);
-    }
-    
-    private void createCommandLineScript()  {
-        try {
-            ResourceToFile scriptWriter = new ResourceToFileImpl();
-            _script = _workingDir + File.separator + "chmviasge.sh";
-            scriptWriter.writeResourceToScript("/chmviasge.sh.template", _script, 
-                    this);
-            File scriptFile = new File(_script);
-            scriptFile.setExecutable(true);
-        }
-        catch(Exception ex){
-            _log.log(Level.WARNING,
-                    "Caught exception trying to create {0} file : {1}",
-                    new Object[]{_script,ex.getMessage()});
-        }
-    }
-    
-     
-    @Override
+     @Override
     public void process(String image) {
         File checkForFile = new File(_inputImageDir+File.separator+image);
         if (checkForFile.exists() == false){
             return;
         }
-        CHMCommandLineJobViaSGE job = new CHMCommandLineJobViaSGE(_script,image,
-                checkForFile.getAbsolutePath(),_workingDir,_queue);
         
+        CHMCommandLineJob job = new CHMCommandLineJob(_inputImageDir+File.separator+image,
+                _trainedModel,_binary,_matlabDir,_workingDir,_tileSize,_colorsToZeroOut);
         _log.log(Level.INFO,"Submitting image {0} for processing and writing output to {1}",
                 new Object[]{image,_workingDir});
         
         App.tilesToProcess.add(job);
-        
     }
-
-
-    
-    
-    
 }
