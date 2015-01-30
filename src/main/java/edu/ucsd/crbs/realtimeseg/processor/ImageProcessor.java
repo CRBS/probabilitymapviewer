@@ -28,7 +28,7 @@
  * THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS. 
  */
 
-package edu.ucsd.crbs.realtimeseg.util;
+package edu.ucsd.crbs.realtimeseg.processor;
 
 /**
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
