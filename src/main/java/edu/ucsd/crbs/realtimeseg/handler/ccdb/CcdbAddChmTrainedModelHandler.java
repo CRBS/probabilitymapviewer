@@ -30,7 +30,10 @@
 
 package edu.ucsd.crbs.realtimeseg.handler.ccdb;
 
+import edu.ucsd.crbs.realtimeseg.handler.ImageProcessorHandler;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
@@ -38,6 +41,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
+import org.eclipse.jetty.server.handler.ContextHandler;
 
 /**
  *
@@ -47,10 +51,20 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
 
     private static final Logger _log = Logger.getLogger(CcdbAddChmTrainedModelHandler.class.getName());
     
-    private String _restURL;
+    public static final String ID_KEY = "id";
+    public static final String COLOR_KEY = "color";
     
-    public CcdbAddChmTrainedModelHandler(String url){
+    
+    private String _restURL;
+    private List<ContextHandler> _contextHandlerList;
+    
+    
+    public CcdbAddChmTrainedModelHandler(final String url){
         _restURL = url;
+    }
+    
+    public void setProcessingContextHandlers(List<ContextHandler> contextHandlerList){
+        _contextHandlerList = contextHandlerList;
     }
     
     @Override
@@ -62,18 +76,43 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
         _log.log(Level.INFO,servletRequest.getQueryString());
         
         //need to parse out id and color 
+        Map<String,String[]> queryParameters = servletRequest.getParameterMap();
+        String id = parseIdFromMap(queryParameters);
+        String color = parseColorFromMap(queryParameters);
+        
+        servletResponse.setContentType("application/json");
+        servletResponse.setCharacterEncoding("UTF-8");
+        
+        if (id == null){
+            String resp = "{ \"error\": \"No id passed in\"}";
+            servletResponse.getWriter().write(resp);
+            servletResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            request.setHandled(true);
+            return;
+        }
+        if (color == null){
+            String resp = "{ \"error\": \"No color set\"}";
+            servletResponse.getWriter().write(resp);
+            servletResponse.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+            request.setHandled(true);
+            return;
+        }
         
         //find an available handler 
+        ContextHandler cHandler = getAvailableContextWithCHMHandler();
+        if (cHandler == null){
+            String resp = "{ \"error\": \"Unable to find handler\"}";
+            servletResponse.getWriter().write(resp);
+            servletResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            request.setHandled(true);
+            return;
+        }
         
         //download the model
         
         //Update the handler with a new image processor
         
         //generate json response so client can add the layer
-        
-        servletResponse.setContentType("application/json");
-        servletResponse.setCharacterEncoding("UTF-8");
-            
         String resp = "{ \"layerPath\": \"foo\","
                     + "\"minZoom\": 0,"
                     + "\"maxZoom\": 0,"
@@ -86,6 +125,36 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
         request.setHandled(true);
     }
     
+    private String parseIdFromMap(Map<String,String[]> theMap){
+        return parseFirstElementFromMap(theMap,ID_KEY);
+    }
     
+    private String parseColorFromMap(Map<String,String[]> theMap){
+        return parseFirstElementFromMap(theMap,COLOR_KEY);
+    }
+    
+    private String parseFirstElementFromMap(Map<String,String[]> theMap,final String key){
+        if (theMap == null || theMap.isEmpty()){
+            return null;
+        }
+        
+        if (theMap.containsKey(key)){
+            String[] vals = theMap.get(key);
+            if (vals == null || vals.length == 0){
+                return null;
+            }
+            return vals[0];
+        }
+        return null;
+    }
+    
+    private ContextHandler getAvailableContextWithCHMHandler(){
+        
+        if (_contextHandlerList == null || _contextHandlerList.isEmpty()){
+            return null;
+        }
+        
+       return null; 
+    }
 
 }
