@@ -45,11 +45,11 @@ public class InternalCustomLayerFactory {
 
     public List<CustomLayer> getLayers(Properties props) throws Exception {
         ArrayList<CustomLayer> layers = new ArrayList<CustomLayer>();
-        CustomLayer layer = new CustomLayer(getMitoTrainedModelDir(props.getProperty(App.DIR_ARG)),
+        CustomLayer layer = new CustomLayer(getMitoTrainedModelDir(props.getProperty(App.LAYER_MODEL_BASE_DIR)),
         "Mitochondria","green","chm");
         layers.add(layer);
         
-        layer = new CustomLayer(getLysoTrainedModelDir(props.getProperty(App.DIR_ARG)),
+        layer = new CustomLayer(getLysoTrainedModelDir(props.getProperty(App.LAYER_MODEL_BASE_DIR)),
         "Lysosome","blue","chm");
         layers.add(layer);
         
