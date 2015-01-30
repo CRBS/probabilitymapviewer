@@ -56,16 +56,21 @@ public class ContextHandlerFactory {
         ArrayList<ContextHandler> cHandlers = new ArrayList<ContextHandler>();
         for (CustomLayer cl : layers){
             ImageProcessor imageProc = new SimpleCHMImageProcessor(props.getProperty(App.INPUT_IMAGE_ARG),
-                    props.getProperty(App.DIR_ARG)+File.separator+cl.getVarName(),
+                    props.getProperty(App.LAYER_HANDLER_BASE_DIR)+File.separator+cl.getVarName(),
                     cl.getTrainedModelDir(),
                     props.getProperty(App.CHM_BIN_ARG)+File.separator+"CHM_test.sh",
                     props.getProperty(App.MATLAB_ARG),cl.getConvertColor(),
                     props.getProperty(App.TILE_SIZE_ARG));
             CHMHandler chmHandler = new CHMHandler(imageProc);
-            ContextHandler chmContext = new ContextHandler("/"+cl.getVarName());
+            ContextHandler chmContext = new ContextHandler("/"+App.LAYER_HANDLER_BASE_DIR+"/"+cl.getVarName());
             chmContext.setHandler(chmHandler);
+            
             cHandlers.add(chmContext);
         }
+        
+        EmptyContextHandlersFactory echf = new EmptyContextHandlersFactory();
+        cHandlers.addAll(echf.getContextHandlers());
+        
         return cHandlers;
     }
 }
