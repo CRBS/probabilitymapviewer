@@ -100,7 +100,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
            CPU Consumed (hours): <div id="cpuconsumedhours" style="display: inline-block;">?</div><br/>
            Avg. Time per tile (secs): <div id="avgtimepertile" style="display: inline-block;">?</div><br/>
            <br/>
-           <button type="button" style="display: none;" onclick="addSegmenterDialog()">Add Segmenter from CCDB</button><p/>
+           <button type="button"  onclick="addSegmenterDialog()">Add Segmenter from CCDB</button><p/>
            <button type="button" style="display: none;" onclick="refreshOverlays()">Add Segmenter from File system</button><p/>
            <button type="button" onclick="refreshOverlays()">Refresh Map</button><p/>
            <div id="debugbox"></div>
@@ -211,18 +211,30 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
                 //$( "#debugbox" ).append("<br/>");
                 //$( "#debugbox" ).append(ccdbLayerVal);
                 //$( "#debugbox" ).append("<br/>");
+                  var myHttpReq = new XMLHttpRequest();
+                 // var params = "color="+ccdbLayerColor;
+                  
+                  //Send the proper header information along with the request
+                  //TODO Need to replace GET with POST call, but not sure why jetty is not seeing the request
+                    myHttpReq.open("GET","/ccdb/add_chm_layer?id="+ccdbLayerVal+"&color="+ccdbLayerColor,false);
+                    myHttpReq.send();
                 
+                if (myHttpReq.status != 200){
+                    alert("ERROR: Unable to add layer.  Got a HTTP status of: "+myHttpReq.status);
+                    return;
+                }
                 
+                var myres = JSON.parse(myHttpReq.responseText);
                 //example layer I must add
-                var uh = L.tileLayer(ccdbLayerVal+'/{z}-r{y}_c{x}.png', {
-                 maxZoom: 0,
-                 minZoom: 0,
-                 maxNativeZoom: 0,
+                var uh = L.tileLayer(myres.layerPath+'/{z}-r{y}_c{x}.png', {
+                 maxZoom: myres.minZoom,
+                 minZoom: myres.maxZoom,
+                 maxNativeZoom: myres.maxNativeZoom,
                  continuousWorld: true,
-                 tileSize: 256,
+                 tileSize: myres.tileSize,
                  noWrap: true,
                  bounds: tileBounds,
-                 opacity: 0.3,
+                 opacity: myres.opacity,
                  errorTileUrl: '/analyzing_'+ccdbLayerColor+'.png',
                  attribution: '<div style="color: '+ccdbLayerColor+';display: inline-block;">'+ccdbLayerName+'</div>',
                  id: ccdbLayerVal
@@ -251,9 +263,15 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
               
                 //layers that can be added
                 //display dialog
+                var httpReq = new XMLHttpRequest();
+                httpReq.open("GET","/ccdb/chm_models",false);
+                httpReq.send();
+                //switch the set of html to jquery from innerHTML
+                var myres = JSON.parse(httpReq.responseText);
                 $( "#layerselect" ).empty();
-                $( "#layerselect" ).append("<option value=\"layer1\" selected=\"selected\">Some Layer</option>");
-                $( "#layerselect" ).append("<option value=\"layer2\">Another Layer</option>");
+                for (var obj in myres){
+                    $( "#layerselect" ).append("<option value=\""+myres[obj].id+"\" selected=\"selected\">"+myres[obj].name+"</option>");
+                }
                 
                 $(function() {
                     $( "#addSegmenter" ).dialog({
