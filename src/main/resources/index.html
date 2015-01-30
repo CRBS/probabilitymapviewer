@@ -103,6 +103,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
            <button type="button"  onclick="addSegmenterDialog()">Add Segmenter from CCDB</button><p/>
            <button type="button" style="display: none;" onclick="refreshOverlays()">Add Segmenter from File system</button><p/>
            <button type="button" onclick="refreshOverlays()">Refresh Map</button><p/>
+           <button type="button" onclick="shutdown()">Shutdown Server</button><p/>
            <div id="debugbox"></div>
            
         </div>
@@ -120,6 +121,10 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
             <form action="" id="colorlist">
              
             </form>
+        </div>
+        
+        <div id="shutdown" title="Shutdown">
+            Are you sure you want to Shutdown?<br/>
         </div>
         
         <script src="leaflet-0.7.3/leaflet.js"></script>
@@ -311,6 +316,42 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
                         
                     });
                   });
+            }
+            
+            function shutdown(){
+                $(function() {
+                    $( "#shutdown" ).dialog({
+                       
+                        modal: true,
+                        buttons: [
+                            {
+                              id: "button-yes",
+                              text: "Yes",
+                              click: function() {
+                                  var myHttpReq = new XMLHttpRequest();
+                                 //TODO Need to replace GET with POST call, but not sure why jetty is not seeing the request
+                                 myHttpReq.open("GET","/shutdown",false);
+                                 myHttpReq.send();
+                                 alert("Shutting down backend service.  Feel free to close browser tab.");
+                                 $( this ).dialog("close");
+                              }
+                            },
+                            {
+                              id: "button-cancel",
+                              text: "Cancel",
+                              click: function() {
+                                 $( this ).dialog("close");
+                              }
+                            },
+
+                        ],
+                        open: function() {
+                              $(this).siblings('.ui-dialog-buttonpane').find("button:contains('Cancel')").focus(); 
+                        },
+                        
+                    });
+                  });
+                
             }
             
             // the interval function should ask the server if any new tiles have
