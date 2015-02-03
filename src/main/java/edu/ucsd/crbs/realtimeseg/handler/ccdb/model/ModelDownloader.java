@@ -30,6 +30,8 @@
 
 package edu.ucsd.crbs.realtimeseg.handler.ccdb.model;
 
+import java.io.File;
+
 /**
  *
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
@@ -43,6 +45,6 @@ public interface ModelDownloader {
      * @param destinationDir Full path to download model to
      * @throws Exception if there was a problem downloading the model
      */
-    void downloadModel(final String id, final String destinationDir) throws Exception;
+    File downloadModel(final String id, final String destinationDir) throws Exception;
 
 }

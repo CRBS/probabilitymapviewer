@@ -30,6 +30,7 @@
 
 package edu.ucsd.crbs.realtimeseg.handler.ccdb.model;
 
+import edu.ucsd.crbs.realtimeseg.util.ZipUtil;
 import java.io.File;
 import java.net.URL;
 import org.apache.commons.io.FileUtils;
@@ -56,11 +57,11 @@ public class ModelDownloaderImpl implements ModelDownloader {
      * @throws Exception if there was a problem downloading the model
      */
     @Override
-    public void downloadModel(final String id,final String destinationDir) throws Exception {
+    public File downloadModel(final String id,final String destinationDir) throws Exception {
         URL url = new URL(_url+"/CCDBSlashChmService/ChmModelDownloadServlet?id="+id);
         File destDir = new File(_modelBaseDir+File.separator+destinationDir);
         destDir.mkdirs();
-        File destFile = new File(destDir.getAbsolutePath()+File.separator+"downloadedFile.out");
+        File destFile = new File(destDir.getAbsolutePath()+File.separator+"downloadedFile.zip");
         
         FileUtils.copyURLToFile(url,destFile, 10000, 10000);
         
@@ -69,5 +70,8 @@ public class ModelDownloaderImpl implements ModelDownloader {
         }
         
         //unzip the file
+        ZipUtil zUtil = new ZipUtil();
+        zUtil.decompress(destFile,destDir);
+        return destDir;
     }
 }
