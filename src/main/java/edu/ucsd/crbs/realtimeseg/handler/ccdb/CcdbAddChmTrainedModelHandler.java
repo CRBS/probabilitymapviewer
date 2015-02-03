@@ -31,6 +31,8 @@
 package edu.ucsd.crbs.realtimeseg.handler.ccdb;
 
 import edu.ucsd.crbs.realtimeseg.handler.ImageProcessorHandler;
+import edu.ucsd.crbs.realtimeseg.handler.ccdb.model.ModelDownloader;
+import edu.ucsd.crbs.realtimeseg.handler.ccdb.model.ModelDownloaderImpl;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +43,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.eclipse.jetty.server.handler.ContextHandler;
 
 /**
  *
@@ -56,15 +57,29 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
     
     
     private String _restURL;
-    private List<ContextHandler> _contextHandlerList;
+    private List<ImageProcessorHandler> _imageProcessorHandlerList;
+    private String _minZoom;
+    private String _maxZoom;
+    private String _maxNativeZoom;
+    private String _tileSize;
+    private String _opacity;
+    private ModelDownloader _modelDownloader;
     
-    
-    public CcdbAddChmTrainedModelHandler(final String url){
+    public CcdbAddChmTrainedModelHandler(final String url,final String minZoom,
+            final String maxZoom,final String maxNativeZoom,final String tileSize,
+            final String opacity,
+            ModelDownloader downloader){
         _restURL = url;
+        _minZoom = minZoom;
+        _maxZoom = maxZoom;
+        _maxNativeZoom = maxNativeZoom;
+        _tileSize = tileSize;
+        _opacity = opacity;
+        _modelDownloader = downloader;
     }
     
-    public void setProcessingContextHandlers(List<ContextHandler> contextHandlerList){
-        _contextHandlerList = contextHandlerList;
+    public void setProcessingContextHandlers(List<ImageProcessorHandler> imageProcessorHandlerList){
+        _imageProcessorHandlerList = imageProcessorHandlerList;
     }
     
     @Override
@@ -99,8 +114,8 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
         }
         
         //find an available handler 
-        ContextHandler cHandler = getAvailableContextWithCHMHandler();
-        if (cHandler == null){
+        ImageProcessorHandler iHandler = getAvailableImageProcessorHandler();
+        if (iHandler == null){
             String resp = "{ \"error\": \"Unable to find handler\"}";
             servletResponse.getWriter().write(resp);
             servletResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -109,16 +124,34 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
         }
         
         //download the model
+        _log.log(Level.INFO,"Found handler and this is the path: {0}",
+                iHandler.getContextHandler().getContextPath());
+        
+        String handlerDir = iHandler.getContextHandler().getContextPath().replaceAll("^.*\\/", "");
+        
+        try {
+        //download the model
+        _modelDownloader.downloadModel(id,
+                "/"+handlerDir);
+        }
+        catch(Exception ex){
+            String resp = "{ \"error\": \""+ex.getMessage()+"\"}";
+            servletResponse.getWriter().write(resp);
+            servletResponse.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            request.setHandled(true);
+            return;
+        }
         
         //Update the handler with a new image processor
         
+        
         //generate json response so client can add the layer
-        String resp = "{ \"layerPath\": \"foo\","
-                    + "\"minZoom\": 0,"
-                    + "\"maxZoom\": 0,"
-                    + "\"maxNativeZoom\": 0,"
-                    + "\"tileSize\": 128,"
-                    + "\"opacity\": 0.3}";
+        String resp = "{ \"layerPath\": \""+iHandler.getContextHandler().getContextPath()+"/{z}-r{y}_c{x}.png\","
+                    + "\"minZoom\": "+_minZoom+","
+                    + "\"maxZoom\": "+_maxZoom+","
+                    + "\"maxNativeZoom\": "+_maxNativeZoom+","
+                    + "\"tileSize\": "+_tileSize+","
+                    + "\"opacity\": "+_opacity+"}";
             
         servletResponse.getWriter().write(resp);
         servletResponse.setStatus(HttpServletResponse.SC_OK);
@@ -148,10 +181,15 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
         return null;
     }
     
-    private ContextHandler getAvailableContextWithCHMHandler(){
+    private ImageProcessorHandler getAvailableImageProcessorHandler(){
         
-        if (_contextHandlerList == null || _contextHandlerList.isEmpty()){
+        if (_imageProcessorHandlerList == null || _imageProcessorHandlerList.isEmpty()){
             return null;
+        }
+        for (ImageProcessorHandler iph : _imageProcessorHandlerList){
+            if (iph.getImageProcessor() == null){
+                return iph;
+            }
         }
         
        return null; 
