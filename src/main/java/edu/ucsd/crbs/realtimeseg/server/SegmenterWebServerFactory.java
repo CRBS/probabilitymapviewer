@@ -41,6 +41,8 @@ import edu.ucsd.crbs.realtimeseg.handler.ccdb.CcdbAddChmTrainedModelHandler;
 import edu.ucsd.crbs.realtimeseg.handler.ccdb.CcdbChmTrainedModelListHandler;
 import edu.ucsd.crbs.realtimeseg.handler.ccdb.model.ModelDownloaderImpl;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
+import edu.ucsd.crbs.realtimeseg.layer.CustomLayerFromCCDBFactory;
+import edu.ucsd.crbs.realtimeseg.processor.ImageProcessorFactory;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -108,7 +110,9 @@ public class SegmenterWebServerFactory {
                 props.getProperty(App.CCDB_ARG),"0","0","0",
                 props.getProperty(App.TILE_SIZE_ARG),
                 props.getProperty(App.OVERLAY_OPACITY_ARG),
-                mdi);
+                mdi,
+                new ImageProcessorFactory(props),
+                new CustomLayerFromCCDBFactory(props));
         
         ContextHandler ccdbAddContext = new ContextHandler("/ccdb/add_chm_layer");
         ccdbAddContext.setHandler(ccdbAddHandler);
