@@ -230,8 +230,9 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
                 }
                 
                 var myres = JSON.parse(myHttpReq.responseText);
+                alert(myres.layerPath);
                 //example layer I must add
-                var uh = L.tileLayer(myres.layerPath+'/{z}-r{y}_c{x}.png', {
+                var uh = L.tileLayer(myres.layerPath, {
                  maxZoom: myres.minZoom,
                  minZoom: myres.maxZoom,
                  maxNativeZoom: myres.maxNativeZoom,
@@ -241,11 +242,11 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
                  bounds: tileBounds,
                  opacity: myres.opacity,
                  errorTileUrl: '/analyzing_'+ccdbLayerColor+'.png',
-                 attribution: '<div style="color: '+ccdbLayerColor+';display: inline-block;">'+ccdbLayerName+'</div>',
+                 attribution: '<div style="color: '+ccdbLayerColor+';display: inline-block;'+myres.backgroundcss+'">'+ccdbLayerName+'</div>',
                  id: ccdbLayerVal
                 });
 
-                var prettyLayerName = '<div style="color: '+ccdbLayerColor+';display: inline-block;">'+ccdbLayerName+'</div>';
+                var prettyLayerName = '<div style="color: '+ccdbLayerColor+';display: inline-block;'+myres.backgroundcss+'">'+ccdbLayerName+'</div>';
                 
                 //add the layer to the overlayMaps variable which is used by refreshOverlays
                 //to redraw the layer
