@@ -31,45 +31,29 @@
 package edu.ucsd.crbs.realtimeseg.handler;
 
 import edu.ucsd.crbs.realtimeseg.App;
-import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
-import edu.ucsd.crbs.realtimeseg.processor.ImageProcessor;
-import edu.ucsd.crbs.realtimeseg.processor.chm.SGECHMImageProcessor;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.ExecutorService;
 import org.eclipse.jetty.server.handler.ContextHandler;
 
 /**
- *
+ * Instances of this factory create 10 {@link ContextHandler}s that don't do
+ * anything, but can be used later
+ * 
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
-public class SGEContextHandlerFactory {
-
-      public List<ContextHandler> getContextHandlers(ExecutorService es,Properties props, List<CustomLayer> layers) throws Exception {
-        if (layers == null || layers.isEmpty()){
-            return null;
+public class EmptyImageProcessorHandlerFactory {
+    
+    public List<ImageProcessorHandler> getImageProcessorHandlers(){
+        //add 10 more handlers that don't do anything just yet
+        ArrayList<ImageProcessorHandler> iHandlers = new ArrayList<ImageProcessorHandler>();
+        for (int i  = 1 ; i <= 10; i++){
+            ContextHandler chmContext = new ContextHandler("/"+App.LAYER_HANDLER_BASE_DIR+"/"+i);
+            ImageProcessorHandler iHandler = new ImageProcessorHandler(null);
+            chmContext.setHandler(iHandler);
+            iHandler.setContextHandler(chmContext);
+            iHandlers.add(iHandler);
         }
-        
-        ArrayList<ContextHandler> cHandlers = new ArrayList<ContextHandler>();
-        for (CustomLayer cl : layers){
-            ImageProcessor imageProc = new SGECHMImageProcessor(props.getProperty(App.INPUT_IMAGE_ARG),
-                    props.getProperty(App.LAYER_HANDLER_BASE_DIR)+File.separator+cl.getVarName(),
-                    cl.getTrainedModelDir(),
-                    props.getProperty(App.CHM_BIN_ARG)+File.separator+"CHM_test.sh",
-                    props.getProperty(App.MATLAB_ARG),cl.getConvertColor(),
-                    props.getProperty(App.TILE_SIZE_ARG),
-                    props.getProperty(App.SGE_QUEUE_ARG),
-                    props.getProperty(App.CONVERT_ARG));
-            ImageProcessorHandler chmHandler = new ImageProcessorHandler(imageProc);
-            ContextHandler chmContext = new ContextHandler("/"+props.getProperty(App.LAYER_HANDLER_BASE_DIR)+"/"+cl.getVarName());
-            chmContext.setHandler(chmHandler);
-            cHandlers.add(chmContext);
-        }
-        EmptyContextHandlersFactory echf = new EmptyContextHandlersFactory();
-        cHandlers.addAll(echf.getContextHandlers());
-
-        return cHandlers;
+        return iHandlers;
     }
+
 }

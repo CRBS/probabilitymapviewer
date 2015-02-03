@@ -45,15 +45,15 @@ import org.eclipse.jetty.server.handler.ContextHandler;
  *
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
-public class ContextHandlerFactory {
+public class CHMLocalImageProcessorHandlerFactory {
 
     
-    public List<ContextHandler> getContextHandlers(ExecutorService es,Properties props, List<CustomLayer> layers) throws Exception {
+    public List<ImageProcessorHandler> getImageProcessorHandlers(ExecutorService es,Properties props, List<CustomLayer> layers) throws Exception {
         if (layers == null || layers.isEmpty()){
             return null;
         }
         
-        ArrayList<ContextHandler> cHandlers = new ArrayList<ContextHandler>();
+        ArrayList<ImageProcessorHandler> iHandlers = new ArrayList<ImageProcessorHandler>();
         for (CustomLayer cl : layers){
             ImageProcessor imageProc = new SimpleCHMImageProcessor(props.getProperty(App.INPUT_IMAGE_ARG),
                     props.getProperty(App.LAYER_HANDLER_BASE_DIR)+File.separator+cl.getVarName(),
@@ -64,13 +64,13 @@ public class ContextHandlerFactory {
             ImageProcessorHandler chmHandler = new ImageProcessorHandler(imageProc);
             ContextHandler chmContext = new ContextHandler("/"+App.LAYER_HANDLER_BASE_DIR+"/"+cl.getVarName());
             chmContext.setHandler(chmHandler);
-            
-            cHandlers.add(chmContext);
+            chmHandler.setContextHandler(chmContext);
+            iHandlers.add(chmHandler);
         }
         
-        EmptyContextHandlersFactory echf = new EmptyContextHandlersFactory();
-        cHandlers.addAll(echf.getContextHandlers());
+        EmptyImageProcessorHandlerFactory echf = new EmptyImageProcessorHandlerFactory();
+        iHandlers.addAll(echf.getImageProcessorHandlers());
         
-        return cHandlers;
+        return iHandlers;
     }
 }
