@@ -1,11 +1,5 @@
 package edu.ucsd.crbs.realtimeseg;
 
-import edu.ucsd.crbs.realtimeseg.handler.ccdb.CcdbAddChmTrainedModelHandler;
-import edu.ucsd.crbs.realtimeseg.handler.ccdb.CcdbChmTrainedModelListHandler;
-import edu.ucsd.crbs.realtimeseg.handler.ContextHandlerFactory;
-import edu.ucsd.crbs.realtimeseg.handler.SGEContextHandlerFactory;
-import edu.ucsd.crbs.realtimeseg.handler.ShutdownHandler;
-import edu.ucsd.crbs.realtimeseg.handler.StatusHandler;
 import edu.ucsd.crbs.realtimeseg.html.HtmlPageGenerator;
 import edu.ucsd.crbs.realtimeseg.html.SingleImageIndexHtmlPageGenerator;
 import edu.ucsd.crbs.realtimeseg.io.WorkingDirCreator;
@@ -13,6 +7,8 @@ import edu.ucsd.crbs.realtimeseg.io.WorkingDirCreatorImpl;
 import edu.ucsd.crbs.realtimeseg.job.JobResult;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayerFromPropertiesFactory;
+import edu.ucsd.crbs.realtimeseg.server.SegmenterWebServer;
+import edu.ucsd.crbs.realtimeseg.server.SegmenterWebServerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -34,9 +30,6 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.apache.commons.io.FileUtils;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.handler.ContextHandler;
-import org.eclipse.jetty.server.handler.ContextHandlerCollection;
-import org.eclipse.jetty.server.handler.ResourceHandler;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
@@ -70,6 +63,7 @@ public class App {
     public static final String USE_SGE_ARG = "usesge";
     public static final String SGE_QUEUE_ARG = "sgequeue";
     public static final String CONVERT_ARG = "convertbinary";
+    public static final String CCDB_ARG = "ccdb";
     
     public static ConcurrentLinkedDeque<Callable> tilesToProcess = new ConcurrentLinkedDeque<Callable>();
     public static boolean SIGNAL_RECEIVED = false;
@@ -101,7 +95,7 @@ public class App {
         
         final String tempDirectory = System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID().toString();
 
-        Server server = null;
+        SegmenterWebServer sws = null;
         boolean tempDirUsed = false;
         
         final List<String> helpArgs = Arrays.asList("h","help","?");
@@ -124,6 +118,7 @@ public class App {
                     accepts(PORT_ARG, "Port to run service").withRequiredArg().ofType(Integer.class).defaultsTo(8080);
                     accepts(DIR_ARG, "Working/Temp directory for server").withRequiredArg().ofType(File.class).defaultsTo(new File(tempDirectory));
                     accepts(TILE_SIZE_ARG,"Size of tiles in pixels ie 128 means 128x128").withRequiredArg().ofType(Integer.class).defaultsTo(128);
+                    accepts(CCDB_ARG,"URL for Cell Centered Database (CCDB) web services").withRequiredArg().ofType(String.class).defaultsTo("http://elephanta.crbs.ucsd.edu:8080/");
                     accepts(NUM_CORES_ARG,"Number of concurrent CHM jobs to run.  Each job requires 1gb ram.").withRequiredArg().ofType(Integer.class).defaultsTo(1);
                     accepts(USE_SGE_ARG,"Use Sun/Oracle Grid Engine (SGE) to run CHM.  If used then --"
                             +DIR_ARG+" must be set to a path on a shared filesystem accessible to all compute nodes");
@@ -174,8 +169,6 @@ public class App {
                 }
             }
 
-            
-
             if (props.getProperty(TEMP_DIR_CREATED_FLAG,"false").equals("true")){
                 tempDirUsed = true;   
             }
@@ -190,13 +183,13 @@ public class App {
             int numCores = Integer.parseInt(props.getProperty(NUM_CORES_ARG));
             ExecutorService es = getExecutorService(numCores);
             
-            server = getWebServer(es,props,layers);
+            sws = getWebServer(es,props,layers);
             
-            server.start();
+            sws.getServer().start();
             int desiredLoad = numCores + (int)((double)numCores*overloadFactor);
             int prevTotalProcessedCount = -1;
             
-            while (SIGNAL_RECEIVED == false && (server.isStarting() || server.isRunning())){
+            while (SIGNAL_RECEIVED == false && (sws.getServer().isStarting() || sws.getServer().isRunning())){
                 //one idea is to have all the image processors dump to a single list
                 //and to have this loop track the completed job list and running job list
                 //we can then just grab the newest items from the list and pass them to the
@@ -222,7 +215,7 @@ public class App {
                 threadSleep(1000);
             }
             
-            server.stop();
+            sws.getServer().stop();
             es.shutdownNow();
             
             _log.log(Level.INFO,"Sleeping for 5 seconds to let things cool down");
@@ -232,9 +225,9 @@ public class App {
             ex.printStackTrace();
             System.exit(1);
         } finally {
-            if (server != null){
+            if (sws.getServer() != null){
                 _log.log(Level.INFO,"Shutting down webserver");
-                server.destroy();
+                sws.getServer().destroy();
             }
 
             if (tempDirUsed) {
@@ -300,6 +293,8 @@ public class App {
         
         props.setProperty(LAYER_MODEL_BASE_DIR, props.getProperty(DIR_ARG)+File.separator+LAYER_MODEL_BASE_DIR);
 
+        props.setProperty(CCDB_ARG,(String)optionSet.valueOf(CCDB_ARG));
+        
         System.out.println(props.toString());
         return props;
     }
@@ -451,82 +446,16 @@ public class App {
 
     }
     
-    public static Server getWebServer(ExecutorService es,Properties props,List<CustomLayer> layers) throws Exception {
+    public static SegmenterWebServer getWebServer(ExecutorService es,Properties props,List<CustomLayer> layers) throws Exception {
 
-        // Create a basic Jetty server object that will listen on port 8080.  Note that if you set this to port 0
-        // then a randomly available port will be assigned that you can either look in the logs for the port,
-        // or programmatically obtain it for use in test cases.
-        Server server = new Server(Integer.parseInt(props.getProperty(PORT_ARG)));
+        SegmenterWebServerFactory serverFac = new SegmenterWebServerFactory();
         
-        ContextHandlerCollection contexts = new ContextHandlerCollection();
-        
-        // Create the ResourceHandler. It is the object that will actually handle the request for a given file. It is
-        // a Jetty Handler object so it is suitable for chaining with other handlers as you will see in other examples.
-        ResourceHandler inputImageHandler = new ResourceHandler();
-        inputImageHandler.setDirectoriesListed(true);
-        inputImageHandler.setResourceBase(props.getProperty(INPUT_IMAGE_ARG));
-        ContextHandler imageContext = new ContextHandler("/images");
-        imageContext.setHandler(inputImageHandler);
-        contexts.addHandler(imageContext);
-        
-        ResourceHandler workingDirHandler = new ResourceHandler();
-        workingDirHandler.setDirectoriesListed(true);
-        workingDirHandler.setResourceBase(props.getProperty(DIR_ARG));
-        workingDirHandler.setWelcomeFiles(new String[]{"index.html"});
-        ContextHandler workingDirContext = new ContextHandler("/");
-        workingDirContext.setHandler(workingDirHandler);
-        contexts.addHandler(workingDirContext);
-        
-        
-        StatusHandler statusHandler = new StatusHandler(Integer.parseInt(props.getProperty(App.NUM_CORES_ARG)));
-        ContextHandler statusContext = new ContextHandler("/status");
-        statusContext.setHandler(statusHandler);
-        contexts.addHandler(statusContext);
-        
-        
-        ShutdownHandler shutdownHandler = new ShutdownHandler();
-        ContextHandler shutdownContext = new ContextHandler("/shutdown");
-        shutdownContext.setHandler(shutdownHandler);
-        
-        contexts.addHandler(shutdownContext);
-        
-        CcdbChmTrainedModelListHandler ccdbHandler = new CcdbChmTrainedModelListHandler("http://elephanta.crbs.ucsd.edu:8080/");
-        ContextHandler ccdbContext = new ContextHandler("/ccdb/chm_models");
-        ccdbContext.setHandler(ccdbHandler);
-        contexts.addHandler(ccdbContext);
-        
-        CcdbAddChmTrainedModelHandler ccdbAddHandler = new CcdbAddChmTrainedModelHandler("http://elephanta.crbs.ucsd.edu:8080/");
-        ContextHandler ccdbAddContext = new ContextHandler("/ccdb/add_chm_layer");
-        ccdbAddContext.setHandler(ccdbAddHandler);
-        contexts.addHandler(ccdbAddContext);
-       
-        if (props.getProperty(USE_SGE_ARG).equals("false")){
-            ContextHandlerFactory chf = new ContextHandlerFactory();
-            List<ContextHandler> handlers = chf.getContextHandlers(es, props, layers);
-            if (handlers != null && !handlers.isEmpty()){
-                ccdbAddHandler.setProcessingContextHandlers(handlers);
-                for (ContextHandler ch : handlers){
-                    contexts.addHandler(ch);
-                }
-            }
-        }
-        else {
-            SGEContextHandlerFactory sgeChf = new SGEContextHandlerFactory();
-            List<ContextHandler> handlers = sgeChf.getContextHandlers(es, props, layers);
-            if (handlers != null && !handlers.isEmpty()){
-                ccdbAddHandler.setProcessingContextHandlers(handlers);
-                for (ContextHandler ch : handlers){
-                    contexts.addHandler(ch);
-                }
-            }
-        }
-        server.setHandler(contexts);
+        SegmenterWebServer sws = serverFac.getSegmenterWebServer(es, props, layers);
         
         System.out.println("\n\n\tOpen a browser to this URL: http://localhost:" 
                 + props.getProperty(PORT_ARG) + "\n\n");
-        server.start();
 
-        return server;
+        return sws;
     }
 
     public static void generateIndexHtmlPage(Properties props,List<CustomLayer> layers) throws Exception {
