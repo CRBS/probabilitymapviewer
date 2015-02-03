@@ -30,9 +30,14 @@
 
 package edu.ucsd.crbs.realtimeseg.handler.ccdb;
 
+import static com.sun.corba.se.spi.presentation.rmi.StubAdapter.request;
 import edu.ucsd.crbs.realtimeseg.handler.ImageProcessorHandler;
 import edu.ucsd.crbs.realtimeseg.handler.ccdb.model.ModelDownloader;
-import edu.ucsd.crbs.realtimeseg.handler.ccdb.model.ModelDownloaderImpl;
+import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
+import edu.ucsd.crbs.realtimeseg.layer.CustomLayerFromCCDBFactory;
+import edu.ucsd.crbs.realtimeseg.processor.ImageProcessor;
+import edu.ucsd.crbs.realtimeseg.processor.ImageProcessorFactory;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -64,11 +69,15 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
     private String _tileSize;
     private String _opacity;
     private ModelDownloader _modelDownloader;
+    private ImageProcessorFactory _imageProcessorFactory;
+    private CustomLayerFromCCDBFactory _customLayerFactory;
     
     public CcdbAddChmTrainedModelHandler(final String url,final String minZoom,
             final String maxZoom,final String maxNativeZoom,final String tileSize,
             final String opacity,
-            ModelDownloader downloader){
+            ModelDownloader downloader,
+            ImageProcessorFactory imageProcessorFactory,
+            CustomLayerFromCCDBFactory customLayerFactory){
         _restURL = url;
         _minZoom = minZoom;
         _maxZoom = maxZoom;
@@ -76,6 +85,8 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
         _tileSize = tileSize;
         _opacity = opacity;
         _modelDownloader = downloader;
+        _imageProcessorFactory = imageProcessorFactory;
+        _customLayerFactory = customLayerFactory;
     }
     
     public void setProcessingContextHandlers(List<ImageProcessorHandler> imageProcessorHandlerList){
@@ -129,9 +140,10 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
         
         String handlerDir = iHandler.getContextHandler().getContextPath().replaceAll("^.*\\/", "");
         
+        File destDir;
         try {
         //download the model
-        _modelDownloader.downloadModel(id,
+        destDir = _modelDownloader.downloadModel(id,
                 "/"+handlerDir);
         }
         catch(Exception ex){
@@ -143,7 +155,9 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
         }
         
         //Update the handler with a new image processor
-        
+        CustomLayer cl = _customLayerFactory.getCustomLayer(handlerDir, destDir.getAbsolutePath(), color);
+        ImageProcessor ip = _imageProcessorFactory.getImageProcessor(cl);
+        iHandler.setImageProcessor(ip);
         
         //generate json response so client can add the layer
         String resp = "{ \"layerPath\": \""+iHandler.getContextHandler().getContextPath()+"/{z}-r{y}_c{x}.png\","
@@ -151,7 +165,8 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
                     + "\"maxZoom\": "+_maxZoom+","
                     + "\"maxNativeZoom\": "+_maxNativeZoom+","
                     + "\"tileSize\": "+_tileSize+","
-                    + "\"opacity\": "+_opacity+"}";
+                    + "\"opacity\": "+_opacity+","
+                    + "\"backgroundcss\": \""+cl.getBackgroundColorCSS()+"\"}";
             
         servletResponse.getWriter().write(resp);
         servletResponse.setStatus(HttpServletResponse.SC_OK);
