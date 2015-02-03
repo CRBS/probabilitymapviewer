@@ -58,7 +58,7 @@ public class CustomLayer {
             _internalDir = "uhoh";
         }
         else {
-            _internalDir = _name.replaceAll("\\W|\"","_");
+            _internalDir = _name;
         }
     }
 
