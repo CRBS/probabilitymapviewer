@@ -33,6 +33,7 @@ package edu.ucsd.crbs.realtimeseg.handler;
 import edu.ucsd.crbs.realtimeseg.App;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
 import edu.ucsd.crbs.realtimeseg.processor.ImageProcessor;
+import edu.ucsd.crbs.realtimeseg.processor.ImageProcessorFactory;
 import edu.ucsd.crbs.realtimeseg.processor.chm.SimpleCHMImageProcessor;
 import java.io.File;
 import java.util.ArrayList;
@@ -52,16 +53,12 @@ public class CHMLocalImageProcessorHandlerFactory {
         if (layers == null || layers.isEmpty()){
             return null;
         }
-        
+        ImageProcessorFactory ipf = new ImageProcessorFactory(props);
         ArrayList<ImageProcessorHandler> iHandlers = new ArrayList<ImageProcessorHandler>();
         for (CustomLayer cl : layers){
-            ImageProcessor imageProc = new SimpleCHMImageProcessor(props.getProperty(App.INPUT_IMAGE_ARG),
-                    props.getProperty(App.LAYER_HANDLER_BASE_DIR)+File.separator+cl.getVarName(),
-                    cl.getTrainedModelDir(),
-                    props.getProperty(App.CHM_BIN_ARG)+File.separator+"CHM_test.sh",
-                    props.getProperty(App.MATLAB_ARG),cl.getConvertColor(),
-                    props.getProperty(App.TILE_SIZE_ARG));
-            ImageProcessorHandler chmHandler = new ImageProcessorHandler(imageProc);
+            
+            ImageProcessorHandler chmHandler = new ImageProcessorHandler(ipf.getImageProcessor(cl));
+
             ContextHandler chmContext = new ContextHandler("/"+App.LAYER_HANDLER_BASE_DIR+"/"+cl.getVarName());
             chmContext.setHandler(chmHandler);
             chmHandler.setContextHandler(chmContext);
