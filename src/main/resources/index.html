@@ -225,7 +225,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
                     myHttpReq.send();
                 
                 if (myHttpReq.status != 200){
-                    alert("ERROR: Unable to add layer.  Got a HTTP status of: "+myHttpReq.status);
+                    alert("ERROR: Unable to add layer.  Got a HTTP status of: "+myHttpReq.status+" : "+myHttpReq.responseText);
                     return;
                 }
                 
