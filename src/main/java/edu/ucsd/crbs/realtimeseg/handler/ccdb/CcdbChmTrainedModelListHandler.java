@@ -91,8 +91,8 @@ public class CcdbChmTrainedModelListHandler extends AbstractHandler {
        // }
         //@TODO REPLACE WITH call to ccdb web service.  Ideally in constructor to 
         // minimize user delay
-        String responseString = "[{ \"id\": \"5235515\", \"name\": \"lysosome_D4_L2_S2\" },"
-                + "{ \"id\": \"5235516\", \"name\": \"lysosome_D6_L1_S2\" }]";
+        String responseString = "[{ \"id\": \"5236283\", \"name\": \"lysosome_D4_L2_S2\" },"
+                + "{ \"id\": \"5236284\", \"name\": \"lysosome_D6_L1_S2\" }]";
         
         
          servletResponse.setContentType("application/json");
