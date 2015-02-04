@@ -31,12 +31,13 @@
 package edu.ucsd.crbs.realtimeseg.handler.ccdb;
 
 import java.io.IOException;
-import java.util.Map;
+import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
@@ -84,15 +85,12 @@ public class CcdbChmTrainedModelListHandler extends AbstractHandler {
         _log.log(Level.INFO, servletRequest.getRequestURI());
         _log.log(Level.INFO,servletRequest.getQueryString());
         
-        //Map<String,String[]> pMap = servletRequest.getParameterMap();
+        String chmModels = IOUtils.toString(new URL(_restURL+"CCDBSlashChmService/rest/chm_models/"));
         
-        //for (String s : pMap.keySet()){
-        //    _log.log(Level.INFO,"("+s+")");
-       // }
-        //@TODO REPLACE WITH call to ccdb web service.  Ideally in constructor to 
-        // minimize user delay
-        String responseString = "[{ \"id\": \"5236283\", \"name\": \"lysosome_D4_L2_S2\" },"
-                + "{ \"id\": \"5236284\", \"name\": \"lysosome_D6_L1_S2\" }]";
+        String responseString = chmModels.replaceFirst("^\\{\"CHM_Model\":", "").replaceAll("}$","");
+        
+        //String responseString = "[{ \"id\": \"5236283\", \"name\": \"lysosome_D4_L2_S2\" },"
+        //        + "{ \"id\": \"5236284\", \"name\": \"lysosome_D6_L1_S2\" }]";
         
         
          servletResponse.setContentType("application/json");

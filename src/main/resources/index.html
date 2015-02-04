@@ -276,7 +276,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
                 var myres = JSON.parse(httpReq.responseText);
                 $( "#layerselect" ).empty();
                 for (var obj in myres){
-                    $( "#layerselect" ).append("<option value=\""+myres[obj].id+"\" selected=\"selected\">"+myres[obj].name+"</option>");
+                    $( "#layerselect" ).append("<option value=\""+myres[obj].id+"\" selected=\"selected\">"+myres[obj].MODEL_NAME+"</option>");
                 }
                 
                 $(function() {
