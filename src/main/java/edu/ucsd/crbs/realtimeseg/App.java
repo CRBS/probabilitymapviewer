@@ -482,7 +482,19 @@ public class App {
             
              FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/analyzing_magenta.png"), 
                 new File(props.getProperty(DIR_ARG)+File.separator+"analyzing_magenta.png"));
+             
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/powericon.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"powericon.png"));
             
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/powericonmouseover.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"powericonmouseover.png"));
+            
+             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/layersadd.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"layersadd.png"));
+            
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/layersaddmouseover.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"layersaddmouseover.png"));
+             
     }
 
     static void threadSleep(long millis) {
