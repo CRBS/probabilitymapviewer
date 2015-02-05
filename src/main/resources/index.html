@@ -100,10 +100,14 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
            CPU Consumed (hours): <div id="cpuconsumedhours" style="display: inline-block;">?</div><br/>
            Avg. Time per tile (secs): <div id="avgtimepertile" style="display: inline-block;">?</div><br/>
            <br/>
-           <button type="button"  onclick="addSegmenterDialog()">Add Segmenter from CCDB</button><p/>
+           <img src="/powericon.png" title="Shutdown server" id="powericon" alt="Shutdown server" onmouseover="this.src='/powericonmouseover.png'" onmouseout="this.src='/powericon.png'" onclick="shutdown()"/>
+           &nbsp;
+           <img src="/layersadd.png" title="Add Segmenter" id="layersadd" alt="Add Segmenter" onmouseover="this.src='/layersaddmouseover.png'" onmouseout="this.src='/layersadd.png'" onclick="addSegmenterDialog()"/>
+           
+           <p/>
+           
            <button type="button" style="display: none;" onclick="refreshOverlays()">Add Segmenter from File system</button><p/>
            <button type="button" onclick="refreshOverlays()">Refresh Map</button><p/>
-           <button type="button" onclick="shutdown()">Shutdown Server</button><p/>
            <div id="debugbox"></div>
            
         </div>
@@ -130,6 +134,9 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
         <script src="leaflet-0.7.3/leaflet.js"></script>
         <script>
 
+            $(function() {
+                $( document ).tooltip();
+            });
         //need to subtract from all bounds otherwise the tiles in r-1 and c-1
         //are requested
         var southWest = L.latLng(@@IMAGE_HEIGHT_NEGATIVE@@, 1);
@@ -230,7 +237,6 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
                 }
                 
                 var myres = JSON.parse(myHttpReq.responseText);
-                alert(myres.layerPath);
                 //example layer I must add
                 var uh = L.tileLayer(myres.layerPath, {
                  maxZoom: myres.minZoom,
