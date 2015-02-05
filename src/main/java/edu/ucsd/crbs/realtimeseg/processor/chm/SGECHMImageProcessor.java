@@ -105,6 +105,13 @@ public class SGECHMImageProcessor implements ImageProcessor,StringReplacer {
     
     private void createCommandLineScript()  {
         try {
+            File workingDirFile = new File(_workingDir);
+            if (!workingDirFile.exists()){
+                if (workingDirFile.mkdirs() != true){
+                    throw new Exception("Unable to create directory: "
+                            +workingDirFile.getAbsolutePath());
+                }
+            }
             ResourceToFile scriptWriter = new ResourceToFileImpl();
             _script = _workingDir + File.separator + "chmviasge.sh";
             scriptWriter.writeResourceToScript("/chmviasge.sh.template", _script, 
