@@ -85,13 +85,7 @@ public class CcdbChmTrainedModelListHandler extends AbstractHandler {
         _log.log(Level.INFO, servletRequest.getRequestURI());
         _log.log(Level.INFO,servletRequest.getQueryString());
         
-        String chmModels = IOUtils.toString(new URL(_restURL+"CCDBSlashChmService/rest/chm_models/"));
-        
-        String responseString = chmModels.replaceFirst("^\\{\"CHM_Model\":", "").replaceAll("}$","");
-        
-        //String responseString = "[{ \"id\": \"5236283\", \"name\": \"lysosome_D4_L2_S2\" },"
-        //        + "{ \"id\": \"5236284\", \"name\": \"lysosome_D6_L1_S2\" }]";
-        
+        String responseString = IOUtils.toString(new URL(_restURL+"CCDBSlashChmService/rest/chm_models/"));
         
          servletResponse.setContentType("application/json");
             servletResponse.setCharacterEncoding("UTF-8");
