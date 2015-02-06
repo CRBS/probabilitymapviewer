@@ -257,6 +257,8 @@ public class App {
 
         Properties props = new Properties();
 
+        //@TODO need to fail if multiple custom layers have the same name cause
+        //this screws everything up. 
         List<String> customList = (List<String>) optionSet.valuesOf(CUSTOM_ARG);
         int counter = 1;
         for (String s : customList) {
