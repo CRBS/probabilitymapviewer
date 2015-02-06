@@ -494,6 +494,12 @@ public class App {
             
             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/layersaddmouseover.png"), 
                 new File(props.getProperty(DIR_ARG)+File.separator+"layersaddmouseover.png"));
+            
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/refresh.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"refresh.png"));
+            
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/refreshmouseover.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"refreshmouseover.png"));
              
     }
 
