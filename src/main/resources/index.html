@@ -215,17 +215,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
             }
             
             function addNewLayerFromCCDB(ccdbLayerVal,ccdbLayerName,ccdbLayerColor) {
-                
-                //$( "#debugbox" ).append("------<p/>");
-                //$( "#debugbox" ).append(ccdbLayerColor);
-                //$( "#debugbox" ).append("<br/>");
-                //$( "#debugbox" ).append(ccdbLayerName);
-                //$( "#debugbox" ).append("<br/>");
-                //$( "#debugbox" ).append(ccdbLayerVal);
-                //$( "#debugbox" ).append("<br/>");
                   var myHttpReq = new XMLHttpRequest();
-                 // var params = "color="+ccdbLayerColor;
-                  
                   //Send the proper header information along with the request
                   //TODO Need to replace GET with POST call, but not sure why jetty is not seeing the request
                     myHttpReq.open("GET","/ccdb/add_chm_layer?id="+ccdbLayerVal+"&color="+ccdbLayerColor,false);
@@ -281,8 +271,8 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
                 //switch the set of html to jquery from innerHTML
                 var myres = JSON.parse(httpReq.responseText);
                 $( "#layerselect" ).empty();
-                for (var obj in myres){
-                    $( "#layerselect" ).append("<option value=\""+myres[obj].id+"\" selected=\"selected\">"+myres[obj].MODEL_NAME+"</option>");
+                for (var obj in myres.CHM_Model){
+                    $( "#layerselect" ).append("<option value=\""+myres.CHM_Model[obj].id+"\" selected=\"selected\">"+myres.CHM_Model[obj].MODEL_NAME+"</option>");
                 }
                 
                 $(function() {
