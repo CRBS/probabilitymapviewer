@@ -103,11 +103,11 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
            <img src="/powericon.png" title="Shutdown server" id="powericon" alt="Shutdown server" onmouseover="this.src='/powericonmouseover.png'" onmouseout="this.src='/powericon.png'" onclick="shutdown()"/>
            &nbsp;
            <img src="/layersadd.png" title="Add Segmenter" id="layersadd" alt="Add Segmenter" onmouseover="this.src='/layersaddmouseover.png'" onmouseout="this.src='/layersadd.png'" onclick="addSegmenterDialog()"/>
-           
+           &nbsp;
+           <img src="/refresh.png" title="Refresh map" id="refreshmap" alt="Refresh map" onmouseover="this.src='/refreshmouseover.png'" onmouseout="this.src='/refresh.png'" onclick="refreshOverlays()"/>
            <p/>
            
            <button type="button" style="display: none;" onclick="refreshOverlays()">Add Segmenter from File system</button><p/>
-           <button type="button" onclick="refreshOverlays()">Refresh Map</button><p/>
            <div id="debugbox"></div>
            
         </div>
@@ -116,7 +116,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
 
         <div id="addSegmenter" title="Add segmenter">
             Select segmenter from CCDB to add<br/>
-            <select id="layerselect" size="6" style="width: 80%;">
+            <select id="layerselect" size="6" style="width: 95%;">
                 
             </select>
             <p/>
@@ -261,7 +261,7 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
                 $( "#colorlist" ).append("<span style=\"color: green;\"><input type=\"radio\" name=\"layerColor\" value=\"green\">Green</input></span><br/>");                  
                 $( "#colorlist" ).append("<span style=\"color: magenta;\"><input type=\"radio\" name=\"layerColor\" value=\"magenta\">Magenta</input></span><br/>");                  
                 $( "#colorlist" ).append("<span style=\"color: red;\"><input type=\"radio\" name=\"layerColor\" value=\"red\">Red</input></span><br/>");  
-                $( "#colorlist" ).append("<span style=\"color: yellow;\"><input type=\"radio\" name=\"layerColor\" value=\"yellow\" checked=\"checked\">Yellow</input></span><br/>");  
+                $( "#colorlist" ).append("<span style=\"color: yellow;background-color: darkgray;\"><input type=\"radio\" name=\"layerColor\" value=\"yellow\" checked=\"checked\">Yellow</input></span><br/>");  
               
                 //layers that can be added
                 //display dialog
@@ -283,17 +283,6 @@ THE realtime-segmentation WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHT
                               id: "button-add",
                               text: "Add",
                               click: function() {
-                                  //$( "#debugbox" ).empty();
-                                 // $( "#debugbox" ).append("hello");
-                                 // $( "#debugbox" ).append("<br/>");
-                                 
-                                //  $( "#debugbox" ).append($( "#layerselect" ).val());
-                                 // $( "#debugbox" ).append("<br/>");
-                                 // $( "#layerselect" ).val();  //for value
-                                 // $( "#layerselect option:selected" ).text() //for for text
-                                // $( "#debugbox" ).append($( "#layerselect option:selected" ).text());
-                                // $( "#debugbox" ).append("<br/>");
-                                // $( "#debugbox" ).append($( "input[name=layerColor]:checked").val());
                                  addNewLayerFromCCDB($( "#layerselect" ).val(),
                                  $( "#layerselect option:selected" ).text(),
                                  $( "input[name=layerColor]:checked").val());
