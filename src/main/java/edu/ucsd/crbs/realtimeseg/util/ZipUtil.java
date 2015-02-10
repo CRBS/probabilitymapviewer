@@ -64,19 +64,23 @@ public class ZipUtil {
         ZipEntry ze = zis.getNextEntry();
         File curDir = null;
         while (ze != null) {
-            if (ze.isDirectory()) {
-                _log.log(Level.INFO, "Found directory with name: {0}", ze.getName());
-                curDir = new File(destDir.getAbsolutePath() + File.separator + removeEverythingLeftOfFirstSlash(ze.getName()));
-                curDir.mkdirs();
-            } else {
-                _log.log(Level.INFO, "Found file with name: {0}", ze.getName());
-                IOUtils.copy(zis, new FileOutputStream(new File(destDir.getAbsolutePath() + File.separator + removeEverythingLeftOfFirstSlash(ze.getName()))));
+            if (!ze.isDirectory()){
+                String curFileName = removeEverythingLeftofSlash(ze.getName());
+                if (curFileName.startsWith("MODEL_") ||
+                        curFileName.equals("param.mat")){
+                    _log.log(Level.INFO, "Found file with name: {0}", ze.getName());
+                    IOUtils.copy(zis, new FileOutputStream(new File(destDir.getAbsolutePath() + File.separator + curFileName)));
+                }
             }
             zis.closeEntry();
             ze = zis.getNextEntry();
         }
         zis.close();
        
+    }
+    
+    private String removeEverythingLeftofSlash(final String path){
+        return path.replaceAll("^.*\\/","");
     }
     
     private String removeEverythingLeftOfFirstSlash(final String path){
