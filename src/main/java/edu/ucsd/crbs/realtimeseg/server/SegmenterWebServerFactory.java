@@ -32,9 +32,8 @@ package edu.ucsd.crbs.realtimeseg.server;
 
 
 import edu.ucsd.crbs.realtimeseg.App;
-import edu.ucsd.crbs.realtimeseg.handler.CHMLocalImageProcessorHandlerFactory;
+import edu.ucsd.crbs.realtimeseg.handler.CHMImageProcessorHandlerFactory;
 import edu.ucsd.crbs.realtimeseg.handler.ImageProcessorHandler;
-import edu.ucsd.crbs.realtimeseg.handler.SGECHMImageProcessorHandlerFactory;
 import edu.ucsd.crbs.realtimeseg.handler.ShutdownHandler;
 import edu.ucsd.crbs.realtimeseg.handler.StatusHandler;
 import edu.ucsd.crbs.realtimeseg.handler.ccdb.CcdbAddChmTrainedModelHandler;
@@ -118,26 +117,15 @@ public class SegmenterWebServerFactory {
         ccdbAddContext.setHandler(ccdbAddHandler);
         contexts.addHandler(ccdbAddContext);
        
-        if (props.getProperty(App.USE_SGE_ARG).equals("false")){
-            CHMLocalImageProcessorHandlerFactory chf = new CHMLocalImageProcessorHandlerFactory();
-            List<ImageProcessorHandler> handlers = chf.getImageProcessorHandlers(es, props, layers);
-            if (handlers != null && !handlers.isEmpty()){
-                ccdbAddHandler.setProcessingContextHandlers(handlers);
-                for (ImageProcessorHandler iph : handlers){
-                    contexts.addHandler(iph.getContextHandler());
-                }
+        CHMImageProcessorHandlerFactory chf = new CHMImageProcessorHandlerFactory();
+        List<ImageProcessorHandler> handlers = chf.getImageProcessorHandlers(es, props, layers);
+        if (handlers != null && !handlers.isEmpty()) {
+            ccdbAddHandler.setProcessingContextHandlers(handlers);
+            for (ImageProcessorHandler iph : handlers) {
+                contexts.addHandler(iph.getContextHandler());
             }
         }
-        else {
-            SGECHMImageProcessorHandlerFactory sgeChf = new SGECHMImageProcessorHandlerFactory();
-            List<ImageProcessorHandler> handlers = sgeChf.getImageProcessorHandlers(es, props, layers);
-            if (handlers != null && !handlers.isEmpty()){
-                ccdbAddHandler.setProcessingContextHandlers(handlers);
-                for (ImageProcessorHandler iph : handlers){
-                    contexts.addHandler(iph.getContextHandler());
-                }
-            }
-        }
+
         server.setHandler(contexts);
 
         return sws;
