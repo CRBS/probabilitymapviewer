@@ -32,22 +32,21 @@ package edu.ucsd.crbs.realtimeseg.handler;
 
 import edu.ucsd.crbs.realtimeseg.App;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
-import edu.ucsd.crbs.realtimeseg.processor.ImageProcessor;
 import edu.ucsd.crbs.realtimeseg.processor.ImageProcessorFactory;
-import edu.ucsd.crbs.realtimeseg.processor.chm.SimpleCHMImageProcessor;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
+import java.util.logging.Logger;
 import org.eclipse.jetty.server.handler.ContextHandler;
 
 /**
  *
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
-public class CHMLocalImageProcessorHandlerFactory {
+public class CHMImageProcessorHandlerFactory {
 
+    private static final Logger _log = Logger.getLogger(CHMImageProcessorHandlerFactory.class.getName());
     
     public List<ImageProcessorHandler> getImageProcessorHandlers(ExecutorService es,Properties props, List<CustomLayer> layers) throws Exception {
         if (layers == null || layers.isEmpty()){
@@ -58,8 +57,9 @@ public class CHMLocalImageProcessorHandlerFactory {
         for (CustomLayer cl : layers){
             
             ImageProcessorHandler chmHandler = new ImageProcessorHandler(ipf.getImageProcessor(cl));
-
-            ContextHandler chmContext = new ContextHandler("/"+App.LAYER_HANDLER_BASE_DIR+"/"+cl.getVarName());
+            
+            String contextHandlerPath = "/"+App.LAYER_HANDLER_BASE_DIR+"/"+cl.getVarName();
+            ContextHandler chmContext = new ContextHandler(contextHandlerPath);
             chmContext.setHandler(chmHandler);
             chmHandler.setContextHandler(chmContext);
             iHandlers.add(chmHandler);
