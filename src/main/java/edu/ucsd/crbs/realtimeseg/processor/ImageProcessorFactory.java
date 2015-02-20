@@ -34,6 +34,7 @@ import edu.ucsd.crbs.realtimeseg.App;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
 import edu.ucsd.crbs.realtimeseg.processor.chm.SGECHMImageProcessor;
 import edu.ucsd.crbs.realtimeseg.processor.chm.SimpleCHMImageProcessor;
+import edu.ucsd.crbs.realtimeseg.processor.chm.SimpleIlastikImageProcessor;
 import java.io.File;
 import java.util.Properties;
 
@@ -44,6 +45,7 @@ import java.util.Properties;
 public class ImageProcessorFactory {
 
     public static final String CHM_TEST_SH = "CHM_test.sh";
+    public static final String RUN_ILASTIK_SH = "run_ilastik.sh";
     
     private Properties _props;
     
@@ -55,12 +57,17 @@ public class ImageProcessorFactory {
         
         String workingDir =  _props.getProperty(App.LAYER_HANDLER_BASE_DIR)
                 +File.separator+layer.getVarName();
-        
-        if (Boolean.parseBoolean(_props.getProperty(App.USE_SGE_ARG,
-                Boolean.FALSE.toString()))){
-            return getSGECHMImageProcessor(workingDir,layer);
+        if (layer.getBinary().equalsIgnoreCase("chm")){
+            if (Boolean.parseBoolean(_props.getProperty(App.USE_SGE_ARG,
+                    Boolean.FALSE.toString()))){
+                return getSGECHMImageProcessor(workingDir,layer);
+            }
+            return getSimpleCHMImageProcessor(workingDir,layer);
         }
-        return getSimpleCHMImageProcessor(workingDir,layer);
+        else if (layer.getBinary().equalsIgnoreCase("ilastik")){
+            return getSimpleIlastikImageProcessor(workingDir,layer);
+        }
+        return null;
     }
     
     private ImageProcessor getSGECHMImageProcessor(final String workingDir,
@@ -83,5 +90,17 @@ public class ImageProcessorFactory {
                     _props.getProperty(App.CHM_BIN_ARG)+File.separator+CHM_TEST_SH,
                     _props.getProperty(App.MATLAB_ARG),layer.getConvertColor(),
                     _props.getProperty(App.TILE_SIZE_ARG));
+    }
+    
+    private ImageProcessor getSimpleIlastikImageProcessor(final String workingDir,
+            CustomLayer layer){
+        return new SimpleIlastikImageProcessor(_props.getProperty(App.INPUT_IMAGE_ARG),
+                    workingDir,
+                    layer.getTrainedModelDir(),
+                    _props.getProperty(App.ILASTIK_ARG)+File.separator+RUN_ILASTIK_SH,
+                    _props.getProperty(App.MATLAB_ARG),layer.getConvertColor(),
+                    _props.getProperty(App.TILE_SIZE_ARG));
+        
+        
     }
 }
