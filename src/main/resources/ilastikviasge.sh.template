@@ -16,7 +16,7 @@ mkdir -p "$tmpDir"
 
 
 
-@@ILASTIK_BINARY@@ --headless --project="@@TRAINED_MODEL@@" --output_format=png --output_filename_format="$tmpDir/${inputImageName}" "$inputImage"
+@@ILASTIK_BINARY@@ --headless --project="@@PROJECT@@" --output_format=png --output_filename_format="$tmpDir/${inputImageName}" "$inputImage"
 
 declare exitVal=$?
 
