@@ -45,6 +45,7 @@ public class App {
     
     public static final String INPUT_IMAGE_ARG = "inputimage";
     public static final String CHM_BIN_ARG = "chmbin";
+    public static final String ILASTIK_ARG = "ilastik";
     public static final String PORT_ARG = "port";
     public static final String DIR_ARG = "dir";
     public static final String MATLAB_ARG = "matlab";
@@ -130,6 +131,7 @@ public class App {
                             + " *color - can be one of the following: red,green,"
                             + "blue,yellow,magenta,cyan\n"
                             + " *binary - Set to 'chm' for now\n").withRequiredArg().ofType(String.class).describedAs("trained model,name,color,binary");
+                    accepts(ILASTIK_ARG,"Sets path to Ilastik directory ie ilastik-1.1.2-Linux").withRequiredArg().ofType(File.class).defaultsTo(new File("/var/tmp/ilastik-1.1.2-Linux"));
                     acceptsAll(helpArgs,"Show Help").forHelp();
                 }
             };
@@ -296,6 +298,8 @@ public class App {
         props.setProperty(LAYER_MODEL_BASE_DIR, props.getProperty(DIR_ARG)+File.separator+LAYER_MODEL_BASE_DIR);
 
         props.setProperty(CCDB_ARG,(String)optionSet.valueOf(CCDB_ARG));
+        
+        props.setProperty(ILASTIK_ARG, ((File)optionSet.valueOf(ILASTIK_ARG)).getAbsolutePath());
         
         System.out.println(props.toString());
         return props;
