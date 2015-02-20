@@ -62,7 +62,8 @@ public class App {
     public static final String TILE_SIZE_ARG = "tilesize";
     public static final String TEMP_DIR_CREATED_FLAG="TEMP_DIR_CREATED";
     public static final String USE_SGE_ARG = "usesge";
-    public static final String SGE_QUEUE_ARG = "sgequeue";
+    public static final String SGE_CHM_QUEUE_ARG = "sgechmqueue";
+    public static final String SGE_ILASTIK_QUEUE_ARG = "sgeilastikqueue";
     public static final String CONVERT_ARG = "convertbinary";
     public static final String CCDB_ARG = "ccdb";
     
@@ -123,7 +124,8 @@ public class App {
                     accepts(NUM_CORES_ARG,"Number of concurrent CHM jobs to run.  Each job requires 1gb ram.").withRequiredArg().ofType(Integer.class).defaultsTo(1);
                     accepts(USE_SGE_ARG,"Use Sun/Oracle Grid Engine (SGE) to run CHM.  If used then --"
                             +DIR_ARG+" must be set to a path on a shared filesystem accessible to all compute nodes");
-                    accepts(SGE_QUEUE_ARG,"Sets the SGE queue to use.  Only relevant with --"+USE_SGE_ARG).withRequiredArg().ofType(String.class).defaultsTo("all.q");
+                    accepts(SGE_CHM_QUEUE_ARG,"Sets the SGE chm queue to use.  Only relevant with --"+USE_SGE_ARG).withRequiredArg().ofType(String.class).defaultsTo("all.q");
+                    accepts(SGE_ILASTIK_QUEUE_ARG,"Sets the SGE Ilastik queue to use.  Only relevant with --"+USE_SGE_ARG).withRequiredArg().ofType(String.class).defaultsTo("all.q");
                     accepts(CONVERT_ARG,"Sets path to convert command (only works with --"+USE_SGE_ARG+")").withRequiredArg().ofType(String.class).defaultsTo("convert");
                     accepts(CUSTOM_ARG,"Custom Segmentation layer (comma delimited)\n"
                             + " *trained model - path to chm trained model\n"
@@ -275,7 +277,8 @@ public class App {
             props.setProperty(USE_SGE_ARG, "false");
         }
         props.setProperty(CONVERT_ARG,(String)optionSet.valueOf(CONVERT_ARG));
-        props.setProperty(SGE_QUEUE_ARG, (String)optionSet.valueOf(SGE_QUEUE_ARG));
+        props.setProperty(SGE_CHM_QUEUE_ARG, (String)optionSet.valueOf(SGE_CHM_QUEUE_ARG));
+        props.setProperty(SGE_ILASTIK_QUEUE_ARG, (String)optionSet.valueOf(SGE_ILASTIK_QUEUE_ARG));
         props.setProperty(IMAGE_NAME_ARG,(String)optionSet.valueOf(IMAGE_NAME_ARG));
         props.setProperty(TITLE_ARG, (String)optionSet.valueOf(TITLE_ARG));
         props.setProperty(TILE_SIZE_ARG, ((Integer)optionSet.valueOf(TILE_SIZE_ARG)).toString());
