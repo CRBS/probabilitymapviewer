@@ -33,6 +33,7 @@ package edu.ucsd.crbs.realtimeseg.processor;
 import edu.ucsd.crbs.realtimeseg.App;
 import edu.ucsd.crbs.realtimeseg.layer.CustomLayer;
 import edu.ucsd.crbs.realtimeseg.processor.chm.SGECHMImageProcessor;
+import edu.ucsd.crbs.realtimeseg.processor.chm.SGEIlastikImageProcessor;
 import edu.ucsd.crbs.realtimeseg.processor.chm.SimpleCHMImageProcessor;
 import edu.ucsd.crbs.realtimeseg.processor.chm.SimpleIlastikImageProcessor;
 import java.io.File;
@@ -65,6 +66,10 @@ public class ImageProcessorFactory {
             return getSimpleCHMImageProcessor(workingDir,layer);
         }
         else if (layer.getBinary().equalsIgnoreCase("ilastik")){
+            if (Boolean.parseBoolean(_props.getProperty(App.USE_SGE_ARG,
+                    Boolean.FALSE.toString()))){
+                return getSGEIlastikImageProcessor(workingDir,layer);
+            }
             return getSimpleIlastikImageProcessor(workingDir,layer);
         }
         return null;
@@ -78,7 +83,7 @@ public class ImageProcessorFactory {
                     _props.getProperty(App.CHM_BIN_ARG)+File.separator+CHM_TEST_SH,
                     _props.getProperty(App.MATLAB_ARG),layer.getConvertColor(),
                     _props.getProperty(App.TILE_SIZE_ARG),
-                    _props.getProperty(App.SGE_QUEUE_ARG),
+                    _props.getProperty(App.SGE_CHM_QUEUE_ARG),
                     _props.getProperty(App.CONVERT_ARG));
     }
     
@@ -102,5 +107,16 @@ public class ImageProcessorFactory {
                     _props.getProperty(App.TILE_SIZE_ARG));
         
         
+    }
+    
+    private ImageProcessor getSGEIlastikImageProcessor(final String workingDir,
+            CustomLayer layer){
+        return new SGEIlastikImageProcessor(_props.getProperty(App.INPUT_IMAGE_ARG),
+                    workingDir,
+                    layer.getTrainedModelDir(),
+                    _props.getProperty(App.ILASTIK_ARG)+File.separator+RUN_ILASTIK_SH,
+                    layer.getConvertColor(),
+                    _props.getProperty(App.SGE_ILASTIK_QUEUE_ARG),
+                    _props.getProperty(App.CONVERT_ARG));
     }
 }
