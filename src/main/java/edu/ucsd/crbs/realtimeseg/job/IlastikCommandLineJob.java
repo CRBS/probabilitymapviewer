@@ -89,11 +89,19 @@ public class IlastikCommandLineJob implements Callable {
             
             long startTime = System.currentTimeMillis();
         
+            _log.log(Level.INFO,"{0} {1} {2} {3} {4} {5}",new Object[]{_binary,
+                    "--headless",
+                    "--project="+_project,
+                    "--output_format=png",
+                    "--output_filename_format="+tempDir.getAbsolutePath()+File.separator+fileName,
+                    _inputImage});
+            
             result = _runCommandLineProcess.runCommandLineProcess(_binary,"--headless",
                     "--project="+_project,"--output_format=png",
                     "--output_filename_format="+tempDir.getAbsolutePath()
-                            +File.separator+fileName+".png",
+                            +File.separator+fileName,
                     _inputImage);
+            
             long ilastikDuration = System.currentTimeMillis() - startTime;
             _log.log(Level.FINE,"Ilastik output: {0}", result);
         
