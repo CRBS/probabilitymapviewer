@@ -1,0 +1,43 @@
+#!/bin/bash
+#
+
+# This script runs Ilastik and then runs convert
+# to create a pretty colored version of the probability map
+#
+
+declare inputImage=$1
+declare inputImageName=$2
+
+# make a temp directory
+
+declare tmpDir="@@OUTPUT_DIR@@/${inputImageName}.dir"
+
+mkdir -p "$tmpDir"
+
+
+
+@@ILASTIK_BINARY@@ --headless --project="@@TRAINED_MODEL@@" --output_format=png --output_filename_format="$tmpDir/${inputImageName}" "$inputImage"
+
+declare exitVal=$?
+
+if [ $exitVal != 0 ] ; then
+  echo "Non zero exit code received from Ilastik"
+  exit $exitVal
+fi
+
+@@CONVERT_BINARY@@ "$tmpDir/${inputImageName}" -negate -channel @@COLORS_TO_ZERO_OUT@@ -threshold 100% "@@OUTPUT_DIR@@/${inputImageName}"
+
+exitVal=$?
+
+
+#remove the temp image and temp directory
+/bin/rm -f "$tmpDir/${inputImageName}"
+/bin/rmdir "$tmpDir"
+
+if [ $exitVal != 0 ] ; then
+  echo "Non zero exit code received from convert"
+  exit $exitVal
+fi
+
+exit 0
+
