@@ -12,7 +12,7 @@ segmentation in real time on a previously tiled image.  Segmentation is
 performed using [Cascaded Hierarchical Model (CHM)][chm].  
 
 This application spins up a [Jetty][jetty] web server on the local host and 
-directs the user to open a browser to view the image and real time segmentation.
+directs the user to open a browser to view the image with segmentation overlays.
 
 
 Requirements
