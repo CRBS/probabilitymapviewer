@@ -4,10 +4,10 @@
 [jetty]: http://eclipse.org/jetty/
 [maven]: http://maven.apache.org/
 
-realtime-segmentation
+segmenter
 =====================
 
-realtime-segmentation is an application that lets a caller perform image
+Segmenter is an application that lets a caller perform image
 segmentation in real time on a previously tiled image.  Segmentation is
 performed using [Cascaded Hierarchical Model (CHM)][chm].  
 
@@ -33,7 +33,7 @@ Building
 Running
 =======
 
-    java -jar target/realtime-segmentation-REPLACEWITHVERSION-jar-with-dependencies.jar
+    java -jar target/segmenter-REPLACEWITHVERSION-jar-with-dependencies.jar
 
 **REPLACEWITHVERSION** must be set to the version
 
