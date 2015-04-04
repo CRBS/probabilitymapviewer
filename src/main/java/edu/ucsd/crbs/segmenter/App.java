@@ -2,6 +2,8 @@ package edu.ucsd.crbs.segmenter;
 
 import edu.ucsd.crbs.segmenter.html.HtmlPageGenerator;
 import edu.ucsd.crbs.segmenter.html.SingleImageIndexHtmlPageGenerator;
+import edu.ucsd.crbs.segmenter.io.SliceMonitor;
+import edu.ucsd.crbs.segmenter.io.SliceMonitorImpl;
 import edu.ucsd.crbs.segmenter.io.WorkingDirCreator;
 import edu.ucsd.crbs.segmenter.io.WorkingDirCreatorImpl;
 import edu.ucsd.crbs.segmenter.job.JobResult;
@@ -29,7 +31,6 @@ import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.apache.commons.io.FileUtils;
-import org.eclipse.jetty.server.Server;
 
 import sun.misc.Signal;
 import sun.misc.SignalHandler;
@@ -79,9 +80,13 @@ public class App {
     
     public static double overloadFactor = 0.5;
     
+    public static String latestSlice = "";
+    
     public static String LAYER_HANDLER_BASE_DIR = "layerhandlers";
     public static String LAYER_MODEL_BASE_DIR = "layermodels";
     
+    
+    public static String IMAGES_CONTEXT_PATH = "images";
     
     public static void main(String[] args) {
         
@@ -110,6 +115,7 @@ public class App {
                             + " where r# is the 0 offset row number and c# is "
                             + "the 0 offset column number.  Ex: 0-r0_c0.png  "
                             + "Tiles must also be size 128x128").withRequiredArg().ofType(File.class).required();
+                    
                     accepts(TITLE_ARG,"Title for app").withRequiredArg().ofType(String.class).defaultsTo("Segmenter");
                     accepts(IMAGE_NAME_ARG,"Name of input image").withRequiredArg().ofType(String.class).defaultsTo("Base image");
                     accepts(IMAGE_WIDTH_ARG,"Width of image in pixels").withRequiredArg().ofType(Integer.class).defaultsTo(50000);
@@ -120,7 +126,7 @@ public class App {
                     accepts(PORT_ARG, "Port to run service").withRequiredArg().ofType(Integer.class).defaultsTo(8080);
                     accepts(DIR_ARG, "Working/Temp directory for server").withRequiredArg().ofType(File.class).defaultsTo(new File(tempDirectory));
                     accepts(TILE_SIZE_ARG,"Size of tiles in pixels ie 128 means 128x128").withRequiredArg().ofType(Integer.class).defaultsTo(128);
-                    accepts(CCDB_ARG,"URL for Cell Centered Database (CCDB) web services").withRequiredArg().ofType(String.class).defaultsTo("http://elephanta.crbs.ucsd.edu:8080/");
+                    accepts(CCDB_ARG,"URL for Cell Centered Database (CCDB) web services").withRequiredArg().ofType(String.class).defaultsTo("http://surus.crbs.ucsd.edu:8080/");
                     accepts(NUM_CORES_ARG,"Number of concurrent CHM jobs to run.  Each job requires 1gb ram.").withRequiredArg().ofType(Integer.class).defaultsTo(1);
                     accepts(USE_SGE_ARG,"Use Sun/Oracle Grid Engine (SGE) to run CHM.  If used then --"
                             +DIR_ARG+" must be set to a path on a shared filesystem accessible to all compute nodes");
@@ -182,6 +188,9 @@ public class App {
             copyOverJqueryLibrary(props);
             
             setCHMBinDir(props);
+            
+            //if collection mode is enabled then set the latest slice path
+            SliceMonitor sliceMonitor = new SliceMonitorImpl(props);
 
             generateIndexHtmlPage(props,layers);
             int numCores = Integer.parseInt(props.getProperty(NUM_CORES_ARG));
@@ -192,6 +201,7 @@ public class App {
             sws.getServer().start();
             int desiredLoad = numCores + (int)((double)numCores*overloadFactor);
             int prevTotalProcessedCount = -1;
+            long iterationCounter = 0;
             
             while (SIGNAL_RECEIVED == false && (sws.getServer().isStarting() || sws.getServer().isRunning())){
                 //one idea is to have all the image processors dump to a single list
@@ -199,6 +209,14 @@ public class App {
                 //we can then just grab the newest items from the list and pass them to the
                 //executor service
                 totalProcessedCount += removeCompletedTasks(futureTaskList);
+               
+                //if this is a collection check for new # directory in input image
+                //if found update status.latestslice to this slice
+                if (iterationCounter % 10 == 0){
+                    _log.log(Level.INFO,"Checking for new slices");
+                    updateSlices(sliceMonitor);
+                }
+                
                 
                 if (totalProcessedCount != prevTotalProcessedCount){
                     _log.log(Level.INFO, "Total Processed Count is {0}, Future Task List Size: {1}, and desired load is {2} and tiles to process is {3}",
@@ -217,6 +235,7 @@ public class App {
                     }
                 }
                 threadSleep(1000);
+                iterationCounter++;
             }
             
             sws.getServer().stop();
@@ -251,6 +270,15 @@ public class App {
         }
     }
     
+    public static void updateSlices(SliceMonitor sliceMonitor) throws Exception {
+        List<String> slices = sliceMonitor.getSlices();
+        if (slices == null || slices.isEmpty()){
+            App.latestSlice = "";
+            return;
+        }
+        App.latestSlice = slices.get(slices.size()-1);
+    }
+    
     /**
      * Converts <b>optionSet</b> to a {@link Properties} object
      * @param optionSet
@@ -276,6 +304,7 @@ public class App {
         else {
             props.setProperty(USE_SGE_ARG, "false");
         }
+        
         props.setProperty(CONVERT_ARG,(String)optionSet.valueOf(CONVERT_ARG));
         props.setProperty(SGE_CHM_QUEUE_ARG, (String)optionSet.valueOf(SGE_CHM_QUEUE_ARG));
         props.setProperty(SGE_ILASTIK_QUEUE_ARG, (String)optionSet.valueOf(SGE_ILASTIK_QUEUE_ARG));
