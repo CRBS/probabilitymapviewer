@@ -72,7 +72,7 @@ public class SegmenterWebServerFactory {
         ResourceHandler inputImageHandler = new ResourceHandler();
         inputImageHandler.setDirectoriesListed(true);
         inputImageHandler.setResourceBase(props.getProperty(App.INPUT_IMAGE_ARG));
-        ContextHandler imageContext = new ContextHandler("/images");
+        ContextHandler imageContext = new ContextHandler("/"+App.IMAGES_CONTEXT_PATH);
         imageContext.setHandler(inputImageHandler);
         contexts.addHandler(imageContext);
         
