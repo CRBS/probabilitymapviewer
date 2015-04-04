@@ -213,7 +213,7 @@ public class App {
                 //if this is a collection check for new # directory in input image
                 //if found update status.latestslice to this slice
                 if (iterationCounter % 10 == 0){
-                    _log.log(Level.INFO,"Checking for new slices");
+                    //_log.log(Level.INFO,"Checking for new slices");
                     updateSlices(sliceMonitor);
                 }
                 
