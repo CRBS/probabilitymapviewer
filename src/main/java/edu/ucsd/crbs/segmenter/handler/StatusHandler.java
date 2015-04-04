@@ -104,25 +104,35 @@ public class StatusHandler extends AbstractHandler  {
                 }
                 
             }
-            String responseString = "{ \"tilestoprocess\": "
-                    +tilesToProcess
-                    +",\"futuretasklistsize\": "+App.futureTaskList.size()
-                    +",\"esttimehours\": \""
-                    + estTimeMinutes+"\""
-                    +",\"estcpuhours\": \""
-                    +estCpuHours+"\""
-                    +",\"tilesprocessed\": "
-                    +App.totalProcessedCount
-                    +",\"cpuconsumedhours\": \""
-                    + totalTimeHours+"\""
-                    +",\"numcoresinuse\": \""
-                    +numCoresInUse+"\""
-                    + ",\"avgtimepertile\": \""
-                    +avgTimePerTile+"\"}";
+            StringBuilder sb = new StringBuilder();
+            sb.append("{ \"tilestoprocess\": ");
+            sb.append(tilesToProcess);
+            sb.append(",\"futuretasklistsize\": ");
+            sb.append(App.futureTaskList.size());
+            sb.append(",\"esttimehours\": \"");
+            sb.append(estTimeMinutes);
+            sb.append("\"");
+            sb.append(",\"estcpuhours\": \"");
+            sb.append(estCpuHours);
+            sb.append("\"");
+            sb.append(",\"tilesprocessed\": ");
+                    sb.append(App.totalProcessedCount);
+                    sb.append(",\"cpuconsumedhours\": \"");
+                    sb.append(totalTimeHours);
+                    sb.append("\"");
+                    sb.append(",\"numcoresinuse\": \"");
+                    sb.append(numCoresInUse);
+                    sb.append("\"");
+                    sb.append(",\"avgtimepertile\": \"");
+                    sb.append(avgTimePerTile);
+                    sb.append("\"");
+                    sb.append(",\"latestslice\": \"");
+                    sb.append(App.latestSlice);
+                    sb.append("\"}");
             
             servletResponse.setContentType("application/json");
             servletResponse.setCharacterEncoding("UTF-8");
-            servletResponse.getWriter().write(responseString);
+            servletResponse.getWriter().write(sb.toString());
             servletResponse.setStatus(HttpServletResponse.SC_OK);
             request.setHandled(true);
     }
