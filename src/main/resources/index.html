@@ -99,6 +99,7 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
            # Cores in Use:  <div id="numcoresinuse" style="display: inline-block;">?</div><br/>
            CPU Consumed (hours): <div id="cpuconsumedhours" style="display: inline-block;">?</div><br/>
            Avg. Time per tile (secs): <div id="avgtimepertile" style="display: inline-block;">?</div><br/>
+           Slice: <div id="currentslice" style="display: inline-block;">?</div><br/>
            <br/>
            <img src="/powericon.png" title="Shutdown server" id="powericon" alt="Shutdown server" onmouseover="this.src='/powericonmouseover.png'" onmouseout="this.src='/powericon.png'" onclick="shutdown()"/>
            &nbsp;
@@ -205,6 +206,9 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
             var cpuConsumedHoursElement = document.getElementById("cpuconsumedhours");
             var avgTimePerTileElement = document.getElementById("avgtimepertile");
             var numCoresInUseElement = document.getElementById("numcoresinuse");
+            var currentSliceElement = document.getElementById("currentslice");
+            
+            
             
             function refreshOverlays() {
                 //iterate through the layers in the overlayMaps and invoke refresh
@@ -355,6 +359,7 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
                 avgTimePerTileElement.innerHTML = myres.avgtimepertile;
                 estCpuHoursElement.innerHTML = myres.estcpuhours;
                 numCoresInUseElement.innerHTML = myres.numcoresinuse;
+                currentSliceElement.innerHTML = myres.latestslice;
                 if (myres.tilestoprocess > 0 || myres.futuretasklistsize > 0){
                    refreshOverlays();
                 }
