@@ -147,6 +147,17 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
 
         var paddedTileBounds = tileBounds.pad(0.05);
        
+        // this should be set to initial base layer url
+        // and updated in refresh to the appropriate layer
+        // if the user wants to be moved to the newest layer
+        // otherwise leave it alone
+        // a baseLayer.setUrl will update the UI
+        // course we have to do this for all other layers
+        // so they can reflect the change as well.  need to 
+        // have some sort of function that can take a previous
+        // url and adjust it
+        var currentBaseLayerUrl = '';
+       
         @@BASE_IMAGE_LAYER_DEC@@
         
         @@CUSTOM_LAYERS_DECS@@
