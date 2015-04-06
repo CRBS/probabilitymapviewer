@@ -538,7 +538,9 @@ public class App {
             
             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/refreshmouseover.png"), 
                 new File(props.getProperty(DIR_ARG)+File.separator+"refreshmouseover.png"));
-             
+            
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/emptycube.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"emptycube.png"));
     }
 
     static void threadSleep(long millis) {
