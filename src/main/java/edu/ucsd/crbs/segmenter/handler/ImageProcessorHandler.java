@@ -30,6 +30,7 @@
 
 package edu.ucsd.crbs.segmenter.handler;
 
+import edu.ucsd.crbs.segmenter.App;
 import edu.ucsd.crbs.segmenter.processor.ImageProcessor;
 import java.io.IOException;
 import java.util.HashSet;
@@ -106,6 +107,10 @@ public class ImageProcessorHandler extends AbstractHandler {
         
         //only process images with non negative positions
         if (imageToProcess.matches("^[0-9]+-r[0-9]+_c[0-9]+\\.png$")){
+            if (App.latestSlice != null && !App.latestSlice.equals("")){
+                int slicePos = servletRequest.getRequestURI().lastIndexOf(App.latestSlice);
+                imageToProcess = servletRequest.getRequestURI().substring(slicePos);
+            }
             if (!_imagesToProcess.contains(imageToProcess)){
             //submit job
                 _processor.process(imageToProcess);
