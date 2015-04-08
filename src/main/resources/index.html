@@ -368,8 +368,10 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
             }
             
             function updateToSlice(sliceName){
+                  //@@UPDATE_TO_SLICE_FUNCTION_GUTS@@
                 baseLayer.setUrl('images/'+sliceName+'/{z}-r{y}_c{x}.png');
                 Mitochondria.setUrl('layerhandlers/Mitochondria/'+sliceName+'/{z}-r{y}_c{x}.png');
+                Lysosome.setUrl('layerhandlers/Lysosome/'+sliceName+'/{z}-r{y}_c{x}.png');
             }
             
             // the interval function should ask the server if any new tiles have
