@@ -80,9 +80,9 @@ public class TestSliceMonitorImpl {
     
     @Test
     public void testGetSlicesWithNullPropertiesPassedIntoConstructor(){
-        SliceMonitorImpl smi = new SliceMonitorImpl(null);
+        
         try {
-           smi.getSlices();
+           SliceMonitorImpl smi = new SliceMonitorImpl(null);
            fail("Expected Exception");
         }
         catch(NullPointerException npe){
@@ -96,9 +96,9 @@ public class TestSliceMonitorImpl {
     
     @Test
     public void testGetSlicesWithNullInputImageArg(){
-        SliceMonitorImpl smi = new SliceMonitorImpl(new Properties());
+        
         try {
-           smi.getSlices();
+           SliceMonitorImpl smi = new SliceMonitorImpl(new Properties());
            fail("Expected Exception");
         }
         catch(NullPointerException npe){
