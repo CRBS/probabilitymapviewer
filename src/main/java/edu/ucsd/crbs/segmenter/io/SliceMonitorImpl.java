@@ -33,11 +33,14 @@ package edu.ucsd.crbs.segmenter.io;
 import edu.ucsd.crbs.segmenter.App;
 import java.io.File;
 import java.io.FileFilter;
+import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Properties;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.filefilter.DirectoryFileFilter;
 
 /**
@@ -47,29 +50,38 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
  */
 public class SliceMonitorImpl implements SliceMonitor,Comparator {
 
+    
+    private static final Logger _log = Logger.getLogger(SliceMonitorImpl.class.getName());
+    
     private Properties _props;
-
+    private String _inputImage;
     public static String SLICE_PREFIX = "slice";
     
+
+    public static final String COLLECTION_PROPS_README = "readme.props";
     
     public SliceMonitorImpl(Properties props){
         _props = props;
+        if (_props == null){
+            throw new NullPointerException("Properties passed in constructor is null");
+        }
+        _inputImage = _props.getProperty(App.INPUT_IMAGE_ARG);
+        if (_inputImage == null){
+            throw new NullPointerException("INPUT_IMAGE_ARG property is null");
+        }
+
+        
     }
     
     @Override
     public List<String> getSlices() throws Exception{
-        if (_props == null){
-            throw new NullPointerException("Properties passed in constructor is null");
-        }
-        
-        String inputImage = _props.getProperty(App.INPUT_IMAGE_ARG);
-        if (inputImage == null){
+        if (_inputImage == null){
             throw new NullPointerException("INPUT_IMAGE_ARG property is null");
         }
         
         TreeSet<String> sliceList = new TreeSet<String>(this);
         
-        File imageDir = new File(_props.getProperty(App.INPUT_IMAGE_ARG));
+        File imageDir = new File(_inputImage);
         File[] sliceDirs = imageDir.listFiles((FileFilter)DirectoryFileFilter.DIRECTORY);
         
         if (sliceDirs == null ||
@@ -86,6 +98,29 @@ public class SliceMonitorImpl implements SliceMonitor,Comparator {
         
         return new ArrayList<String>(sliceList);
     }
+
+    @Override
+    public Properties getCollectionInformation() throws Exception {
+        if (_inputImage == null) {
+            _log.log(Level.WARNING,"Input Image path is null");
+            return null;
+        }
+        try {
+            File readmeFile = new File(_inputImage + File.separator + COLLECTION_PROPS_README);
+            if (readmeFile.isFile()) {
+                Properties collectionProps = new Properties();
+                collectionProps.load(new FileReader(readmeFile));
+                return collectionProps;
+            }
+        } catch (Exception ex) {
+            _log.log(Level.WARNING, "caught exception trying to load "
+                    + COLLECTION_PROPS_README + " file: " + ex.getMessage(),
+                    ex);
+        }
+        return null;
+    }
+    
+    
 
     @Override
     public int compare(Object o1, Object o2) {
