@@ -136,9 +136,9 @@ public class StatusHandler extends AbstractHandler {
         sb.append(",\"collectionname\": \"");
         sb.append(App.collectionName);
         sb.append("\"");
-
-        sb.append(",\"sliceaquiretime\": \"");
-        sb.append(App.sliceAquireTime);
+        
+        sb.append(",\"slicescollected\": \"");
+        sb.append(App.slicesCollected);
         sb.append("\"");
 
         
