@@ -70,6 +70,7 @@ public class App {
     public static final String CCDB_ARG = "ccdb";
     
     public static final String SIMULATE_COLLECTION_ARG = "simulatecollection";
+    public static final String COLLECTION_DELAY_ARG = "collectiondelay";
     
     
     public static ConcurrentLinkedDeque<Callable> tilesToProcess = new ConcurrentLinkedDeque<Callable>();
@@ -145,7 +146,8 @@ public class App {
                             + "blue,yellow,magenta,cyan\n"
                             + " *binary - Set to 'chm' for now\n").withRequiredArg().ofType(String.class).describedAs("trained model,name,color,binary");
                     accepts(ILASTIK_ARG,"Sets path to Ilastik directory ie ilastik-1.1.2-Linux").withRequiredArg().ofType(File.class).defaultsTo(new File("/var/tmp/ilastik-1.1.2-Linux"));
-                    accepts(SIMULATE_COLLECTION_ARG,"Simulates collection with new image every X seconds");
+                    accepts(SIMULATE_COLLECTION_ARG,"Simulates collection with new image every (value of --"+COLLECTION_DELAY_ARG+" seconds");
+                    accepts(COLLECTION_DELAY_ARG,"Delay in seconds before loading next image for simluated collection.  Used with --"+SIMULATE_COLLECTION_ARG).withRequiredArg().ofType(Integer.class).defaultsTo(240);
                     acceptsAll(helpArgs,"Show Help").forHelp();
                 }
             };
@@ -214,6 +216,7 @@ public class App {
             int desiredLoad = numCores + (int)((double)numCores*overloadFactor);
             int prevTotalProcessedCount = -1;
             long iterationCounter = 0;
+            int collectionDelay = Integer.parseInt(props.getProperty(COLLECTION_DELAY_ARG));
             
             while (SIGNAL_RECEIVED == false && (sws.getServer().isStarting() || sws.getServer().isRunning())){
                 //one idea is to have all the image processors dump to a single list
@@ -224,7 +227,7 @@ public class App {
                
                 //if this is a collection check for new # directory in input image
                 //if found update status.latestslice to this slice
-                if (iterationCounter % 40 == 0){
+                if (iterationCounter % collectionDelay == 0){
                     //_log.log(Level.INFO,"Checking for new slices");
                     updateSlices(sliceMonitor);
                 }
@@ -334,6 +337,7 @@ public class App {
             props.setProperty(SIMULATE_COLLECTION_ARG,"false");
         }
         
+        props.setProperty(COLLECTION_DELAY_ARG, ((Integer)optionSet.valueOf(COLLECTION_DELAY_ARG)).toString());
         props.setProperty(CONVERT_ARG,(String)optionSet.valueOf(CONVERT_ARG));
         props.setProperty(SGE_CHM_QUEUE_ARG, (String)optionSet.valueOf(SGE_CHM_QUEUE_ARG));
         props.setProperty(SGE_ILASTIK_QUEUE_ARG, (String)optionSet.valueOf(SGE_ILASTIK_QUEUE_ARG));
