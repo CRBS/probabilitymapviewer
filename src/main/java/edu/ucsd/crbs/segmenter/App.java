@@ -2,6 +2,7 @@ package edu.ucsd.crbs.segmenter;
 
 import edu.ucsd.crbs.segmenter.html.HtmlPageGenerator;
 import edu.ucsd.crbs.segmenter.html.SingleImageIndexHtmlPageGenerator;
+import edu.ucsd.crbs.segmenter.io.SimulatedSliceMonitor;
 import edu.ucsd.crbs.segmenter.io.SliceMonitor;
 import edu.ucsd.crbs.segmenter.io.SliceMonitorImpl;
 import edu.ucsd.crbs.segmenter.io.WorkingDirCreator;
@@ -68,6 +69,9 @@ public class App {
     public static final String CONVERT_ARG = "convertbinary";
     public static final String CCDB_ARG = "ccdb";
     
+    public static final String SIMULATE_COLLECTION_ARG = "simulatecollection";
+    
+    
     public static ConcurrentLinkedDeque<Callable> tilesToProcess = new ConcurrentLinkedDeque<Callable>();
     public static boolean SIGNAL_RECEIVED = false;
     
@@ -81,7 +85,8 @@ public class App {
     public static double overloadFactor = 0.5;
     
     public static String latestSlice = "";
-    
+    public static String collectionName = "";
+    public static String sliceAquireTime = "";
     public static String LAYER_HANDLER_BASE_DIR = "layerhandlers";
     public static String LAYER_MODEL_BASE_DIR = "layermodels";
     
@@ -140,6 +145,7 @@ public class App {
                             + "blue,yellow,magenta,cyan\n"
                             + " *binary - Set to 'chm' for now\n").withRequiredArg().ofType(String.class).describedAs("trained model,name,color,binary");
                     accepts(ILASTIK_ARG,"Sets path to Ilastik directory ie ilastik-1.1.2-Linux").withRequiredArg().ofType(File.class).defaultsTo(new File("/var/tmp/ilastik-1.1.2-Linux"));
+                    accepts(SIMULATE_COLLECTION_ARG,"Simulates collection with new image every X seconds");
                     acceptsAll(helpArgs,"Show Help").forHelp();
                 }
             };
@@ -190,7 +196,13 @@ public class App {
             setCHMBinDir(props);
             
             //if collection mode is enabled then set the latest slice path
-            SliceMonitor sliceMonitor = new SliceMonitorImpl(props);
+            SliceMonitor sliceMonitor = null;
+            if (props.getProperty(App.SIMULATE_COLLECTION_ARG,"false").equals("true")){
+                sliceMonitor = new SimulatedSliceMonitor(props);
+            }
+            else {
+                sliceMonitor = new SliceMonitorImpl(props);
+            }
 
             generateIndexHtmlPage(props,layers);
             int numCores = Integer.parseInt(props.getProperty(NUM_CORES_ARG));
@@ -212,7 +224,7 @@ public class App {
                
                 //if this is a collection check for new # directory in input image
                 //if found update status.latestslice to this slice
-                if (iterationCounter % 10 == 0){
+                if (iterationCounter % 40 == 0){
                     //_log.log(Level.INFO,"Checking for new slices");
                     updateSlices(sliceMonitor);
                 }
@@ -276,7 +288,17 @@ public class App {
             App.latestSlice = "";
             return;
         }
-        App.latestSlice = slices.get(slices.size()-1);
+
+        Properties props = sliceMonitor.getCollectionInformation();
+        if (props != null) {
+            App.collectionName = props.getProperty("name", "");
+            //App.sliceAquireTime = props.getProperty("sliceaquiretime", "");
+        }
+        String latestSlice = slices.get(slices.size()-1);
+        if (!latestSlice.equals(App.latestSlice)){
+            App.latestSlice = latestSlice;
+            App.tilesToProcess.clear();
+        }
     }
     
     /**
@@ -303,6 +325,13 @@ public class App {
         }
         else {
             props.setProperty(USE_SGE_ARG, "false");
+        }
+        
+        if (optionSet.has(SIMULATE_COLLECTION_ARG)){
+            props.setProperty(SIMULATE_COLLECTION_ARG,"true");
+        }
+        else {
+            props.setProperty(SIMULATE_COLLECTION_ARG,"false");
         }
         
         props.setProperty(CONVERT_ARG,(String)optionSet.valueOf(CONVERT_ARG));
@@ -541,6 +570,8 @@ public class App {
             
             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/emptycube.png"), 
                 new File(props.getProperty(DIR_ARG)+File.separator+"emptycube.png"));
+             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/halfcube.png"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"halfcube.png"));
     }
 
     static void threadSleep(long millis) {
