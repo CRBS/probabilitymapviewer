@@ -30,7 +30,6 @@
 package edu.ucsd.crbs.segmenter.html;
 
 import edu.ucsd.crbs.segmenter.App;
-import static edu.ucsd.crbs.segmenter.App.LAYER_HANDLER_BASE_DIR;
 import edu.ucsd.crbs.segmenter.io.ResourceToFile;
 import edu.ucsd.crbs.segmenter.io.ResourceToFileImpl;
 import edu.ucsd.crbs.segmenter.io.StringReplacer;
@@ -70,6 +69,10 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
     
     public static final String TITLE_TOKEN = "@@TITLE@@";
     
+    public static final String COLLECTION_BLOCK_DISPLAY_TOKEN = "@@COLLECTION_BLOCK_DISPLAY@@";
+    
+    public static final String ADD_SEGMENTER_DISPLAY_TOKEN = "@@ADD_SEGMENTER_DISPLAY@@";
+    
 
 
     private String _baseLayerDeclaration;
@@ -83,7 +86,8 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
     private String _customLayersRedraws;
     private String _title;
     private String _imageName;
-
+    private String _collectionBlockDisplay;
+    private String _addSegmenterDisplay;
 
     private List<CustomLayer> _layers;
 
@@ -97,6 +101,14 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         _layers = layers;
         _title = props.getProperty(App.TITLE_ARG,"Segmenter");
         _imageName = props.getProperty(App.IMAGE_NAME_ARG,"Base image");
+        if (props.getProperty(App.SIMULATE_COLLECTION_ARG,"false").equals("true")){
+            _collectionBlockDisplay = "inline-block;";
+            _addSegmenterDisplay = "none;";
+        }
+        else {
+            _collectionBlockDisplay = "none;";
+            _addSegmenterDisplay = "inline-block;";
+        }
     }
 
     @Override
@@ -113,6 +125,8 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
                 .replaceAll(MITO_LAYER_VAR_NAME_TOKEN, MITO_LAYER_VAR_NAME)
                 .replaceAll(CUSTOM_LAYERS_DECS_TOKEN, _customLayersDescs)
                 .replaceAll(CUSTOM_LAYERS_OVERLAYS_TOKEN, _customLayersOverlays)
+                .replaceAll(COLLECTION_BLOCK_DISPLAY_TOKEN,_collectionBlockDisplay)
+                .replaceAll(ADD_SEGMENTER_DISPLAY_TOKEN,_addSegmenterDisplay)
                 .replaceAll(TITLE_TOKEN,_title);
 
     }
