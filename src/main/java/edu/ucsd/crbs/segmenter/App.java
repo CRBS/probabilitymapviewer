@@ -87,7 +87,7 @@ public class App {
     
     public static String latestSlice = "";
     public static String collectionName = "";
-    public static String sliceAquireTime = "";
+    public static String slicesCollected = "";
     public static String LAYER_HANDLER_BASE_DIR = "layerhandlers";
     public static String LAYER_MODEL_BASE_DIR = "layermodels";
     
@@ -295,12 +295,12 @@ public class App {
         Properties props = sliceMonitor.getCollectionInformation();
         if (props != null) {
             App.collectionName = props.getProperty("name", "");
-            //App.sliceAquireTime = props.getProperty("sliceaquiretime", "");
         }
         String latestSlice = slices.get(slices.size()-1);
         if (!latestSlice.equals(App.latestSlice)){
             App.latestSlice = latestSlice;
             App.tilesToProcess.clear();
+            App.slicesCollected = Integer.toString(slices.size());
         }
     }
     
@@ -576,6 +576,11 @@ public class App {
                 new File(props.getProperty(DIR_ARG)+File.separator+"emptycube.png"));
              FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/halfcube.png"), 
                 new File(props.getProperty(DIR_ARG)+File.separator+"halfcube.png"));
+             
+             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/cube.gif"), 
+                new File(props.getProperty(DIR_ARG)+File.separator+"cube.gif"));
+             
+             
     }
 
     static void threadSleep(long millis) {
