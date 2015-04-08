@@ -31,6 +31,7 @@
 package edu.ucsd.crbs.segmenter.io;
 
 import java.util.List;
+import java.util.Properties;
 
 /**
  * Implementing classes will provide a list of slice sub paths with the
@@ -47,4 +48,6 @@ public interface SliceMonitor {
      */
     public List<String> getSlices() throws Exception;
 
+    
+    public Properties getCollectionInformation() throws Exception;
 }
