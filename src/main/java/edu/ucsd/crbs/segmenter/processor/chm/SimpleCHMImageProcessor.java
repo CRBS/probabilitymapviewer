@@ -71,13 +71,21 @@ public class SimpleCHMImageProcessor implements ImageProcessor{
 
      @Override
     public void process(String image) {
-        File checkForFile = new File(_inputImageDir+File.separator+image);
+        String fileCheckPath = _inputImageDir+File.separator+image;
+        String workingDirPath = _workingDir;
+
+        
+        if (App.latestSlice != null && App.latestSlice != ""){
+            workingDirPath = _workingDir+File.separator+App.latestSlice;
+        }
+        
+        File checkForFile = new File(fileCheckPath);
         if (checkForFile.exists() == false){
             return;
         }
         
-        CHMCommandLineJob job = new CHMCommandLineJob(_inputImageDir+File.separator+image,
-                _trainedModel,_binary,_matlabDir,_workingDir,_tileSize,_colorsToZeroOut);
+        CHMCommandLineJob job = new CHMCommandLineJob(fileCheckPath,
+                _trainedModel,_binary,_matlabDir,workingDirPath,_tileSize,_colorsToZeroOut);
         _log.log(Level.INFO,"Submitting image {0} for processing and writing output to {1}",
                 new Object[]{image,_workingDir});
         
