@@ -100,27 +100,21 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
            CPU Consumed (hours): <div id="cpuconsumedhours" style="display: inline-block;">?</div><br/>
            Avg. Time per tile (secs): <div id="avgtimepertile" style="display: inline-block;">?</div><br/>
            <br/>
-           <div id="collectionblock" style="display: none;">
+           <div id="collectionblock" style="display: @@COLLECTION_BLOCK_DISPLAY@@">
            <b>Collection</b><br/>
            <br/>
            Name: <div id="colname" style="display: inline-block;">?</div><br/>
            Current Slice: <div id="currentslice" style="display: inline-block;">?</div><br/>
-           Time of Acquisition: <div id="sliceaquiretime" style="display: inline-block;">?</div><br/>
+           Slice Aquire Time: <div id="sliceaquiretime" style="display: inline-block;">?</div><br/>
            <br/>
-           <img style="max-width: 80%;max-height: 80%;" src="/emptycube.png"/>  
+           <img style="max-width: 80%;max-height: 80%;" src="/halfcube.png"/>  
            <div id="imagenote" style="display: inline-block;font-size: 10px;">NOTE: Image on cube is simulated</div>
-           <br/>
-           <div id="autoupdatediv" style="display: none;">
-           <form action="">
-               <input type="checkbox" name="automovetolatestslice" value="true" checked="true">Auto move to latest slice<br/>
-           </form>
-           </div>
            <br/>
            </div>
            <br/>
            <img src="/powericon.png" title="Shutdown server" id="powericon" alt="Shutdown server" onmouseover="this.src='/powericonmouseover.png'" onmouseout="this.src='/powericon.png'" onclick="shutdown()"/>
            &nbsp;
-           <img src="/layersadd.png" title="Add Segmenter" id="layersadd" alt="Add Segmenter" onmouseover="this.src='/layersaddmouseover.png'" onmouseout="this.src='/layersadd.png'" onclick="addSegmenterDialog()"/>
+           <img style="display: @@ADD_SEGMENTER_DISPLAY@@" src="/layersadd.png" title="Add Segmenter" id="layersadd" alt="Add Segmenter" onmouseover="this.src='/layersaddmouseover.png'" onmouseout="this.src='/layersadd.png'" onclick="addSegmenterDialog()"/>
            &nbsp;
            <img src="/refresh.png" title="Refresh map" id="refreshmap" alt="Refresh map" onmouseover="this.src='/refreshmouseover.png'" onmouseout="this.src='/refresh.png'" onclick="refreshOverlays()"/>
            <p/>
@@ -235,7 +229,8 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
             var avgTimePerTileElement = document.getElementById("avgtimepertile");
             var numCoresInUseElement = document.getElementById("numcoresinuse");
             var currentSliceElement = document.getElementById("currentslice");
-            
+            var collectionNameElement = document.getElementById("colname");
+            var sliceAquireTimeElement = document.getElementById("sliceaquiretime");
             
             
             function refreshOverlays() {
@@ -372,6 +367,11 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
                 
             }
             
+            function updateToSlice(sliceName){
+                baseLayer.setUrl('images/'+sliceName+'/{z}-r{y}_c{x}.png');
+                Mitochondria.setUrl('layerhandlers/Mitochondria/'+sliceName+'/{z}-r{y}_c{x}.png');
+            }
+            
             // the interval function should ask the server if any new tiles have
             // appeared since last call and to update the layer if so otherwise
             // not to do anything
@@ -387,7 +387,13 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
                 avgTimePerTileElement.innerHTML = myres.avgtimepertile;
                 estCpuHoursElement.innerHTML = myres.estcpuhours;
                 numCoresInUseElement.innerHTML = myres.numcoresinuse;
+                if (myres.latestslice != "" && 
+                    currentSliceElement.innerHTML != myres.latestslice){
+                    updateToSlice(myres.latestslice);
+                }
                 currentSliceElement.innerHTML = myres.latestslice;
+                collectionNameElement.innerHTML = myres.collectionname;
+                sliceAquireTimeElement.innerHTML = myres.sliceaquiretime;
                 if (myres.tilestoprocess > 0 || myres.futuretasklistsize > 0){
                    refreshOverlays();
                 }
