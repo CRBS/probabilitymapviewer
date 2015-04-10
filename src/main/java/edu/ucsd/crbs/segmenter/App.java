@@ -70,6 +70,7 @@ public class App {
     public static final String CCDB_ARG = "ccdb";
     
     public static final String SIMULATE_COLLECTION_ARG = "simulatecollection";
+    public static final String COLLECTION_MODE_ARG = "collectionmode";
     public static final String COLLECTION_DELAY_ARG = "collectiondelay";
     
     
@@ -146,8 +147,9 @@ public class App {
                             + "blue,yellow,magenta,cyan\n"
                             + " *binary - Set to 'chm' for now\n").withRequiredArg().ofType(String.class).describedAs("trained model,name,color,binary");
                     accepts(ILASTIK_ARG,"Sets path to Ilastik directory ie ilastik-1.1.2-Linux").withRequiredArg().ofType(File.class).defaultsTo(new File("/var/tmp/ilastik-1.1.2-Linux"));
-                    accepts(SIMULATE_COLLECTION_ARG,"Simulates collection with new image every (value of --"+COLLECTION_DELAY_ARG+" seconds");
-                    accepts(COLLECTION_DELAY_ARG,"Delay in seconds before loading next image for simluated collection.  Used with --"+SIMULATE_COLLECTION_ARG).withRequiredArg().ofType(Integer.class).defaultsTo(240);
+                    accepts(SIMULATE_COLLECTION_ARG,"Simulates collection with new image every (value of --"+COLLECTION_DELAY_ARG+" seconds using slice_### folders that exist in --"+INPUT_IMAGE_ARG+" directory.");
+                    accepts(COLLECTION_DELAY_ARG,"Delay in seconds before loading next image for simluated collection and delay between checks for real collection.  Used with --"+SIMULATE_COLLECTION_ARG+" and --"+COLLECTION_MODE_ARG).withRequiredArg().ofType(Integer.class).defaultsTo(240);
+                    accepts(COLLECTION_MODE_ARG,"Runs Segmenter in Collection mode which looks for new slice_### folders in --"+INPUT_IMAGE_ARG+" directory.");
                     acceptsAll(helpArgs,"Show Help").forHelp();
                 }
             };
@@ -202,7 +204,7 @@ public class App {
             if (props.getProperty(App.SIMULATE_COLLECTION_ARG,"false").equals("true")){
                 sliceMonitor = new SimulatedSliceMonitor(props);
             }
-            else {
+            else if (props.getProperty(App.COLLECTION_MODE_ARG,"false").equals("true")){
                 sliceMonitor = new SliceMonitorImpl(props);
             }
 
@@ -286,6 +288,10 @@ public class App {
     }
     
     public static void updateSlices(SliceMonitor sliceMonitor) throws Exception {
+        if (sliceMonitor == null){
+            return;
+        }
+        
         List<String> slices = sliceMonitor.getSlices();
         if (slices == null || slices.isEmpty()){
             App.latestSlice = "";
@@ -330,11 +336,23 @@ public class App {
             props.setProperty(USE_SGE_ARG, "false");
         }
         
+        if (optionSet.has(SIMULATE_COLLECTION_ARG) &&
+            optionSet.has(COLLECTION_MODE_ARG)){
+            throw new Exception("--"+SIMULATE_COLLECTION_ARG+" and --"+COLLECTION_MODE_ARG+" cannot both be set.  Pick one.");
+        }
+        
         if (optionSet.has(SIMULATE_COLLECTION_ARG)){
             props.setProperty(SIMULATE_COLLECTION_ARG,"true");
+            props.setProperty(COLLECTION_MODE_ARG, "false");
         }
         else {
             props.setProperty(SIMULATE_COLLECTION_ARG,"false");
+        }
+        
+        if (optionSet.has(COLLECTION_MODE_ARG)) {
+            props.setProperty(COLLECTION_MODE_ARG, "true");
+        } else {
+            props.setProperty(COLLECTION_MODE_ARG, "false");
         }
         
         props.setProperty(COLLECTION_DELAY_ARG, ((Integer)optionSet.valueOf(COLLECTION_DELAY_ARG)).toString());
