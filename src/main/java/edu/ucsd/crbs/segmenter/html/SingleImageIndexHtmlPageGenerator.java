@@ -101,7 +101,8 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         _layers = layers;
         _title = props.getProperty(App.TITLE_ARG,"Segmenter");
         _imageName = props.getProperty(App.IMAGE_NAME_ARG,"Base image");
-        if (props.getProperty(App.SIMULATE_COLLECTION_ARG,"false").equals("true")){
+        if (props.getProperty(App.SIMULATE_COLLECTION_ARG,"false").equals("true") ||
+            props.getProperty(App.COLLECTION_MODE_ARG,"false").equals("true")){
             _collectionBlockDisplay = "inline-block;";
             _addSegmenterDisplay = "none;";
         }
