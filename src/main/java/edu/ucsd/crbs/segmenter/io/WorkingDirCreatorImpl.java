@@ -32,10 +32,10 @@ package edu.ucsd.crbs.segmenter.io;
 
 import static edu.ucsd.crbs.segmenter.App.DIR_ARG;
 import static edu.ucsd.crbs.segmenter.App.TEMP_DIR_CREATED_FLAG;
-import edu.ucsd.crbs.segmenter.layer.CustomLayer;
 import java.io.File;
-import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -43,16 +43,28 @@ import java.util.Properties;
  */
 public class WorkingDirCreatorImpl implements WorkingDirCreator{
 
+        private static final Logger _log = Logger.getLogger(WorkingDirCreatorImpl.class.getName());
+
     
     @Override
     public File createWorkingDir(Properties props) throws Exception {
-        File workingDir = new File(props.getProperty(DIR_ARG));
+        if (props == null){
+            throw new NullPointerException("Properties is null");
+        }
+        String dirArg = props.getProperty(DIR_ARG);
+        if (dirArg == null || dirArg.trim().equals("")){
+            throw new Exception(DIR_ARG+" property not set");
+        }
+        
+        File workingDir = new File(dirArg);
 
         if (workingDir.exists() == false) {
-            System.out.println("--"+DIR_ARG+" " + workingDir.getAbsolutePath() + " does not exist.  Creating directory");
+            
+            _log.log(Level.INFO,"--"+DIR_ARG+" " + workingDir.getAbsolutePath() 
+                    + " does not exist.  Creating directory");
             if (workingDir.mkdirs() == false) {
-                System.err.println("Unable to create " + workingDir.getAbsolutePath());
-                System.exit(1);
+                throw new Exception("Unable to create " 
+                        + workingDir.getAbsolutePath());
             }
             props.setProperty(TEMP_DIR_CREATED_FLAG, "true");
         }
