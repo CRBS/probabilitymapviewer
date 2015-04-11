@@ -7,14 +7,12 @@
 
 declare inputImage=$1
 declare inputImageName=$2
-
+declare outputDir=$3
 # make a temp directory
 
-declare tmpDir="@@OUTPUT_DIR@@/${inputImageName}.dir"
+declare tmpDir="$outputDir/${inputImageName}.dir"
 
 mkdir -p "$tmpDir"
-
-
 
 @@CHM_BINARY@@ "$inputImage" "$tmpDir" -b @@TILE_SIZE@@ -o @@OVERLAP@@ -t 1,1 -m "@@TRAINED_MODEL@@" -M "@@MATLAB_DIR@@"
 
@@ -25,7 +23,7 @@ if [ $exitVal != 0 ] ; then
   exit $exitVal
 fi
 
-@@CONVERT_BINARY@@ "$tmpDir/${inputImageName}" -threshold 30% -transparent black -alpha set -channel A -channel @@COLORS_TO_ZERO_OUT@@ -evaluate set 0 "@@OUTPUT_DIR@@/${inputImageName}"
+@@CONVERT_BINARY@@ "$tmpDir/${inputImageName}" -threshold 30% -transparent black -alpha set -channel A -channel @@COLORS_TO_ZERO_OUT@@ -evaluate set 0 "$outputDir/${inputImageName}"
 
 exitVal=$?
 
