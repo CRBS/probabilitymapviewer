@@ -46,7 +46,6 @@ import java.util.logging.Logger;
  */
 public class SGECHMImageProcessor implements ImageProcessor,StringReplacer {
     
-    public static final String OUTPUT_DIR_TOKEN = "@@OUTPUT_DIR@@";
     public static final String CHM_BINARY_TOKEN = "@@CHM_BINARY@@";
     public static final String TILE_SIZE_TOKEN = "@@TILE_SIZE@@";
     public static final String OVERLAP_TOKEN = "@@OVERLAP@@";
@@ -93,8 +92,7 @@ public class SGECHMImageProcessor implements ImageProcessor,StringReplacer {
         if (line == null){
             return null;
         }
-        return line.replaceAll(OUTPUT_DIR_TOKEN, _workingDir)
-                   .replaceAll(CHM_BINARY_TOKEN, _binary)
+        return line.replaceAll(CHM_BINARY_TOKEN, _binary)
                    .replaceAll(TILE_SIZE_TOKEN, _tileSize)
                    .replaceAll(OVERLAP_TOKEN, "0x0")
                    .replaceAll(TRAINED_MODEL_TOKEN, _trainedModel)
@@ -129,15 +127,27 @@ public class SGECHMImageProcessor implements ImageProcessor,StringReplacer {
      
     @Override
     public void process(String image) {
-        File checkForFile = new File(_inputImageDir+File.separator+image);
+        
+        /** @TODO This path adjustment is redundant in SimpleCHM so it should be
+         * moved into its own class
+         */
+        String fileCheckPath = _inputImageDir+File.separator+image;
+        String workingDirPath = _workingDir;
+
+        
+        if (App.latestSlice != null && App.latestSlice != ""){
+            workingDirPath = _workingDir+File.separator+App.latestSlice;
+        }
+        
+        File checkForFile = new File(fileCheckPath);
         if (checkForFile.exists() == false){
             return;
         }
         CHMCommandLineJobViaSGE job = new CHMCommandLineJobViaSGE(_script,image,
-                checkForFile.getAbsolutePath(),_workingDir,_queue);
+                checkForFile.getAbsolutePath(),workingDirPath,_queue);
         
         _log.log(Level.INFO,"Submitting image {0} for processing and writing output to {1}",
-                new Object[]{image,_workingDir});
+                new Object[]{image,workingDirPath});
         
         App.tilesToProcess.add(job);
         
