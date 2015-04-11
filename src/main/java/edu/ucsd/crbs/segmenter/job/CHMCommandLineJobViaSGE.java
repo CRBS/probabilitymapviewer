@@ -69,9 +69,14 @@ public class CHMCommandLineJobViaSGE implements Callable {
         //invoke job with flags
         //sync should be a flag as to whether this call waits or not although if there
         //isnt a wait then we dont know how long it takes to run
-        //qsub -sync y -b y -N (image name) -j y -o `pwd`/Mitochondria/0-r1_c1.png.out `pwd`/mito.sh /home/churas/src/leaflet/images6/0-r1_c1.png 0-r1_c1.png
+        //qsub -sync y -b y -N (image name) -j y -o `pwd`/Mitochondria/0-r1_c1.png.out `pwd`/mito.sh /home/churas/src/leaflet/images6/0-r1_c1.png 0-r1_c1.png `pwd`
         
         //delete the (image name).out file if its size is 0
+        
+       File outDirCheck = new File(_outDir);
+       if (!outDirCheck.exists()){
+           outDirCheck.mkdirs();
+       }
         
         _runCommandLineProcess.setWorkingDirectory(_outDir);
         String result = null;
@@ -79,14 +84,21 @@ public class CHMCommandLineJobViaSGE implements Callable {
         JobResult jobResult = new JobResult();
         
         try {
-            String fixedName = "chm_"+_inputImageName.replaceAll("-", "");
-            String outFilePath = _outDir+File.separator+_inputImageName+".out";
+            int slashPos = _inputImageName.lastIndexOf('/');
+            String justInputImageName = _inputImageName;
+            if (slashPos > 0){
+               justInputImageName = _inputImageName.substring(slashPos+1);
+            }
+            
+            String fixedName = "chm_"+justInputImageName.replaceAll("-|", "");
+            
+            String outFilePath = _outDir+File.separator+justInputImageName+".out";
             long startTime = System.currentTimeMillis();
             result = _runCommandLineProcess.runCommandLineProcess("qsub","-V","-q",
                     _queue,
                     "-sync","y","-b","y","-N",fixedName,"-j","y","-o",outFilePath,
                     _script,
-                    _inputImage,_inputImageName);
+                    _inputImage,justInputImageName,_outDir);
              long chmDuration = System.currentTimeMillis() - startTime;
             _log.log(Level.FINE,"chm output: {0}", result);
             jobResult.setRunTimeInMilliseconds(chmDuration);
