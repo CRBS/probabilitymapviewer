@@ -87,7 +87,7 @@ public class SimpleCHMImageProcessor implements ImageProcessor{
         CHMCommandLineJob job = new CHMCommandLineJob(fileCheckPath,
                 _trainedModel,_binary,_matlabDir,workingDirPath,_tileSize,_colorsToZeroOut);
         _log.log(Level.INFO,"Submitting image {0} for processing and writing output to {1}",
-                new Object[]{image,_workingDir});
+                new Object[]{image,workingDirPath});
         
         App.tilesToProcess.add(job);
     }
