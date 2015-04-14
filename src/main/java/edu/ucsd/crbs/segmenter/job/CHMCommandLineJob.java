@@ -55,11 +55,12 @@ public class CHMCommandLineJob implements Callable {
     private String _outDir;
     private String _matlabDir;
     private String _colorsToZeroOut;
+    private String _analyzingTile;
     private RunCommandLineProcess _runCommandLineProcess;
     
     public CHMCommandLineJob(final String inputImage, final String trainedModel,
             final String binary,final String matlabDir, final String outDir,final String tileSize,
-            final String colorsToZeroOut){
+            final String colorsToZeroOut, final String analyzingTile){
         _inputImage = inputImage;
         _trainedModel = trainedModel;
         _binary = binary;
@@ -67,6 +68,7 @@ public class CHMCommandLineJob implements Callable {
         _tileSize = tileSize;
         _matlabDir = matlabDir;
         _colorsToZeroOut = colorsToZeroOut;
+        _analyzingTile = analyzingTile;
         _runCommandLineProcess = new RunCommandLineProcessImpl();
     }
     
@@ -83,6 +85,9 @@ public class CHMCommandLineJob implements Callable {
         try {
             int slashPos = _inputImage.lastIndexOf('/');
             String fileName = _inputImage.substring(slashPos+1);
+
+            FileUtils.copyFile(new File(_analyzingTile),
+                    new File(_outDir+File.separator+fileName));
             
             File tempDir = new File(_outDir+File.separator+fileName+"dir");
             tempDir.mkdirs();
