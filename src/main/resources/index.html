@@ -89,7 +89,7 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
         
                 
         <div id="status">
-           @@TITLE@@<p/>
+            <H2>@@TITLE@@</H2>
            <div style="display: inline-block">&nbsp;</div><br/>
            # Tiles to Process: <div id="tilestoprocess" style="display: inline-block;">?</div></br>
            Est. Time (minutes): <div id="esttimehours" style="display: inline-block;">?</div><br/>
@@ -371,7 +371,7 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
             }
             
             function updateToSlice(sliceName){
-                  //@@UPDATE_TO_SLICE_FUNCTION_GUTS@@
+                @@UPDATE_TO_SLICE_GUTS@@
                 baseLayer.setUrl('images/'+sliceName+'/{z}-r{y}_c{x}.png');
                 Mitochondria.setUrl('layerhandlers/Mitochondria/'+sliceName+'/{z}-r{y}_c{x}.png');
                 Lysosome.setUrl('layerhandlers/Lysosome/'+sliceName+'/{z}-r{y}_c{x}.png');
