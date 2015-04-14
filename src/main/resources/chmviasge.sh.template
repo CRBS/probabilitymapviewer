@@ -12,6 +12,12 @@ declare outputDir=$3
 
 declare tmpDir="$outputDir/${inputImageName}.dir"
 
+declare analyzingTile="@@ANALYZING_TILE@@"
+
+if [ -e "$analyzingTile" ] ; then
+  /bin/cp "$analyzingTile" "$outputDir/${inputImageName}"
+fi
+
 mkdir -p "$tmpDir"
 
 @@CHM_BINARY@@ "$inputImage" "$tmpDir" -b @@TILE_SIZE@@ -o @@OVERLAP@@ -t 1,1 -m "@@TRAINED_MODEL@@" -M "@@MATLAB_DIR@@"
