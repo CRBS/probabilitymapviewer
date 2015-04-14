@@ -397,22 +397,23 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
                     if (currentSliceElement.innerHTML != myres.latestslice){
                       updateToSlice(myres.latestslice);
                       currentSliceElement.style.fontWeight='bold';
-                      sliceAquireTimeElement.innerHTML = -10;
+                      sliceAquireTimeElement.innerHTML = -@@REFRESH_INTERVAL_SECS@@;
                       sliceAquireTimeElement.style.fontWeight='bold';
                       setTimeout(function() {currentSliceElement.style.fontWeight='normal';sliceAquireTimeElement.style.fontWeight='normal';},5000);
                     }
                     currentSliceElement.innerHTML = myres.latestslice;
                     collectionNameElement.innerHTML = myres.collectionname;
-                    sliceAquireTimeElement.innerHTML = Number(sliceAquireTimeElement.innerHTML) + Number(10);
+                    sliceAquireTimeElement.innerHTML = Number(sliceAquireTimeElement.innerHTML) + Number(@@REFRESH_INTERVAL_SECS@@);
                     cubeImageElement.src=myres.cubeimage;
                     slicesCollectedElement.innerHTML = myres.slicescollected;
                     expectedSlices.innerHTML = myres.expectedslices;
                 }
                 
-                if (myres.tilestoprocess > 0 || myres.futuretasklistsize > 0){
+                if (myres.tilestoprocess > 0 || myres.futuretasklistsize > 0 ||
+                    myres.latestslice != ""){
                    refreshOverlays();
                 }
-            }, 10000);
+            }, @@REFRESH_INTERVAL_MILLIS@@);
 
         </script>
         
