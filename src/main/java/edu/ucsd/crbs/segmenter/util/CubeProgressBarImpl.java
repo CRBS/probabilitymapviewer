@@ -49,7 +49,7 @@ public class CubeProgressBarImpl implements CubeProgressBar {
             _expectedSlices = 1000;
             return;
         }
-        _expectedSlices = Integer.parseInt(props.getProperty(App.EXPECTED_SLICES,"1000"));
+        _expectedSlices = Integer.parseInt(props.getProperty(App.EXPECTED_SLICES_ARG,"1000"));
     }
     
     public void setExpectedSlices(int val){

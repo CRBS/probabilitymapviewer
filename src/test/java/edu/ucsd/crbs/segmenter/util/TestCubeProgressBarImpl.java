@@ -119,7 +119,7 @@ public class TestCubeProgressBarImpl {
     @Test
     public void testExpectedSliceOfOneThousandAndVariousSliceCounts() {
         Properties props = new Properties();
-        props.setProperty(App.EXPECTED_SLICES, "1000");
+        props.setProperty(App.EXPECTED_SLICES_ARG, "1000");
         CubeProgressBarImpl progBar = new CubeProgressBarImpl(props);
         assertTrue(progBar.getCubeImage(-1), progBar.getCubeImage(-1).equals(
                 CubeProgressBarImpl.CUBES_PREFIX_PATH + "cube.png"));
@@ -146,7 +146,7 @@ public class TestCubeProgressBarImpl {
     @Test
     public void testExpectedSliceOfOneHundredAndVariousSliceCounts() {
         Properties props = new Properties();
-        props.setProperty(App.EXPECTED_SLICES, "100");
+        props.setProperty(App.EXPECTED_SLICES_ARG, "100");
         CubeProgressBarImpl progBar = new CubeProgressBarImpl(props);
         assertTrue(progBar.getCubeImage(-1), progBar.getCubeImage(-1).equals(
                 CubeProgressBarImpl.CUBES_PREFIX_PATH + "cube.png"));
