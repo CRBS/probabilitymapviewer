@@ -53,6 +53,7 @@ public class SGECHMImageProcessor implements ImageProcessor,StringReplacer {
     public static final String MATLAB_DIR_TOKEN = "@@MATLAB_DIR@@";
     public static final String CONVERT_BINARY_TOKEN = "@@CONVERT_BINARY@@";
     public static final String COLORS_TO_ZERO_OUT_TOKEN = "@@COLORS_TO_ZERO_OUT@@";
+    public static final String ANALYZING_TILE_TOKEN = "@@ANALYZING_TILE@@";
     
     
     private static final Logger _log = Logger.getLogger(SGECHMImageProcessor.class.getName());
@@ -67,13 +68,15 @@ public class SGECHMImageProcessor implements ImageProcessor,StringReplacer {
     private String _script;
     private String _queue;
     private String _convert;
+    private String _analyzingTile;
     
      public SGECHMImageProcessor(final String inputImageDir,
             final String workingDir,final String trainedModel,
             final String binary,final String matlabDir,final String colorsToZeroOut,
             final String tileSize,
             final String queue,
-            final String convert){
+            final String convert,
+            final String analyzingTile){
         _inputImageDir = inputImageDir;
         _workingDir = workingDir;
         _trainedModel = trainedModel;
@@ -83,6 +86,7 @@ public class SGECHMImageProcessor implements ImageProcessor,StringReplacer {
         _tileSize = tileSize+"x"+tileSize;
         _queue = queue;
         _convert = convert;
+        _analyzingTile = analyzingTile;
         _log.log(Level.INFO,"Image Processor colors to zero out: {0}",_colorsToZeroOut);
         createCommandLineScript();
     }
@@ -98,6 +102,7 @@ public class SGECHMImageProcessor implements ImageProcessor,StringReplacer {
                    .replaceAll(TRAINED_MODEL_TOKEN, _trainedModel)
                    .replaceAll(MATLAB_DIR_TOKEN, _matlabDir)
                    .replaceAll(CONVERT_BINARY_TOKEN, _convert)
+                   .replaceAll(ANALYZING_TILE_TOKEN,_analyzingTile)
                    .replaceAll(COLORS_TO_ZERO_OUT_TOKEN, _colorsToZeroOut);
     }
     
