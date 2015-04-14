@@ -73,6 +73,10 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
     
     public static final String ADD_SEGMENTER_DISPLAY_TOKEN = "@@ADD_SEGMENTER_DISPLAY@@";
     
+    public static final String REFRESH_INTERVAL_MILLIS_TOKEN = "@@REFRESH_INTERVAL_MILLIS@@";
+
+    public static final String REFRESH_INTERVAL_SECS_TOKEN = "@@REFRESH_INTERVAL_SECS@@";
+    
 
 
     private String _baseLayerDeclaration;
@@ -88,7 +92,9 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
     private String _imageName;
     private String _collectionBlockDisplay;
     private String _addSegmenterDisplay;
-
+    private String _refreshIntervalSecs;
+    private String _refreshIntervalMillis;
+    
     private List<CustomLayer> _layers;
 
     public SingleImageIndexHtmlPageGenerator(Properties props, List<CustomLayer> layers) {
@@ -101,6 +107,11 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         _layers = layers;
         _title = props.getProperty(App.TITLE_ARG,"Segmenter");
         _imageName = props.getProperty(App.IMAGE_NAME_ARG,"Base image");
+        
+        _refreshIntervalSecs = props.getProperty(App.REFRESH_OVERLAY_DELAY_ARG, "10");
+        
+        _refreshIntervalMillis = Integer.toString(Integer.parseInt(_refreshIntervalSecs)*1000);
+        
         if (props.getProperty(App.SIMULATE_COLLECTION_ARG,"false").equals("true") ||
             props.getProperty(App.COLLECTION_MODE_ARG,"false").equals("true")){
             _collectionBlockDisplay = "inline-block;";
@@ -128,8 +139,9 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
                 .replaceAll(CUSTOM_LAYERS_OVERLAYS_TOKEN, _customLayersOverlays)
                 .replaceAll(COLLECTION_BLOCK_DISPLAY_TOKEN,_collectionBlockDisplay)
                 .replaceAll(ADD_SEGMENTER_DISPLAY_TOKEN,_addSegmenterDisplay)
+                .replaceAll(REFRESH_INTERVAL_MILLIS_TOKEN,_refreshIntervalMillis)
+                .replaceAll(REFRESH_INTERVAL_SECS_TOKEN,_refreshIntervalSecs)
                 .replaceAll(TITLE_TOKEN,_title);
-
     }
 
     @Override
