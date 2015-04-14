@@ -141,6 +141,16 @@ public class StatusHandler extends AbstractHandler {
         sb.append(App.slicesCollected);
         sb.append("\"");
 
+        sb.append(",\"expectedslices\": \"");
+        sb.append(App.expectedSlices);
+        sb.append("\"");
+        
+        
+        sb.append(",\"cubeimage\": \"");
+        sb.append(App.cubeImage);
+        sb.append("\"");
+
+        
         
         sb.append("}");
 
