@@ -96,6 +96,32 @@ public class CustomLayer {
         return "";
     }
     
+    public String getAnalyzingTile(){
+        if (_color == null){
+            _log.log(Level.WARNING,"No color was set");
+            return "analyzing.png";
+        }
+        if (_color.equalsIgnoreCase("green")){
+            return "analyzing_green_50opac.png";
+        }
+        else if (_color.equalsIgnoreCase("blue")){
+            return "analyzing_blue_50opac.png";
+        }
+        else if (_color.equalsIgnoreCase("yellow")){
+            return "analyzing_yellow_50opac.png";
+        }
+        else if (_color.equalsIgnoreCase("magenta")){
+            return "analyzing_magenta_50opac.png";
+        }
+        else if (_color.equalsIgnoreCase("red")){
+            return "analyzing_red_50opac.png";
+        }
+        else if (_color.equalsIgnoreCase("cyan")){
+            return "analyzing_cyan_50opac.png";
+        }
+        return "analyzing_red_50opac.png";
+    }
+    
     public String getConvertColor(){
         if (_color == null){
             _log.log(Level.WARNING,"No color was set");
