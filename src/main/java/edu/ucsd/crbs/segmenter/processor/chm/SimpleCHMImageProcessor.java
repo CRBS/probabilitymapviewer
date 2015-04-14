@@ -54,11 +54,13 @@ public class SimpleCHMImageProcessor implements ImageProcessor{
     private String _matlabDir;
     private String _colorsToZeroOut;
     private String _tileSize;
+    private String _analyzingTile;
     
     public SimpleCHMImageProcessor(final String inputImageDir,
             final String workingDir,final String trainedModel,
             final String binary,final String matlabDir,final String colorsToZeroOut,
-            final String tileSize){
+            final String tileSize,
+            final String analyzingTile){
         _inputImageDir = inputImageDir;
         _workingDir = workingDir;
         _trainedModel = trainedModel;
@@ -66,6 +68,7 @@ public class SimpleCHMImageProcessor implements ImageProcessor{
         _matlabDir = matlabDir;
         _colorsToZeroOut = colorsToZeroOut;
         _tileSize = tileSize+"x"+tileSize;
+        _analyzingTile = analyzingTile;
         _log.log(Level.INFO,"Image Processor colors to zero out: {0}",_colorsToZeroOut);
     }
 
@@ -85,7 +88,8 @@ public class SimpleCHMImageProcessor implements ImageProcessor{
         }
         
         CHMCommandLineJob job = new CHMCommandLineJob(fileCheckPath,
-                _trainedModel,_binary,_matlabDir,workingDirPath,_tileSize,_colorsToZeroOut);
+                _trainedModel,_binary,_matlabDir,workingDirPath,_tileSize,_colorsToZeroOut,
+        _analyzingTile);
         _log.log(Level.INFO,"Submitting image {0} for processing and writing output to {1}",
                 new Object[]{image,workingDirPath});
         
