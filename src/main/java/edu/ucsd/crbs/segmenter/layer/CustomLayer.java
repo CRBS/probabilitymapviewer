@@ -83,7 +83,11 @@ public class CustomLayer {
     }
     
     public String getImagesPath(){
-        return _internalDir+"/{z}-r{y}_c{x}.png";
+        return _internalDir+"/"+getImageName();
+    }
+    
+    public String getImageName(){
+        return "{z}-r{y}_c{x}.png";
     }
     
     public String getBackgroundColorCSS(){
