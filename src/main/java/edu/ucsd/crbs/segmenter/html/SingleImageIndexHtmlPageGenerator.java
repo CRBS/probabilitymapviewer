@@ -77,6 +77,8 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
 
     public static final String REFRESH_INTERVAL_SECS_TOKEN = "@@REFRESH_INTERVAL_SECS@@";
     
+    public static final String UPDATE_TO_SLICE_GUTS_TOKEN = "@@UPDATE_TO_SLICE_GUTS@@";
+    
 
 
     private String _baseLayerDeclaration;
@@ -94,6 +96,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
     private String _addSegmenterDisplay;
     private String _refreshIntervalSecs;
     private String _refreshIntervalMillis;
+    private String _updateToSliceGuts;
     
     private List<CustomLayer> _layers;
 
@@ -107,7 +110,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         _layers = layers;
         _title = props.getProperty(App.TITLE_ARG,"Segmenter");
         _imageName = props.getProperty(App.IMAGE_NAME_ARG,"Base image");
-        
+        _updateToSliceGuts = "";
         _refreshIntervalSecs = props.getProperty(App.REFRESH_OVERLAY_DELAY_ARG, "10");
         
         _refreshIntervalMillis = Integer.toString(Integer.parseInt(_refreshIntervalSecs)*1000);
@@ -141,6 +144,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
                 .replaceAll(ADD_SEGMENTER_DISPLAY_TOKEN,_addSegmenterDisplay)
                 .replaceAll(REFRESH_INTERVAL_MILLIS_TOKEN,_refreshIntervalMillis)
                 .replaceAll(REFRESH_INTERVAL_SECS_TOKEN,_refreshIntervalSecs)
+                .replaceAll(UPDATE_TO_SLICE_GUTS_TOKEN,_updateToSliceGuts)
                 .replaceAll(TITLE_TOKEN,_title);
     }
 
@@ -173,7 +177,9 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
             return;
         }
         LayerDeclarationGenerator decGenerator = null;
+        LayerUpdateToSliceCode updateGenerator = null;
         StringBuilder decs = new StringBuilder();
+        StringBuilder updateToSlice = new StringBuilder();
         StringBuilder overlays = new StringBuilder();
         for (CustomLayer cl : _layers) {
 
@@ -190,6 +196,9 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
             
             decs.append(decGenerator.getLayerDeclaration()).append('\n');
 
+            updateGenerator = new LayerUpdateToSliceCodeImpl(cl);
+            updateToSlice.append(updateGenerator.getLayerUpdateToSliceCode());
+            
             overlays.append("\"<div style='")
                     .append(cl.getBackgroundColorCSS())
                     .append("color: ")
@@ -200,6 +209,6 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         }
         _customLayersDescs = decs.toString();
         _customLayersOverlays = overlays.toString();
-
+        _updateToSliceGuts = updateToSlice.toString();
     }
 }
