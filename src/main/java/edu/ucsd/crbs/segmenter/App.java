@@ -12,6 +12,8 @@ import edu.ucsd.crbs.segmenter.layer.CustomLayer;
 import edu.ucsd.crbs.segmenter.layer.CustomLayerFromPropertiesFactory;
 import edu.ucsd.crbs.segmenter.server.SegmenterWebServer;
 import edu.ucsd.crbs.segmenter.server.SegmenterWebServerFactory;
+import edu.ucsd.crbs.segmenter.util.CubeProgressBar;
+import edu.ucsd.crbs.segmenter.util.CubeProgressBarImpl;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -72,6 +74,7 @@ public class App {
     public static final String SIMULATE_COLLECTION_ARG = "simulatecollection";
     public static final String COLLECTION_MODE_ARG = "collectionmode";
     public static final String COLLECTION_DELAY_ARG = "collectiondelay";
+    public static final String EXPECTED_SLICES = "expectedslices";
     
     
     public static ConcurrentLinkedDeque<Callable> tilesToProcess = new ConcurrentLinkedDeque<Callable>();
@@ -89,6 +92,8 @@ public class App {
     public static String latestSlice = "";
     public static String collectionName = "";
     public static String slicesCollected = "";
+    public static String expectedSlices = "";
+    public static String cubeImage = "cubes/cube.png";
     public static String LAYER_HANDLER_BASE_DIR = "layerhandlers";
     public static String LAYER_MODEL_BASE_DIR = "layermodels";
     
@@ -150,6 +155,7 @@ public class App {
                     accepts(SIMULATE_COLLECTION_ARG,"Simulates collection with new image every (value of --"+COLLECTION_DELAY_ARG+" seconds using slice_### folders that exist in --"+INPUT_IMAGE_ARG+" directory.");
                     accepts(COLLECTION_DELAY_ARG,"Delay in seconds before loading next image for simluated collection and delay between checks for real collection.  Used with --"+SIMULATE_COLLECTION_ARG+" and --"+COLLECTION_MODE_ARG).withRequiredArg().ofType(Integer.class).defaultsTo(240);
                     accepts(COLLECTION_MODE_ARG,"Runs Segmenter in Collection mode which looks for new slice_### folders in --"+INPUT_IMAGE_ARG+" directory.");
+                    accepts(EXPECTED_SLICES,"Expected number of slices in collection used with --"+SIMULATE_COLLECTION_ARG+" and --"+COLLECTION_MODE_ARG).withRequiredArg().ofType(Integer.class).defaultsTo(1000);
                     acceptsAll(helpArgs,"Show Help").forHelp();
                 }
             };
@@ -201,11 +207,18 @@ public class App {
             
             //if collection mode is enabled then set the latest slice path
             SliceMonitor sliceMonitor = null;
+            CubeProgressBar cubeProgressBar = new CubeProgressBarImpl(props);
             if (props.getProperty(App.SIMULATE_COLLECTION_ARG,"false").equals("true")){
                 sliceMonitor = new SimulatedSliceMonitor(props);
+                cubeProgressBar = new CubeProgressBarImpl(props);
             }
             else if (props.getProperty(App.COLLECTION_MODE_ARG,"false").equals("true")){
                 sliceMonitor = new SliceMonitorImpl(props);
+                cubeProgressBar = new CubeProgressBarImpl(props);
+            }
+            
+            if (sliceMonitor != null){
+                App.expectedSlices = props.getProperty(App.EXPECTED_SLICES,"");
             }
 
             generateIndexHtmlPage(props,layers);
@@ -231,7 +244,7 @@ public class App {
                 //if found update status.latestslice to this slice
                 if (iterationCounter % collectionDelay == 0){
                     //_log.log(Level.INFO,"Checking for new slices");
-                    updateSlices(sliceMonitor);
+                    updateSlices(sliceMonitor,cubeProgressBar);
                 }
                 
                 
@@ -287,7 +300,8 @@ public class App {
         }
     }
     
-    public static void updateSlices(SliceMonitor sliceMonitor) throws Exception {
+    public static void updateSlices(SliceMonitor sliceMonitor,
+            CubeProgressBar cubeProgressBar) throws Exception {
         if (sliceMonitor == null){
             return;
         }
@@ -307,6 +321,9 @@ public class App {
             App.latestSlice = latestSlice;
             App.tilesToProcess.clear();
             App.slicesCollected = Integer.toString(slices.size());
+            if (cubeProgressBar != null){
+                App.cubeImage = cubeProgressBar.getCubeImage(slices.size());
+            }
         }
     }
     
@@ -354,7 +371,7 @@ public class App {
         } else {
             props.setProperty(COLLECTION_MODE_ARG, "false");
         }
-        
+        props.setProperty(EXPECTED_SLICES,((Integer)optionSet.valueOf(EXPECTED_SLICES)).toString());
         props.setProperty(COLLECTION_DELAY_ARG, ((Integer)optionSet.valueOf(COLLECTION_DELAY_ARG)).toString());
         props.setProperty(CONVERT_ARG,(String)optionSet.valueOf(CONVERT_ARG));
         props.setProperty(SGE_CHM_QUEUE_ARG, (String)optionSet.valueOf(SGE_CHM_QUEUE_ARG));
@@ -589,18 +606,28 @@ public class App {
             
             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/refreshmouseover.png"), 
                 new File(props.getProperty(DIR_ARG)+File.separator+"refreshmouseover.png"));
-            
-            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/emptycube.png"), 
-                new File(props.getProperty(DIR_ARG)+File.separator+"emptycube.png"));
-             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/halfcube.png"), 
-                new File(props.getProperty(DIR_ARG)+File.separator+"halfcube.png"));
              
-             FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/cube.gif"), 
-                new File(props.getProperty(DIR_ARG)+File.separator+"cube.gif"));
-             
-             
+             copyOverCubes(props);
     }
 
+    public static void copyOverCubes(Properties props) throws Exception {
+        
+        String cubes = "cubes";
+        File cubesDir = new File(props.getProperty(DIR_ARG)+File.separator+cubes);
+        cubesDir.mkdirs();
+        
+             
+        FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+cubes
+                +"/cube.png"), 
+            new File(cubesDir.getAbsolutePath()+File.separator+"cube.png"));
+        
+        for (int i = 10; i <= 100; i+=10){
+            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/"+cubes
+                +"/cube"+i+".png"), 
+            new File(cubesDir.getAbsolutePath()+File.separator+"cube"+i+".png"));
+        }
+    }
+    
     static void threadSleep(long millis) {
         try {
             Thread.sleep(millis);
