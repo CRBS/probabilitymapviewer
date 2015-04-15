@@ -77,6 +77,7 @@ public class ImageProcessorFactory {
     
     private ImageProcessor getSGECHMImageProcessor(final String workingDir,
             CustomLayer layer){
+        
         return new SGECHMImageProcessor(_props.getProperty(App.INPUT_IMAGE_ARG),
                     workingDir,
                     layer.getTrainedModelDir(),
@@ -85,8 +86,7 @@ public class ImageProcessorFactory {
                     _props.getProperty(App.TILE_SIZE_ARG),
                     _props.getProperty(App.SGE_CHM_QUEUE_ARG),
                     _props.getProperty(App.CONVERT_ARG),
-                    _props.getProperty(App.DIR_ARG)+File.separator
-                            +layer.getAnalyzingTile());
+                    getAnalyzingTile(layer));
     }
     
     private ImageProcessor getSimpleCHMImageProcessor(final String workingDir,
@@ -97,8 +97,7 @@ public class ImageProcessorFactory {
                     _props.getProperty(App.CHM_BIN_ARG)+File.separator+CHM_TEST_SH,
                     _props.getProperty(App.MATLAB_ARG),layer.getConvertColor(),
                     _props.getProperty(App.TILE_SIZE_ARG),
-                    _props.getProperty(App.DIR_ARG)+File.separator
-                            +layer.getAnalyzingTile());
+                    getAnalyzingTile(layer));
     }
     
     private ImageProcessor getSimpleIlastikImageProcessor(final String workingDir,
@@ -124,5 +123,14 @@ public class ImageProcessorFactory {
                     layer.getConvertColor(),
                     _props.getProperty(App.SGE_ILASTIK_QUEUE_ARG),
                     _props.getProperty(App.CONVERT_ARG));
+    }
+    
+    private String getAnalyzingTile(CustomLayer layer){
+        String analyzingTile = null;
+        if (_props.getProperty(App.DISABLE_ANALYZING_TILE_ARG,"true").equals("false")){
+            analyzingTile = _props.getProperty(App.DIR_ARG)+File.separator
+                            +layer.getAnalyzingTile();
+        }
+        return analyzingTile;
     }
 }
