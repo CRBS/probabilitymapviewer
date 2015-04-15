@@ -86,7 +86,14 @@ public class SGECHMImageProcessor implements ImageProcessor,StringReplacer {
         _tileSize = tileSize+"x"+tileSize;
         _queue = queue;
         _convert = convert;
-        _analyzingTile = analyzingTile;
+        
+        if (analyzingTile == null){
+            _analyzingTile = "";
+        }
+        else {
+            _analyzingTile = analyzingTile;
+        }
+        
         _log.log(Level.INFO,"Image Processor colors to zero out: {0}",_colorsToZeroOut);
         createCommandLineScript();
     }
