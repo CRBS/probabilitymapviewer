@@ -75,6 +75,7 @@ public class App {
     public static final String COLLECTION_DELAY_ARG = "collectiondelay";
     public static final String EXPECTED_SLICES_ARG = "expectedslices";
     public static final String REFRESH_OVERLAY_DELAY_ARG = "refreshoverlaydelay";
+    public static final String DISABLE_ANALYZING_TILE_ARG = "disableanalyzingtile";
 
     public static ConcurrentLinkedDeque<Callable> tilesToProcess = new ConcurrentLinkedDeque<Callable>();
     public static boolean SIGNAL_RECEIVED = false;
@@ -153,6 +154,7 @@ public class App {
                     accepts(COLLECTION_MODE_ARG, "Runs Segmenter in Collection mode which looks for new slice_### folders in --" + INPUT_IMAGE_ARG + " directory.");
                     accepts(EXPECTED_SLICES_ARG, "Expected number of slices in collection used with --" + SIMULATE_COLLECTION_ARG + " and --" + COLLECTION_MODE_ARG).withRequiredArg().ofType(Integer.class).defaultsTo(1000);
                     accepts(REFRESH_OVERLAY_DELAY_ARG, "Delay in seconds between overlay refreshes on webbrowser").withRequiredArg().ofType(Integer.class).defaultsTo(10);
+                    accepts(DISABLE_ANALYZING_TILE_ARG,"If set app no longer denotes with less opaque tile which tiles are being processed");
                     acceptsAll(helpArgs, "Show Help").forHelp();
                 }
             };
@@ -347,6 +349,13 @@ public class App {
             props.setProperty(USE_SGE_ARG, "true");
         } else {
             props.setProperty(USE_SGE_ARG, "false");
+        }
+        
+        if (optionSet.has(DISABLE_ANALYZING_TILE_ARG)){
+            props.setProperty(DISABLE_ANALYZING_TILE_ARG, "true");
+        }
+        else {
+            props.setProperty(DISABLE_ANALYZING_TILE_ARG, "false");
         }
 
         if (optionSet.has(SIMULATE_COLLECTION_ARG)
