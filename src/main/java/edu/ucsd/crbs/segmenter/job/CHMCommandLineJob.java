@@ -86,8 +86,13 @@ public class CHMCommandLineJob implements Callable {
             int slashPos = _inputImage.lastIndexOf('/');
             String fileName = _inputImage.substring(slashPos+1);
 
-            FileUtils.copyFile(new File(_analyzingTile),
-                    new File(_outDir+File.separator+fileName));
+            if (_analyzingTile != null){
+                File aTile = new File(_analyzingTile);
+                if (aTile.exists()){
+                    FileUtils.copyFile(aTile,
+                            new File(_outDir+File.separator+fileName));
+                }
+            }
             
             File tempDir = new File(_outDir+File.separator+fileName+"dir");
             tempDir.mkdirs();
