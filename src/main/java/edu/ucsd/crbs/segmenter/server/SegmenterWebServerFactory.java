@@ -78,6 +78,13 @@ public class SegmenterWebServerFactory {
         
         ResourceHandler workingDirHandler = new ResourceHandler();
         workingDirHandler.setDirectoriesListed(true);
+        
+        // if we denote what tiles are being analyzed we need to disable
+        // caching
+        if (props.getProperty(App.DISABLE_ANALYZING_TILE_ARG,"false").equals("false")){
+            workingDirHandler.setCacheControl("no-cache, no-store, must-revalidate");
+        }
+        
         workingDirHandler.setResourceBase(props.getProperty(App.DIR_ARG));
         workingDirHandler.setWelcomeFiles(new String[]{"index.html"});
         ContextHandler workingDirContext = new ContextHandler("/");
