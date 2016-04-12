@@ -2,6 +2,9 @@ package edu.ucsd.crbs.segmenter;
 
 import edu.ucsd.crbs.segmenter.html.HtmlPageGenerator;
 import edu.ucsd.crbs.segmenter.html.SingleImageIndexHtmlPageGenerator;
+import edu.ucsd.crbs.segmenter.io.Dm4SliceConverterDaemon;
+import edu.ucsd.crbs.segmenter.io.Dm4SliceMonitorImpl;
+import edu.ucsd.crbs.segmenter.io.Dm4ToSliceConverter;
 import edu.ucsd.crbs.segmenter.io.SimulatedSliceMonitor;
 import edu.ucsd.crbs.segmenter.io.SliceMonitor;
 import edu.ucsd.crbs.segmenter.io.SliceMonitorImpl;
@@ -72,15 +75,27 @@ public class App {
 
     public static final String SIMULATE_COLLECTION_ARG = "simulatecollection";
     public static final String COLLECTION_MODE_ARG = "collectionmode";
+    public static final String INCLUDE_DM4_ARG = "includedm4";
+    
     public static final String COLLECTION_DELAY_ARG = "collectiondelay";
     public static final String EXPECTED_SLICES_ARG = "expectedslices";
-    public static final String REFRESH_OVERLAY_DELAY_ARG = "refreshoverlaydelay";
-    public static final String DISABLE_ANALYZING_TILE_ARG = "disableanalyzingtile";
+    public static final String REFRESH_OVERLAY_DELAY_ARG = 
+            "refreshoverlaydelay";
+    public static final String DISABLE_ANALYZING_TILE_ARG = 
+            "disableanalyzingtile";
+    
+    public static final String DM2MRC_ARG = "dm2mrcbinary";
+    public static final String MRC2TIF_ARG = "mrc2tifbinary";
+    
+    public static final String DOWNSAMPLEFACTOR_ARG = "downsamplefactor";
+    
 
-    public static ConcurrentLinkedDeque<Callable> tilesToProcess = new ConcurrentLinkedDeque<Callable>();
+    public static ConcurrentLinkedDeque<Callable> tilesToProcess = 
+            new ConcurrentLinkedDeque<Callable>();
     public static boolean SIGNAL_RECEIVED = false;
 
-    public static List<Future> futureTaskList = Collections.synchronizedList(new LinkedList<Future>());
+    public static List<Future> futureTaskList = Collections
+            .synchronizedList(new LinkedList<Future>());
 
     public static int totalProcessedCount = 0;
 
@@ -109,7 +124,8 @@ public class App {
             }
         });
 
-        final String tempDirectory = System.getProperty("java.io.tmpdir") + File.separator + UUID.randomUUID().toString();
+        final String tempDirectory = System.getProperty("java.io.tmpdir") 
+                + File.separator + UUID.randomUUID().toString();
 
         SegmenterWebServer sws = null;
         boolean tempDirUsed = false;
@@ -120,41 +136,151 @@ public class App {
 
                 {
                     accepts(INPUT_IMAGE_ARG, "Tiled input image directory.  "
-                            + "Tiles must have name in following format: 0-r#_c#.png"
+                            + "Tiles must have name in following format: "
+                            + "0-r#_c#.png"
                             + " where r# is the 0 offset row number and c# is "
                             + "the 0 offset column number.  Ex: 0-r0_c0.png  "
-                            + "Tiles must also be size 128x128").withRequiredArg().ofType(File.class).required();
+                            + "Tiles must also be size 128x128")
+                            .withRequiredArg().ofType(File.class).required();
 
-                    accepts(TITLE_ARG, "Title for app").withRequiredArg().ofType(String.class).defaultsTo("Segmenter");
-                    accepts(IMAGE_NAME_ARG, "Name of input image").withRequiredArg().ofType(String.class).defaultsTo("Base image");
-                    accepts(IMAGE_WIDTH_ARG, "Width of image in pixels").withRequiredArg().ofType(Integer.class).defaultsTo(50000);
-                    accepts(IMAGE_HEIGHT_ARG, "Height of image in pixels").withRequiredArg().ofType(Integer.class).defaultsTo(50000);
-                    accepts(OVERLAY_OPACITY_ARG, "Opacity of segmentation layers 0-1").withRequiredArg().ofType(Double.class).defaultsTo(0.3);
-                    accepts(CHM_BIN_ARG, "Path to CHM bin directory").withRequiredArg().ofType(File.class);
-                    accepts(MATLAB_ARG, "Path to Matlab base directory ie /../matlab2013a/v81").withRequiredArg().ofType(File.class).required();
-                    accepts(PORT_ARG, "Port to run service").withRequiredArg().ofType(Integer.class).defaultsTo(8080);
-                    accepts(DIR_ARG, "Working/Temp directory for server").withRequiredArg().ofType(File.class).defaultsTo(new File(tempDirectory));
-                    accepts(TILE_SIZE_ARG, "Size of tiles in pixels ie 128 means 128x128").withRequiredArg().ofType(Integer.class).defaultsTo(128);
-                    accepts(CCDB_ARG, "URL for Cell Centered Database (CCDB) web services").withRequiredArg().ofType(String.class).defaultsTo("http://surus.crbs.ucsd.edu:8080/");
-                    accepts(NUM_CORES_ARG, "Number of concurrent CHM jobs to run.  Each job requires 1gb ram.").withRequiredArg().ofType(Integer.class).defaultsTo(1);
-                    accepts(USE_SGE_ARG, "Use Sun/Oracle Grid Engine (SGE) to run CHM.  If used then --"
-                            + DIR_ARG + " must be set to a path on a shared filesystem accessible to all compute nodes");
-                    accepts(SGE_CHM_QUEUE_ARG, "Sets the SGE chm queue to use.  Only relevant with --" + USE_SGE_ARG).withRequiredArg().ofType(String.class).defaultsTo("all.q");
-                    accepts(SGE_ILASTIK_QUEUE_ARG, "Sets the SGE Ilastik queue to use.  Only relevant with --" + USE_SGE_ARG).withRequiredArg().ofType(String.class).defaultsTo("all.q");
-                    accepts(CONVERT_ARG, "Sets path to convert command (only works with --" + USE_SGE_ARG + ")").withRequiredArg().ofType(String.class).defaultsTo("convert");
-                    accepts(CUSTOM_ARG, "Custom Segmentation layer (comma delimited)\n"
+                    accepts(TITLE_ARG, "Title for app").withRequiredArg()
+                            .ofType(String.class).defaultsTo("Segmenter");
+                    accepts(IMAGE_NAME_ARG, "Name of input image")
+                            .withRequiredArg().ofType(String.class)
+                            .defaultsTo("Base image");
+                    accepts(IMAGE_WIDTH_ARG, "Width of image in pixels")
+                            .withRequiredArg().ofType(Integer.class)
+                            .defaultsTo(50000);
+                    accepts(IMAGE_HEIGHT_ARG, "Height of image in pixels")
+                            .withRequiredArg().ofType(Integer.class)
+                            .defaultsTo(50000);
+                    accepts(OVERLAY_OPACITY_ARG, "Opacity of segmentation "
+                            + "layers 0-1").withRequiredArg()
+                            .ofType(Double.class).defaultsTo(0.3);
+                    accepts(CHM_BIN_ARG, "Path to CHM bin directory")
+                            .withRequiredArg().ofType(File.class);
+                    accepts(MATLAB_ARG, "Path to Matlab base directory ie "
+                            + "/../matlab2013a/v81").withRequiredArg()
+                            .ofType(File.class).required();
+                    
+                    accepts(PORT_ARG, "Port to run service").withRequiredArg()
+                            .ofType(Integer.class).defaultsTo(8080);
+                    
+                    accepts(DIR_ARG, "Working/Temp directory for server")
+                            .withRequiredArg().ofType(File.class)
+                            .defaultsTo(new File(tempDirectory));
+                    
+                    accepts(TILE_SIZE_ARG, "Size of tiles in pixels ie 128 "
+                            + "means 128x128").withRequiredArg()
+                            .ofType(Integer.class).defaultsTo(128);
+                    
+                    accepts(CCDB_ARG, "URL for Cell Centered Database (CCDB) "
+                            + "web services").withRequiredArg()
+                            .ofType(String.class)
+                            .defaultsTo("http://surus.crbs.ucsd.edu:8080/");
+                    
+                    accepts(NUM_CORES_ARG, "Number of concurrent CHM jobs to "
+                            + "run.  Each job requires 1gb ram.")
+                            .withRequiredArg().ofType(Integer.class)
+                            .defaultsTo(1);
+                    
+                    accepts(USE_SGE_ARG, "Use Sun/Oracle Grid Engine (SGE) "
+                            + "to run CHM.  If used then --"
+                            + DIR_ARG + " must be set to a path on a shared "
+                            + "filesystem accessible to all compute nodes");
+                    
+                    accepts(SGE_CHM_QUEUE_ARG, "Sets the SGE chm queue to use."
+                            + "  Only relevant with --" + USE_SGE_ARG)
+                            .withRequiredArg().ofType(String.class)
+                            .defaultsTo("all.q");
+                    
+                    accepts(SGE_ILASTIK_QUEUE_ARG, "Sets the SGE Ilastik queue "
+                            + "to use.  Only relevant with --" + USE_SGE_ARG)
+                            .withRequiredArg().ofType(String.class)
+                            .defaultsTo("all.q");
+                    
+                    accepts(CONVERT_ARG, "Sets path to convert command (only "
+                            + "works with --" + USE_SGE_ARG + " and --"
+                            + COLLECTION_MODE_ARG + ")")
+                            .withRequiredArg().ofType(String.class)
+                            .defaultsTo("convert");
+                    
+                    accepts(DM2MRC_ARG, "Sets path to dm2mrc command (only "
+                            + "works with --" + COLLECTION_MODE_ARG + " and --"
+                            + INCLUDE_DM4_ARG + ")")
+                            .withRequiredArg().ofType(String.class)
+                            .defaultsTo("dm2mrc");
+                    
+                    accepts(MRC2TIF_ARG, "Sets path to mrc2tif command (only "
+                            + "works with --" + COLLECTION_MODE_ARG + " and --"
+                            + INCLUDE_DM4_ARG + ")")
+                            .withRequiredArg().ofType(String.class)
+                            .defaultsTo("mrc2tif");
+                    
+                    accepts(CUSTOM_ARG, "Custom Segmentation layer (comma "
+                            + "delimited)\n"
                             + " *trained model - path to chm trained model\n"
                             + " *name - Name to display in overlay menu\n"
-                            + " *color - can be one of the following: red,green,"
-                            + "blue,yellow,magenta,cyan\n"
-                            + " *binary - Set to 'chm' for now\n").withRequiredArg().ofType(String.class).describedAs("trained model,name,color,binary");
-                    accepts(ILASTIK_ARG, "Sets path to Ilastik directory ie ilastik-1.1.2-Linux").withRequiredArg().ofType(File.class).defaultsTo(new File("/var/tmp/ilastik-1.1.2-Linux"));
-                    accepts(SIMULATE_COLLECTION_ARG, "Simulates collection with new image every (value of --" + COLLECTION_DELAY_ARG + " seconds using slice_### folders that exist in --" + INPUT_IMAGE_ARG + " directory.");
-                    accepts(COLLECTION_DELAY_ARG, "Delay in seconds before loading next image for simluated collection and delay between checks for real collection.  Used with --" + SIMULATE_COLLECTION_ARG + " and --" + COLLECTION_MODE_ARG).withRequiredArg().ofType(Integer.class).defaultsTo(240);
-                    accepts(COLLECTION_MODE_ARG, "Runs Segmenter in Collection mode which looks for new slice_### folders in --" + INPUT_IMAGE_ARG + " directory.");
-                    accepts(EXPECTED_SLICES_ARG, "Expected number of slices in collection used with --" + SIMULATE_COLLECTION_ARG + " and --" + COLLECTION_MODE_ARG).withRequiredArg().ofType(Integer.class).defaultsTo(1000);
-                    accepts(REFRESH_OVERLAY_DELAY_ARG, "Delay in seconds between overlay refreshes on webbrowser").withRequiredArg().ofType(Integer.class).defaultsTo(10);
-                    accepts(DISABLE_ANALYZING_TILE_ARG,"If set app no longer denotes with less opaque tile which tiles are being processed");
+                            + " *color - can be one of the following: red,green"
+                            + ",blue,yellow,magenta,cyan\n"
+                            + " *binary - Set to 'chm' for now\n")
+                            .withRequiredArg().ofType(String.class)
+                            .describedAs("trained model,name,color,binary");
+                    accepts(ILASTIK_ARG, "Sets path to Ilastik directory ie "
+                            + "ilastik-1.1.2-Linux").withRequiredArg()
+                            .ofType(File.class)
+                            .defaultsTo(new File("/var/tmp/ilastik-1.1.2"
+                                    + "-Linux"));
+                    
+                    accepts(COLLECTION_DELAY_ARG, 
+                            "Delay in seconds before loading next image for " 
+                                    + "simluated collection and delay between "
+                                    + "checks for real collection.  Used with"
+                                    + " --" + SIMULATE_COLLECTION_ARG + " and"
+                                    + " --"
+                                    + COLLECTION_MODE_ARG).withRequiredArg()
+                            .ofType(Integer.class).defaultsTo(240);
+                    
+                    accepts(SIMULATE_COLLECTION_ARG, 
+                            "Simulates collection with new image every "
+                                    + "(value of --" + COLLECTION_DELAY_ARG
+                                    + " seconds using slice_### folders that "
+                                    + "exist in --" + INPUT_IMAGE_ARG
+                                    + " directory.");
+                    
+                    accepts(INCLUDE_DM4_ARG, 
+                            "When set in collection mode tells segmenter to "
+                                    + "search for new *.dm4 files in --"
+                                    + INPUT_IMAGE_ARG + " directory."
+                                    + "Can only be used with --"
+                                    + COLLECTION_MODE_ARG);
+                    
+                    accepts(DOWNSAMPLEFACTOR_ARG,
+                            "Sets downsampling factor ie value of 2 means to"
+                                    + "reduce image size by half.  Used with"
+                                    + "--" + INCLUDE_DM4_ARG + " and --"
+                                    + COLLECTION_MODE_ARG).withRequiredArg()
+                            .ofType(Integer.class).defaultsTo(4);
+                    
+                    accepts(COLLECTION_MODE_ARG, "Runs Segmenter in Collection "
+                            + "mode which looks for new slice_### folders in --" 
+                            + INPUT_IMAGE_ARG + " directory.");
+                    
+                    accepts(EXPECTED_SLICES_ARG, "Expected number of slices "
+                            + "in collection used with --" 
+                            + SIMULATE_COLLECTION_ARG + " and --" 
+                            + COLLECTION_MODE_ARG)
+                            .withRequiredArg().ofType(Integer.class)
+                            .defaultsTo(1000);
+                    
+                    accepts(REFRESH_OVERLAY_DELAY_ARG, "Delay in seconds "
+                            + "between overlay refreshes on webbrowser")
+                            .withRequiredArg().ofType(Integer.class)
+                            .defaultsTo(10);
+                    accepts(DISABLE_ANALYZING_TILE_ARG,"If set app no longer "
+                            + "denotes with less opaque tile which tiles are "
+                            + "being processed");
+                    
                     acceptsAll(helpArgs, "Show Help").forHelp();
                 }
             };
@@ -163,7 +289,8 @@ public class App {
             try {
                 optionSet = parser.parse(args);
             } catch (OptionException oe) {
-                System.err.println("\nThere was an error parsing arguments: " + oe.getMessage() + "\n\n");
+                System.err.println("\nThere was an error parsing arguments: " 
+                        + oe.getMessage() + "\n\n");
                 parser.printHelpOn(System.err);
                 System.exit(1);
             }
@@ -182,19 +309,23 @@ public class App {
             WorkingDirCreator wDirCreator = new WorkingDirCreatorImpl();
             wDirCreator.createWorkingDir(props);
 
-            CustomLayerFromPropertiesFactory layerFac = new CustomLayerFromPropertiesFactory();
+            CustomLayerFromPropertiesFactory layerFac = 
+                    new CustomLayerFromPropertiesFactory();
             List<CustomLayer> layers = layerFac.getCustomLayers(props);
 
             if (layers != null && !layers.isEmpty()) {
                 for (CustomLayer cl : layers) {
-                    File layerDir = new File(props.getProperty(LAYER_HANDLER_BASE_DIR) + File.separator + cl.getVarName());
+                    File layerDir = 
+                            new File(props.getProperty(LAYER_HANDLER_BASE_DIR) 
+                            + File.separator + cl.getVarName());
                     if (!layerDir.exists()) {
                         layerDir.mkdirs();
                     }
                 }
             }
 
-            if (props.getProperty(TEMP_DIR_CREATED_FLAG, "false").equals("true")) {
+            if (props.getProperty(TEMP_DIR_CREATED_FLAG, "false")
+                    .equals("true")) {
                 tempDirUsed = true;
             }
 
@@ -207,12 +338,23 @@ public class App {
             //if collection mode is enabled then set the latest slice path
             SliceMonitor sliceMonitor = null;
             CubeProgressBar cubeProgressBar = new CubeProgressBarImpl(props);
-            if (props.getProperty(App.SIMULATE_COLLECTION_ARG, "false").equals("true")) {
+            if (props.getProperty(App.SIMULATE_COLLECTION_ARG, "false")
+                    .equals("true")) {
                 sliceMonitor = new SimulatedSliceMonitor(props);
                 cubeProgressBar = new CubeProgressBarImpl(props);
-            } else if (props.getProperty(App.COLLECTION_MODE_ARG, "false").equals("true")) {
-                sliceMonitor = new SliceMonitorImpl(props);
+            } else if (props.getProperty(App.COLLECTION_MODE_ARG, "false")
+                    .equals("true")) {
+                if (props.getProperty(App.INCLUDE_DM4_ARG, "false")
+                        .equals("true")){
+                    sliceMonitor = new Dm4SliceMonitorImpl(props, 
+                            new Dm4SliceConverterDaemon(props,
+                            new Dm4ToSliceConverter(props)));
+                    
+                } else{
+                    sliceMonitor = new SliceMonitorImpl(props);
+                }
                 cubeProgressBar = new CubeProgressBarImpl(props);
+                
             }
 
             if (sliceMonitor != null) {
@@ -222,7 +364,7 @@ public class App {
             generateIndexHtmlPage(props, layers);
             int numCores = Integer.parseInt(props.getProperty(NUM_CORES_ARG));
             ExecutorService es = getExecutorService(numCores);
-
+            
             sws = getWebServer(es, props, layers);
 
             sws.getServer().start();
@@ -332,7 +474,8 @@ public class App {
      * configuration file
      * @throws Exception
      */
-    public static Properties getPropertiesFromCommandLine(OptionSet optionSet) throws Exception {
+    public static Properties getPropertiesFromCommandLine(OptionSet optionSet)
+            throws Exception {
 
         Properties props = new Properties();
 
@@ -360,7 +503,8 @@ public class App {
 
         if (optionSet.has(SIMULATE_COLLECTION_ARG)
                 && optionSet.has(COLLECTION_MODE_ARG)) {
-            throw new Exception("--" + SIMULATE_COLLECTION_ARG + " and --" + COLLECTION_MODE_ARG + " cannot both be set.  Pick one.");
+            throw new Exception("--" + SIMULATE_COLLECTION_ARG + " and --" +
+                    COLLECTION_MODE_ARG + " cannot both be set.  Pick one.");
         }
 
         if (optionSet.has(SIMULATE_COLLECTION_ARG)) {
@@ -393,18 +537,23 @@ public class App {
         props.setProperty(DIR_ARG, ((File) optionSet.valueOf(DIR_ARG)).getAbsolutePath());
 
         if (optionSet.has(CHM_BIN_ARG)) {
-            props.setProperty(CHM_BIN_ARG, ((File) optionSet.valueOf(CHM_BIN_ARG)).getAbsolutePath());
+            props.setProperty(CHM_BIN_ARG,
+                    ((File) optionSet.valueOf(CHM_BIN_ARG)).getAbsolutePath());
         }
 
-        props.setProperty(MATLAB_ARG, ((File) optionSet.valueOf(MATLAB_ARG)).getAbsolutePath());
+        props.setProperty(MATLAB_ARG,
+                ((File) optionSet.valueOf(MATLAB_ARG)).getAbsolutePath());
 
-        props.setProperty(LAYER_HANDLER_BASE_DIR, props.getProperty(DIR_ARG) + File.separator + LAYER_HANDLER_BASE_DIR);
+        props.setProperty(LAYER_HANDLER_BASE_DIR, props.getProperty(DIR_ARG) +
+                File.separator + LAYER_HANDLER_BASE_DIR);
 
-        props.setProperty(LAYER_MODEL_BASE_DIR, props.getProperty(DIR_ARG) + File.separator + LAYER_MODEL_BASE_DIR);
+        props.setProperty(LAYER_MODEL_BASE_DIR, props.getProperty(DIR_ARG) +
+                File.separator + LAYER_MODEL_BASE_DIR);
 
         props.setProperty(CCDB_ARG, (String) optionSet.valueOf(CCDB_ARG));
 
-        props.setProperty(ILASTIK_ARG, ((File) optionSet.valueOf(ILASTIK_ARG)).getAbsolutePath());
+        props.setProperty(ILASTIK_ARG,
+                ((File) optionSet.valueOf(ILASTIK_ARG)).getAbsolutePath());
 
         System.out.println(props.toString());
         return props;
