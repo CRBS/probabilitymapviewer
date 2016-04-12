@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.ucsd.crbs.segmenter.io;
+package edu.ucsd.crbs.segmenter.slice;
 
 /**
  * Defines methods to convert some data to a slice that is consumable by

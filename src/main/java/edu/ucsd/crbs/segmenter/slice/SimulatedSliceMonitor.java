@@ -28,26 +28,53 @@
  * THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS. 
  */
 
-package edu.ucsd.crbs.segmenter.io;
+package edu.ucsd.crbs.segmenter.slice;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
- * Implementing classes will provide a list of slice sub paths with the
- * newest slices first
+ * This slice monitor slowly adds slices from a path set in constructor.
+ * The delay is also set in the constructor.
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
-public interface SliceMonitor {
-    
-    /**
-     * Gets list of slices sub paths with the newest first
-     * @return List of slice sub paths or null if there was an error.  If 
-     * only a single image is found then the list will have 1 element and it
-     * will be an empty string
-     */
-    public List<String> getSlices() throws Exception;
+public class SimulatedSliceMonitor implements SliceMonitor {
 
+    private static final Logger _log = Logger.getLogger(SimulatedSliceMonitor.class.getName());
     
-    public Properties getCollectionInformation() throws Exception;
+    private LinkedList<SliceDir> _slicesToReturnViaGetSlices;
+    private List<SliceDir> _slicesLeft;
+    private Properties _collectionProps;
+    
+    public SimulatedSliceMonitor(Properties props){
+        SliceMonitor smi = new SliceMonitorImpl(props);
+        try {
+            _slicesLeft = smi.getSlices();
+            _collectionProps = smi.getCollectionInformation();
+        }
+        catch(Exception ex){
+            _log.log(Level.WARNING, "Caught Exception: "+ex.getMessage(),ex);
+        }
+        _slicesToReturnViaGetSlices = new LinkedList<SliceDir>();
+        
+    }
+    
+    @Override
+    public List<SliceDir> getSlices() throws Exception {
+        if (_slicesLeft == null){
+            return _slicesToReturnViaGetSlices;
+        }
+        if (_slicesLeft.isEmpty() == false){
+            _slicesToReturnViaGetSlices.add(_slicesLeft.remove(0));
+        }
+        return _slicesToReturnViaGetSlices;
+    }
+
+    @Override
+    public Properties getCollectionInformation() throws Exception {
+        return _collectionProps;
+    }
 }

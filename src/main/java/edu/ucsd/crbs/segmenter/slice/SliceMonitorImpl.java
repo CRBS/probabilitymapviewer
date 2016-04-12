@@ -28,7 +28,7 @@
  * THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS. 
  */
 
-package edu.ucsd.crbs.segmenter.io;
+package edu.ucsd.crbs.segmenter.slice;
 
 import edu.ucsd.crbs.segmenter.App;
 import java.io.File;
@@ -48,15 +48,13 @@ import org.apache.commons.io.filefilter.DirectoryFileFilter;
  * directory for sub directories with name (need to fill in)
  * @author Christopher Churas <churas@ncmir.ucsd.edu>
  */
-public class SliceMonitorImpl implements SliceMonitor,Comparator {
+public class SliceMonitorImpl implements SliceMonitor {
 
     
     private static final Logger _log = Logger.getLogger(SliceMonitorImpl.class.getName());
     
     private Properties _props;
-    private String _inputImage;
-    public static String SLICE_PREFIX = "slice";
-    
+    private String _inputImage;    
 
     public static final String COLLECTION_PROPS_README = "readme.props";
     
@@ -68,35 +66,33 @@ public class SliceMonitorImpl implements SliceMonitor,Comparator {
         _inputImage = _props.getProperty(App.INPUT_IMAGE_ARG);
         if (_inputImage == null){
             throw new NullPointerException("INPUT_IMAGE_ARG property is null");
-        }
-
-        
+        }        
     }
     
     @Override
-    public List<String> getSlices() throws Exception{
+    public List<SliceDir> getSlices() throws Exception{
         if (_inputImage == null){
             throw new NullPointerException("INPUT_IMAGE_ARG property is null");
         }
         
-        TreeSet<String> sliceList = new TreeSet<String>(this);
+        TreeSet<SliceDir> sliceList = 
+                new TreeSet<SliceDir>(new SliceNumberComparator());
         
         File imageDir = new File(_inputImage);
         File[] sliceDirs = imageDir.listFiles((FileFilter)DirectoryFileFilter.DIRECTORY);
         
         if (sliceDirs == null ||
             sliceDirs.length == 0){
-            sliceList.add("");
-            return new ArrayList<String>(sliceList);
+            return new ArrayList<SliceDir>(sliceList);
         }
         
         for (int i = 0; i < sliceDirs.length; i++){
-            if (sliceDirs[i].getName().startsWith(SLICE_PREFIX)){
-                sliceList.add(sliceDirs[i].getName());
+            if (sliceDirs[i].getName().startsWith(SliceDir.SLICE_PREFIX)){
+                sliceList.add(new SliceDir(sliceDirs[i].getAbsolutePath()));
             }
         }        
         
-        return new ArrayList<String>(sliceList);
+        return new ArrayList<SliceDir>(sliceList);
     }
 
     @Override
@@ -119,59 +115,4 @@ public class SliceMonitorImpl implements SliceMonitor,Comparator {
         }
         return null;
     }
-    
-    
-
-    @Override
-    public int compare(Object o1, Object o2) {
-        String one = (String)o1;
-        String two = (String)o2;
-        
-        if (one == null && two == null){
-            return 0;
-        }
-        
-        if (one == null && two != null){
-            return -1;
-        }
-        if (one != null && two == null){
-            return -1;
-        }
-        
-        //okay both are not null.
-        int oneInt = 0;
-        int twoInt = 0;
-        try {
-            oneInt = Integer.parseInt(lopOffPrefix(one));
-        }
-        catch(NumberFormatException nfe){
-           oneInt = -1;   
-        }   
-        
-        try {
-            twoInt = Integer.parseInt(lopOffPrefix(two));
-        }
-        catch(NumberFormatException nfe){
-            twoInt = -1;
-        }
-        
-        if (oneInt < twoInt){
-            return -1;
-        }
-        if (oneInt == twoInt){
-            return 0;
-        }
-        return 1;
-    }
-    
-    private String lopOffPrefix(final String val){
-        int prefixPos = val.lastIndexOf("_");
-        if (prefixPos < 0){
-            return val;
-        }
-        return val.substring(prefixPos+1);
-    }
-    
-    
-
 }

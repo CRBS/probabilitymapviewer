@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.ucsd.crbs.segmenter.io;
+package edu.ucsd.crbs.segmenter.slice;
 
 import java.util.List;
 import java.util.Properties;
@@ -34,7 +34,7 @@ public class Dm4SliceMonitorImpl implements SliceMonitor{
 
     
     @Override
-    public List<String> getSlices() throws Exception {
+    public List<SliceDir> getSlices() throws Exception {
         return _sliceMonitor.getSlices();
     }
 

@@ -2,12 +2,12 @@ package edu.ucsd.crbs.segmenter;
 
 import edu.ucsd.crbs.segmenter.html.HtmlPageGenerator;
 import edu.ucsd.crbs.segmenter.html.SingleImageIndexHtmlPageGenerator;
-import edu.ucsd.crbs.segmenter.io.Dm4SliceConverterDaemon;
-import edu.ucsd.crbs.segmenter.io.Dm4SliceMonitorImpl;
-import edu.ucsd.crbs.segmenter.io.Dm4ToSliceConverter;
-import edu.ucsd.crbs.segmenter.io.SimulatedSliceMonitor;
-import edu.ucsd.crbs.segmenter.io.SliceMonitor;
-import edu.ucsd.crbs.segmenter.io.SliceMonitorImpl;
+import edu.ucsd.crbs.segmenter.slice.Dm4SliceConverterDaemon;
+import edu.ucsd.crbs.segmenter.slice.Dm4SliceMonitorImpl;
+import edu.ucsd.crbs.segmenter.slice.Dm4ToSliceConverter;
+import edu.ucsd.crbs.segmenter.slice.SimulatedSliceMonitor;
+import edu.ucsd.crbs.segmenter.slice.SliceMonitor;
+import edu.ucsd.crbs.segmenter.slice.SliceMonitorImpl;
 import edu.ucsd.crbs.segmenter.io.WorkingDirCreator;
 import edu.ucsd.crbs.segmenter.io.WorkingDirCreatorImpl;
 import edu.ucsd.crbs.segmenter.job.JobResult;
@@ -15,6 +15,7 @@ import edu.ucsd.crbs.segmenter.layer.CustomLayer;
 import edu.ucsd.crbs.segmenter.layer.CustomLayerFromPropertiesFactory;
 import edu.ucsd.crbs.segmenter.server.SegmenterWebServer;
 import edu.ucsd.crbs.segmenter.server.SegmenterWebServerFactory;
+import edu.ucsd.crbs.segmenter.slice.SliceDir;
 import edu.ucsd.crbs.segmenter.util.CubeProgressBar;
 import edu.ucsd.crbs.segmenter.util.CubeProgressBarImpl;
 import java.io.File;
@@ -358,7 +359,8 @@ public class App {
             }
 
             if (sliceMonitor != null) {
-                App.expectedSlices = props.getProperty(App.EXPECTED_SLICES_ARG, "");
+                App.expectedSlices = props.getProperty(App.EXPECTED_SLICES_ARG,
+                        "");
             }
 
             generateIndexHtmlPage(props, layers);
@@ -445,7 +447,7 @@ public class App {
             return;
         }
 
-        List<String> slices = sliceMonitor.getSlices();
+        List<SliceDir> slices = sliceMonitor.getSlices();
         if (slices == null || slices.isEmpty()) {
             App.latestSlice = "";
             return;
@@ -455,9 +457,9 @@ public class App {
         if (props != null) {
             App.collectionName = props.getProperty("name", "");
         }
-        String latestSlice = slices.get(slices.size() - 1);
-        if (!latestSlice.equals(App.latestSlice)) {
-            App.latestSlice = latestSlice;
+        SliceDir latestSlice = slices.get(slices.size() - 1);
+        if (!latestSlice.getSliceName().equals(App.latestSlice)) {
+            App.latestSlice = latestSlice.getSliceName();
             App.tilesToProcess.clear();
             App.slicesCollected = Integer.toString(slices.size());
             if (cubeProgressBar != null) {

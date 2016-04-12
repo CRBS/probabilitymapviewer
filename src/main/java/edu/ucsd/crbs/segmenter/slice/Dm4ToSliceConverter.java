@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.ucsd.crbs.segmenter.io;
+package edu.ucsd.crbs.segmenter.slice;
 
 import edu.ucsd.crbs.segmenter.App;
 import edu.ucsd.crbs.segmenter.util.RunCommandLineProcess;
@@ -42,7 +42,8 @@ public class Dm4ToSliceConverter implements SliceConverter {
         _props = props;
 
         if (_props == null) {
-            throw new NullPointerException("Properties passed in constructor is null");
+            throw new NullPointerException("Properties passed in constructor "
+                    + "is null");
         }
         _inputImage = _props.getProperty(App.INPUT_IMAGE_ARG);
         if (_inputImage == null) {
@@ -84,6 +85,7 @@ public class Dm4ToSliceConverter implements SliceConverter {
         _renameArgForConvert = "\"r%[fx:page.y/" + tileSize + "]_c%[fx:page.x/"
                 + tileSize + "]\"";
 
+        _runCommandLineProcess = new RunCommandLineProcessImpl();
     }
 
     public void setRunCommandLineProcess(RunCommandLineProcess rclp) {

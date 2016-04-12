@@ -3,12 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package edu.ucsd.crbs.segmenter.io;
+package edu.ucsd.crbs.segmenter.slice;
 
 import edu.ucsd.crbs.segmenter.App;
 import java.io.File;
 import java.io.FileFilter;
-import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +26,7 @@ public class Dm4SliceConverterDaemon implements SliceConverterDaemon {
     private Properties _props;
     private File _dirToWatch;
     private SliceConverter _sliceConverter;
+    private boolean _shutdown = false;
     public Dm4SliceConverterDaemon(Properties props, SliceConverter converter) {
         _props = props;
         
@@ -39,9 +39,17 @@ public class Dm4SliceConverterDaemon implements SliceConverterDaemon {
     }
 
     @Override
+    public void shutdown() {
+        _log.log(Level.INFO, "Received shutdown notification");
+        _shutdown = true;
+    }
+
+    
+    
+    @Override
     public void run() {        
         _log.log(Level.INFO," Dm4SliceConverterDaemon, entering run loop...");
-        while(true){
+        while(_shutdown == false){
             File dm4File = getSecondNewestDm4File();
             if (dm4File != null){
                 _log.log(Level.INFO,"Found file to convert: " 
@@ -67,6 +75,7 @@ public class Dm4SliceConverterDaemon implements SliceConverterDaemon {
             
                 }        
         }
+        _log.log(Level.INFO, "Shutting down...");
     }
     
     private String genDestinationPath(File dm4File){

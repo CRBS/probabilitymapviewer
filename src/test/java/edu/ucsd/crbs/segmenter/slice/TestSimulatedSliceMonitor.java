@@ -28,7 +28,7 @@
  * THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS. 
  */
 
-package edu.ucsd.crbs.segmenter.io;
+package edu.ucsd.crbs.segmenter.slice;
 
 import edu.ucsd.crbs.segmenter.App;
 import java.io.File;
@@ -106,8 +106,7 @@ public class TestSimulatedSliceMonitor {
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, tmpDir.getAbsolutePath());
         SimulatedSliceMonitor ssm = new SimulatedSliceMonitor(props);
-        assertTrue(ssm.getSlices().size() == 1);
-        assertTrue(ssm.getSlices().get(0).equals(""));
+        assertTrue(ssm.getSlices().size() == 0);
         assertTrue(ssm.getCollectionInformation() == null);
     }
     
@@ -123,8 +122,7 @@ public class TestSimulatedSliceMonitor {
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, tmpDir.getAbsolutePath());
         SimulatedSliceMonitor ssm = new SimulatedSliceMonitor(props);
-        assertTrue(ssm.getSlices().size() == 1);
-        assertTrue(ssm.getSlices().get(0).equals(""));
+        assertTrue(ssm.getSlices().size() == 0);
         
         Properties resProp = ssm.getCollectionInformation();
         assertTrue(resProp != null);
@@ -149,7 +147,7 @@ public class TestSimulatedSliceMonitor {
         SimulatedSliceMonitor ssm = new SimulatedSliceMonitor(props);
         
         assertTrue(ssm.getSlices().size() == 1);
-        assertTrue(ssm.getSlices().get(0).equals("slice_46"));
+        assertTrue(ssm.getSlices().get(0).getSliceName().equals("slice_46"));
         
         assertTrue(ssm.getSlices().size() == 1);
         
@@ -173,25 +171,25 @@ public class TestSimulatedSliceMonitor {
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, tmpDir.getAbsolutePath());
         SimulatedSliceMonitor ssm = new SimulatedSliceMonitor(props);
-        List<String> slices = ssm.getSlices();
+        List<SliceDir> slices = ssm.getSlices();
 
         assertTrue(slices.size() == 1);
-        assertTrue(slices.get(0).equals("slice_0"));
+        assertTrue(slices.get(0).getSliceName().equals("slice_0"));
         
         slices = ssm.getSlices();
         assertTrue(slices.size() == 2);
-        assertTrue(slices.get(0).equals("slice_0"));
-        assertTrue(slices.get(1).equals("slice_46"));
+        assertTrue(slices.get(0).getSliceName().equals("slice_0"));
+        assertTrue(slices.get(1).getSliceName().equals("slice_46"));
         
         slices = ssm.getSlices();
         assertTrue(slices.size() == 2);
-        assertTrue(slices.get(0).equals("slice_0"));
-        assertTrue(slices.get(1).equals("slice_46"));
+        assertTrue(slices.get(0).getSliceName().equals("slice_0"));
+        assertTrue(slices.get(1).getSliceName().equals("slice_46"));
 
         slices = ssm.getSlices();
         assertTrue(slices.size() == 2);
-        assertTrue(slices.get(0).equals("slice_0"));
-        assertTrue(slices.get(1).equals("slice_46"));
+        assertTrue(slices.get(0).getSliceName().equals("slice_0"));
+        assertTrue(slices.get(1).getSliceName().equals("slice_46"));
         
         assertNull(ssm.getCollectionInformation());
     }
@@ -209,20 +207,20 @@ public class TestSimulatedSliceMonitor {
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, tmpDir.getAbsolutePath());
         SimulatedSliceMonitor ssm = new SimulatedSliceMonitor(props);
-        List<String> slices = ssm.getSlices();
+        List<SliceDir> slices = ssm.getSlices();
 
         assertTrue(slices.size() == 1);
-        assertTrue(slices.get(0).equals("slice_0"));
+        assertTrue(slices.get(0).getSliceName().equals("slice_0"));
         
         slices = ssm.getSlices();
         assertTrue(slices.size() == 2);
-        assertTrue(slices.get(0).equals("slice_0"));
-        assertTrue(slices.get(1).equals("slice_1"));
+        assertTrue(slices.get(0).getSliceName().equals("slice_0"));
+        assertTrue(slices.get(1).getSliceName().equals("slice_1"));
         
         for (int i = 2; i < 50; i++){
             slices = ssm.getSlices();
             assertTrue(slices.size() == i+1);
-            assertTrue(slices.get(i).equals("slice_"+i));
+            assertTrue(slices.get(i).getSliceName().equals("slice_"+i));
         }
         assertNull(ssm.getCollectionInformation());
     }
