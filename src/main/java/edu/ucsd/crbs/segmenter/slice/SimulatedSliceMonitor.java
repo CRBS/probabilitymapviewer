@@ -50,7 +50,7 @@ public class SimulatedSliceMonitor implements SliceMonitor {
     private Properties _collectionProps;
     
     public SimulatedSliceMonitor(Properties props){
-        SliceMonitor smi = new SliceMonitorImpl(props);
+        SliceMonitor smi = new SliceMonitorImpl(props, null);
         try {
             _slicesLeft = smi.getSlices();
             _collectionProps = smi.getCollectionInformation();

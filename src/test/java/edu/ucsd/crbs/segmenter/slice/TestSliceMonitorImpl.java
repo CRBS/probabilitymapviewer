@@ -82,7 +82,7 @@ public class TestSliceMonitorImpl {
     public void testGetSlicesWithNullPropertiesPassedIntoConstructor(){
         
         try {
-           SliceMonitorImpl smi = new SliceMonitorImpl(null);
+           SliceMonitorImpl smi = new SliceMonitorImpl(null,null);
            fail("Expected Exception");
         }
         catch(NullPointerException npe){
@@ -98,7 +98,7 @@ public class TestSliceMonitorImpl {
     public void testGetSlicesWithNullInputImageArg(){
         
         try {
-           SliceMonitorImpl smi = new SliceMonitorImpl(new Properties());
+           SliceMonitorImpl smi = new SliceMonitorImpl(new Properties(),null);
            fail("Expected Exception");
         }
         catch(NullPointerException npe){
@@ -115,7 +115,7 @@ public class TestSliceMonitorImpl {
         File tempDir = testFolder.newFolder();
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, tempDir.getAbsolutePath()+File.separator+"doesnotexist");
-        SliceMonitorImpl smi = new SliceMonitorImpl(props);
+        SliceMonitorImpl smi = new SliceMonitorImpl(props,null);
         List<SliceDir> sliceList = smi.getSlices();
         assertTrue(sliceList != null);
         assertTrue(sliceList.size() == 0);        
@@ -126,7 +126,7 @@ public class TestSliceMonitorImpl {
         File tempDir = testFolder.newFolder();
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, tempDir.getAbsolutePath());
-        SliceMonitorImpl smi = new SliceMonitorImpl(props);
+        SliceMonitorImpl smi = new SliceMonitorImpl(props,null);
         List<SliceDir> sliceList = smi.getSlices();
         assertTrue(sliceList != null);
         assertTrue(sliceList.size() == 0);
@@ -136,12 +136,12 @@ public class TestSliceMonitorImpl {
     public void testGetSlicesOnSingleSliceDir() throws Exception{
         File tempDir = testFolder.newFolder();
         File subDir = new File(tempDir.getAbsolutePath()+
-                File.separator+SliceDir.SLICE_PREFIX+"_7");
+                File.separator+SliceDir.SLICE_PREFIX+"7");
         assertTrue(subDir.mkdirs());
         
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, tempDir.getAbsolutePath());
-        SliceMonitorImpl smi = new SliceMonitorImpl(props);
+        SliceMonitorImpl smi = new SliceMonitorImpl(props,null);
         List<SliceDir> sliceList = smi.getSlices();
         assertTrue(sliceList != null);
         assertTrue(sliceList.size() == 1);
@@ -153,17 +153,17 @@ public class TestSliceMonitorImpl {
     public void testGetSlicesOnTwoSliceDir() throws Exception{
         File tempDir = testFolder.newFolder();
         File subDir = new File(tempDir.getAbsolutePath()+
-                File.separator+SliceDir.SLICE_PREFIX+"_7");
+                File.separator+SliceDir.SLICE_PREFIX+"7");
         assertTrue(subDir.mkdirs());
         subDir = new File(tempDir.getAbsolutePath()+
-                File.separator+SliceDir.SLICE_PREFIX+"_4");
+                File.separator+SliceDir.SLICE_PREFIX+"4");
         assertTrue(subDir.mkdirs());
 
         
         
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, tempDir.getAbsolutePath());
-        SliceMonitorImpl smi = new SliceMonitorImpl(props);
+        SliceMonitorImpl smi = new SliceMonitorImpl(props,null);
         List<SliceDir> sliceList = smi.getSlices();
         assertTrue(sliceList != null);
         assertTrue(sliceList.size() == 2);
@@ -175,17 +175,17 @@ public class TestSliceMonitorImpl {
     public void testGetSlicesOnTwoSliceDirWhereOneSliceLacksNumberAfterUnderscore() throws Exception{
         File tempDir = testFolder.newFolder();
         File subDir = new File(tempDir.getAbsolutePath()+
-                File.separator+SliceDir.SLICE_PREFIX+"_7");
+                File.separator+SliceDir.SLICE_PREFIX+"7");
         assertTrue(subDir.mkdirs());
         subDir = new File(tempDir.getAbsolutePath()+
-                File.separator+SliceDir.SLICE_PREFIX+"_xs");
+                File.separator+SliceDir.SLICE_PREFIX+"xs");
         assertTrue(subDir.mkdirs());
 
         
         
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, tempDir.getAbsolutePath());
-        SliceMonitorImpl smi = new SliceMonitorImpl(props);
+        SliceMonitorImpl smi = new SliceMonitorImpl(props,null);
         List<SliceDir> sliceList = smi.getSlices();
         assertTrue(sliceList != null);
         assertTrue(sliceList.size() == 2);
@@ -197,20 +197,20 @@ public class TestSliceMonitorImpl {
     public void testGetSlicesOnThreeoSliceDir() throws Exception{
         File tempDir = testFolder.newFolder();
         File subDir = new File(tempDir.getAbsolutePath()+
-                File.separator+SliceDir.SLICE_PREFIX+"_7");
+                File.separator+SliceDir.SLICE_PREFIX+"7");
         assertTrue(subDir.mkdirs());
         subDir = new File(tempDir.getAbsolutePath()+
-                File.separator+SliceDir.SLICE_PREFIX+"_4");
+                File.separator+SliceDir.SLICE_PREFIX+"4");
         assertTrue(subDir.mkdirs());
 
         subDir = new File(tempDir.getAbsolutePath()+
-                File.separator+SliceDir.SLICE_PREFIX+"_5");
+                File.separator+SliceDir.SLICE_PREFIX+"5");
         assertTrue(subDir.mkdirs());
         
         
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, tempDir.getAbsolutePath());
-        SliceMonitorImpl smi = new SliceMonitorImpl(props);
+        SliceMonitorImpl smi = new SliceMonitorImpl(props,null);
         List<SliceDir> sliceList = smi.getSlices();
         assertTrue(sliceList != null);
         assertTrue(sliceList.size() == 3);
@@ -226,14 +226,14 @@ public class TestSliceMonitorImpl {
         
         for (int i = 1000; i > 0; i--){
             subDir = new File(tempDir.getAbsolutePath()+
-                    File.separator+SliceDir.SLICE_PREFIX+"_"+
+                    File.separator+SliceDir.SLICE_PREFIX+
                     Integer.toString(i));
             assertTrue(subDir.mkdirs());
         }
         
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, tempDir.getAbsolutePath());
-        SliceMonitorImpl smi = new SliceMonitorImpl(props);
+        SliceMonitorImpl smi = new SliceMonitorImpl(props,null);
         List<SliceDir> sliceList = smi.getSlices();
         assertTrue(sliceList != null);
         assertTrue(sliceList.size() == 1000);

@@ -23,7 +23,6 @@ public class Dm4SliceFile {
     private static final Logger _log
             = Logger.getLogger(Dm4SliceFile.class.getName());
 
-    public static final String SLICE_PREFIX = "slice_";
     public static final String DM4_EXTENSION = ".dm4";
     
     private String _path;
@@ -78,21 +77,16 @@ public class Dm4SliceFile {
     }
 
     /**
-     * 
+     * Strips off extension .dm4 from file name
      * @return 
      */
     public String getSliceName() {
         if (_path == null) {
             return null;
         }
-
-        String noextension = _path.replaceAll("\\" + DM4_EXTENSION + "$", "");
         
-        int slicepos = noextension.lastIndexOf(Dm4SliceFile.SLICE_PREFIX);
-        if (slicepos < 0) {
-            return noextension;
-        }
-        return noextension.substring(slicepos);
+        return new File(_path).getName()
+                .replaceAll("\\" + DM4_EXTENSION + "$", "");
     }
 
 }

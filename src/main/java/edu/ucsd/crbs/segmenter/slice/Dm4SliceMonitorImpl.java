@@ -26,7 +26,7 @@ public class Dm4SliceMonitorImpl implements SliceMonitor{
      * @param scd 
      */
     public Dm4SliceMonitorImpl(Properties props, SliceConverterDaemon scd) {
-        _sliceMonitor = new SliceMonitorImpl(props);
+        _sliceMonitor = new SliceMonitorImpl(props, new SliceDirLastModifiedComparator());
         _daemon = new Thread(scd);
         _daemon.setDaemon(true);
         _daemon.start();

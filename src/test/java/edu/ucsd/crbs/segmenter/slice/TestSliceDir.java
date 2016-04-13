@@ -39,10 +39,12 @@ public class TestSliceDir {
 
     @Test
     public void testSliceWithNullPath(){
-        SliceDir s = new SliceDir(null);
-        assertTrue(s.getSliceName() == null);
-        assertTrue(s.getSliceNumber() == -1);
-        assertTrue(s.getFullPath() == null);
+        try {
+            SliceDir s = new SliceDir(null);
+        }
+        catch(NullPointerException npe){
+            assertTrue(npe.getMessage().equals("Slice Path cannot be null"));
+        }
     }
     
     @Test
@@ -58,7 +60,7 @@ public class TestSliceDir {
         SliceDir s = new SliceDir("slice_0001");
         assertTrue(s.getSliceName().equals("slice_0001"));
         assertTrue(s.getSliceNumber() == 1);
-        assertTrue(s.getFullPath().equals("slice_0001"));
+        assertTrue(s.getFullPath().endsWith("slice_0001"));
     }
     
     @Test

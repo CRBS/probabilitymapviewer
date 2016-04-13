@@ -352,7 +352,7 @@ public class App {
                             new Dm4ToSliceConverter(props)));
                     
                 } else{
-                    sliceMonitor = new SliceMonitorImpl(props);
+                    sliceMonitor = new SliceMonitorImpl(props, null);
                 }
                 cubeProgressBar = new CubeProgressBarImpl(props);
                 

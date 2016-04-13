@@ -55,11 +55,16 @@ public class SliceMonitorImpl implements SliceMonitor {
     
     private Properties _props;
     private String _inputImage;    
+    private Comparator _comparator;
 
     public static final String COLLECTION_PROPS_README = "readme.props";
     
-    public SliceMonitorImpl(Properties props){
+    public SliceMonitorImpl(Properties props,Comparator comparator){
         _props = props;
+        
+        if (comparator == null){
+            _comparator = new SliceDirNumberComparator();
+        }
         if (_props == null){
             throw new NullPointerException("Properties passed in constructor is null");
         }
@@ -76,7 +81,7 @@ public class SliceMonitorImpl implements SliceMonitor {
         }
         
         TreeSet<SliceDir> sliceList = 
-                new TreeSet<SliceDir>(new SliceNumberComparator());
+                new TreeSet<SliceDir>(_comparator);
         
         File imageDir = new File(_inputImage);
         File[] sliceDirs = imageDir.listFiles((FileFilter)DirectoryFileFilter.DIRECTORY);

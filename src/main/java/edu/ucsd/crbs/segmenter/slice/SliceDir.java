@@ -19,9 +19,9 @@ public class SliceDir {
     
     private static final Logger _log = Logger.getLogger(SliceDir.class.getName());
 
-    public static String SLICE_PREFIX = "slice";
+    public static String SLICE_PREFIX = "slice_";
     
-    private String _path;
+    private File _sliceDir;
     private int _sliceNumber;
     
     /**
@@ -29,12 +29,19 @@ public class SliceDir {
      * @param slicePath full path to Slice
      */
     public SliceDir(final String slicePath){
-        _path = slicePath;
+        if (slicePath == null){
+            throw new NullPointerException("Slice Path cannot be null");
+        }
+        _sliceDir = new File(slicePath);
         extractSliceNumber();
     }
 
     public int getSliceNumber(){
         return _sliceNumber;
+    }
+    
+    public long getLastModified(){
+        return _sliceDir.lastModified();
     }
     
     /**
@@ -44,24 +51,25 @@ public class SliceDir {
      * or -3 if the slice number could not be converted to an int
      */
     private void extractSliceNumber() {
-        if (_path == null){
+        if (_sliceDir == null){
             _sliceNumber = -1;
             return;
         }
-        int prefixPos = _path.lastIndexOf("_");
+        int prefixPos = _sliceDir.getName().lastIndexOf("_");
         
         if (prefixPos < 0){
             _log.log(Level.WARNING,"No _ found in path "
-                    + _path);
+                    + _sliceDir.getName());
             _sliceNumber = -2;
             return;
         }
         try {
-            _sliceNumber = Integer.parseInt(_path.substring(prefixPos + 1));
+            _sliceNumber = Integer.parseInt(_sliceDir.getName()
+                    .substring(prefixPos + 1));
         }
         catch(NumberFormatException nfe){
             _log.log(Level.WARNING,"Unable to extract slice number from path "
-                    + _path);
+                    + _sliceDir.getName());
             _sliceNumber = -3;
             return;
         }        
@@ -72,19 +80,14 @@ public class SliceDir {
      * @return Path to slice directory
      */
     public String getFullPath(){
-        return _path;
+        return _sliceDir.getAbsolutePath();
     }
     
     public String getSliceName(){
-        if (_path == null){
+        if (_sliceDir == null){
             return null;
         }
         
-        String notrailslash = _path.replaceAll(File.separator + "+$","");
-        int slashpos = notrailslash.lastIndexOf(File.separator);
-        if (slashpos < 0){
-            return notrailslash;
-        }
-        return notrailslash.substring(slashpos + 1);
+        return _sliceDir.getName();
     }
 }

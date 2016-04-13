@@ -38,13 +38,14 @@ public class Dm4SliceConverterDaemon implements SliceConverterDaemon {
         _sliceConverter = converter;
     }
 
+    /**
+     * Tells this object to shutdown
+     */
     @Override
     public void shutdown() {
         _log.log(Level.INFO, "Received shutdown notification");
         _shutdown = true;
     }
-
-    
     
     @Override
     public void run() {        
@@ -79,7 +80,8 @@ public class Dm4SliceConverterDaemon implements SliceConverterDaemon {
     }
     
     private String genDestinationPath(File dm4File){
-        return null; //wrong fix this
+        Dm4SliceFile sliceFile = new Dm4SliceFile(dm4File.getAbsolutePath());
+        return SliceDir.SLICE_PREFIX + sliceFile.getSliceName();
     }
     
     private File getSecondNewestDm4File(){
@@ -90,7 +92,7 @@ public class Dm4SliceConverterDaemon implements SliceConverterDaemon {
         
         File[] files = _dirToWatch.listFiles((FileFilter)FileFileFilter.FILE);
         for (int i = 0; i < files.length; i++){
-            if (!files[i].getName().endsWith(".dm4")){
+            if (!files[i].getName().endsWith(Dm4SliceFile.DM4_EXTENSION)){
                 continue;
             }
             if (youngestAge == -1){
