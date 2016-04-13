@@ -47,6 +47,8 @@ public interface RunCommandLineProcess {
 
     public void setEnvironmentVariables(Map<String, String> envVars);
 
+    public String getLastCommand();
+    
     /**
      * Runs command line program specified by first argument.
      * @param command - First argument should be full path to command followed by arguments

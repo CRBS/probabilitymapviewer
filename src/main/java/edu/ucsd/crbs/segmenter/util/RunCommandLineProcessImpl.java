@@ -38,6 +38,8 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -45,8 +47,13 @@ import java.util.Map;
  */
 public class RunCommandLineProcessImpl implements RunCommandLineProcess {
 
+    
+    private static final Logger _log
+            = Logger.getLogger(RunCommandLineProcessImpl.class.getName());
+    
     private String _workingDirectory;
     private Map<String, String> _environVars;
+    private String _lastCommand;
     
     @Override
     public void setWorkingDirectory(final String workingDir) {
@@ -59,14 +66,30 @@ public class RunCommandLineProcessImpl implements RunCommandLineProcess {
     }
 
     @Override
+    public String getLastCommand() {
+        return _lastCommand;
+    }
+    
+    
+    @Override
     public String runCommandLineProcess(String... command) throws Exception {
         String[] mCmd;
         int i = 0;
         mCmd = new String[command.length];
+        _lastCommand = null;
+        StringBuilder lastCmdSb = new StringBuilder();
         for (String c : command) {
             mCmd[i] = c;
+            if (lastCmdSb.length() > 0){
+                lastCmdSb.append(" ");
+            }
+            lastCmdSb.append(mCmd[i]);
             i++;
         }
+        _lastCommand = lastCmdSb.toString();
+        
+        _log.log(Level.FINE,"Running command: " + _lastCommand);
+        
         ProcessBuilder pb = new ProcessBuilder(mCmd);
 
         //lets caller set working directory
