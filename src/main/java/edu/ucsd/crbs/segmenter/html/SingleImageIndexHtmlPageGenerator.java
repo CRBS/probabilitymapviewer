@@ -116,9 +116,10 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
         _refreshIntervalMillis = Integer.toString(Integer.parseInt(_refreshIntervalSecs)*1000);
         
         if (props.getProperty(App.SIMULATE_COLLECTION_ARG,"false").equals("true") ||
-            props.getProperty(App.COLLECTION_MODE_ARG,"false").equals("true")){
+            props.getProperty(App.COLLECTION_MODE_ARG,"false").equals("true") ||
+            props.getProperty(App.DM4_COLLECTION_MODE_ARG,"false").equals("true")){
             _collectionBlockDisplay = "inline-block;";
-            _addSegmenterDisplay = "none;";
+            _addSegmenterDisplay = "inline-block;";
         }
         else {
             _collectionBlockDisplay = "none;";

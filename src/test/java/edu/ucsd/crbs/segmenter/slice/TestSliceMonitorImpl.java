@@ -118,7 +118,7 @@ public class TestSliceMonitorImpl {
         SliceMonitorImpl smi = new SliceMonitorImpl(props,null);
         List<SliceDir> sliceList = smi.getSlices();
         assertTrue(sliceList != null);
-        assertTrue(sliceList.size() == 0);        
+        assertTrue(sliceList.size() == 0);
     }
 
     @Test

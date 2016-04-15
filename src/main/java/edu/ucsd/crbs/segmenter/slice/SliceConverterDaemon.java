@@ -11,6 +11,9 @@ package edu.ucsd.crbs.segmenter.slice;
  */
 public interface SliceConverterDaemon extends Runnable {
 
+    /**
+     * Runs the daemon
+     */
     @Override
     public void run();
     
@@ -18,4 +21,11 @@ public interface SliceConverterDaemon extends Runnable {
      * Tells daemon to shutdown
      */
     public void shutdown();
+
+    /**
+     * Returns the destination directory for the converted slices
+     * @return Path to converted slices
+     */
+    public String getDestinationDirectory();
+
 }

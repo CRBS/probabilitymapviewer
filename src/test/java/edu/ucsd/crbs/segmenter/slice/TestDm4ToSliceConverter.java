@@ -62,18 +62,6 @@ public class TestDm4ToSliceConverter {
         }
     }
 
-    //test constructor INPUT_IMAGE_ARG is null
-    @Test
-    public void testConstructorInputimageargNull() {
-        try {
-            Dm4ToSliceConverter d = new Dm4ToSliceConverter(new Properties());
-            fail("Expected exception");
-        } catch (NullPointerException npe) {
-            assertTrue(npe.getMessage().equals(App.INPUT_IMAGE_ARG
-                    + " property is null"));
-        }
-    }
-
     //test constructor MRC2TIF_ARG is null
     @Test
     public void testConstructorMrc2tifargNull() {
@@ -334,7 +322,7 @@ public class TestDm4ToSliceConverter {
                 .thenReturn("hello2");
         when(mockrclp.runCommandLineProcess("convert",pngTmpFile,"-resize",
                 "100%","-crop","128x128","-set","filename:tile",
-                "\"r%[fx:page.y/128]_c%[fx:page.x/128]\"","+repage","+adjoin",
+                "r%[fx:page.y/128]_c%[fx:page.x/128]","+repage","+adjoin",
                 destTmpDir + File.separator + "0-%[filename:tile].png"))
                 .thenThrow(new Exception("convertfailed"));
                 
@@ -386,7 +374,7 @@ public class TestDm4ToSliceConverter {
                 .thenReturn("hello2");
         when(mockrclp.runCommandLineProcess("convert",pngTmpFile,"-resize",
                 "25%","-crop","128x128","-set","filename:tile",
-                "\"r%[fx:page.y/128]_c%[fx:page.x/128]\"","+repage","+adjoin",
+                "r%[fx:page.y/128]_c%[fx:page.x/128]","+repage","+adjoin",
                 destTmpDir + File.separator + "0-%[filename:tile].png"))
                 .thenReturn("hello3");
                 

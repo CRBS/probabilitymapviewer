@@ -30,41 +30,6 @@ public class Dm4SliceFile {
 
     public Dm4SliceFile(final String slicePath) {
         _path = slicePath;
-        extractSliceNumber();
-    }
-
-    public int getSliceNumber() {
-        return _sliceNumber;
-    }
-
-    /**
-     * Parses slice number from path by looking for last '_' in path and
-     * assuming any characters to right are a number.
-     *
-     * @return slice number or -1 if path is null, -2 if no _ found in path or
-     * -3 if the slice number could not be converted to an int
-     */
-    private void extractSliceNumber() {
-        if (_path == null) {
-            _sliceNumber = -1;
-            return;
-        }
-        int prefixPos = _path.lastIndexOf("_");
-
-        if (prefixPos < 0) {
-            _log.log(Level.WARNING, "No _ found in path "
-                    + _path);
-            _sliceNumber = -2;
-            return;
-        }
-        try {
-            _sliceNumber = Integer.parseInt(_path.substring(prefixPos + 1));
-        } catch (NumberFormatException nfe) {
-            _log.log(Level.WARNING, "Unable to extract slice number from path "
-                    + _path);
-            _sliceNumber = -3;
-            return;
-        }
     }
 
     /**

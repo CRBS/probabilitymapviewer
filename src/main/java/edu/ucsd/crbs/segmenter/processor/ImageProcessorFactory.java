@@ -78,7 +78,7 @@ public class ImageProcessorFactory {
     private ImageProcessor getSGECHMImageProcessor(final String workingDir,
             CustomLayer layer){
         
-        return new SGECHMImageProcessor(_props.getProperty(App.INPUT_IMAGE_ARG),
+        return new SGECHMImageProcessor(_props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
                     workingDir,
                     layer.getTrainedModelDir(),
                     _props.getProperty(App.CHM_BIN_ARG)+File.separator+CHM_TEST_SH,
@@ -91,7 +91,7 @@ public class ImageProcessorFactory {
     
     private ImageProcessor getSimpleCHMImageProcessor(final String workingDir,
             CustomLayer layer){
-        return new SimpleCHMImageProcessor(_props.getProperty(App.INPUT_IMAGE_ARG),
+        return new SimpleCHMImageProcessor(_props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
                     workingDir,
                     layer.getTrainedModelDir(),
                     _props.getProperty(App.CHM_BIN_ARG)+File.separator+CHM_TEST_SH,
@@ -103,7 +103,7 @@ public class ImageProcessorFactory {
     private ImageProcessor getSimpleIlastikImageProcessor(final String workingDir,
             CustomLayer layer){
         /** @TODO Add support for analyzing tile */
-        return new SimpleIlastikImageProcessor(_props.getProperty(App.INPUT_IMAGE_ARG),
+        return new SimpleIlastikImageProcessor(_props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
                     workingDir,
                     layer.getTrainedModelDir(),
                     _props.getProperty(App.ILASTIK_ARG)+File.separator+RUN_ILASTIK_SH,
@@ -116,7 +116,7 @@ public class ImageProcessorFactory {
     private ImageProcessor getSGEIlastikImageProcessor(final String workingDir,
             CustomLayer layer){
         /** @TODO Add support for analyzing tile */
-        return new SGEIlastikImageProcessor(_props.getProperty(App.INPUT_IMAGE_ARG),
+        return new SGEIlastikImageProcessor(_props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
                     workingDir,
                     layer.getTrainedModelDir(),
                     _props.getProperty(App.ILASTIK_ARG)+File.separator+RUN_ILASTIK_SH,

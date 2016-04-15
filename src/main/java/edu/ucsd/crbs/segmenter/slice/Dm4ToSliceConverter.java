@@ -9,6 +9,7 @@ import edu.ucsd.crbs.segmenter.App;
 import edu.ucsd.crbs.segmenter.util.RunCommandLineProcess;
 import edu.ucsd.crbs.segmenter.util.RunCommandLineProcessImpl;
 import java.io.File;
+import java.io.FileWriter;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -28,7 +29,6 @@ public class Dm4ToSliceConverter implements SliceConverter {
             = Logger.getLogger(Dm4ToSliceConverter.class.getName());
 
     private Properties _props;
-    private String _inputImage;
     private String _dm2mrc_cmd;
     private String _mrc2tif_cmd;
     private String _convert_cmd;
@@ -45,11 +45,6 @@ public class Dm4ToSliceConverter implements SliceConverter {
         if (_props == null) {
             throw new NullPointerException("Properties passed in constructor "
                     + "is null");
-        }
-        _inputImage = _props.getProperty(App.INPUT_IMAGE_ARG);
-        if (_inputImage == null) {
-            throw new NullPointerException(App.INPUT_IMAGE_ARG
-                    + " property is null");
         }
 
         //need binary paths for convert, dm2mrc, mrc2tif
@@ -87,8 +82,8 @@ public class Dm4ToSliceConverter implements SliceConverter {
         }
         String tileSize = _props.getProperty(App.TILE_SIZE_ARG, "128");
         _tileSizeArgForConvert = tileSize + "x" + tileSize;
-        _renameArgForConvert = "\"r%[fx:page.y/" + tileSize + "]_c%[fx:page.x/"
-                + tileSize + "]\"";
+        _renameArgForConvert = "r%[fx:page.y/" + tileSize + "]_c%[fx:page.x/"
+                + tileSize + "]";
 
         _runCommandLineProcess = new RunCommandLineProcessImpl();
     }
@@ -122,7 +117,11 @@ public class Dm4ToSliceConverter implements SliceConverter {
             throw new Exception("Unable to create "
                     + destTmpDir.getAbsolutePath() + " tmp directory");
         }
-
+        Thread.sleep(1000); //no directory yet very weird....
+        
+        //write out a readme.props file to directory
+        writeReadmeFile(sourcePath,destTmpDir.getAbsolutePath());
+        
         _runCommandLineProcess
                 .setWorkingDirectory(destTmpDir.getAbsolutePath());
 
@@ -139,7 +138,20 @@ public class Dm4ToSliceConverter implements SliceConverter {
             throw new Exception("Unable to rename "
                     + destTmpDir.getAbsolutePath() + " to " + destPath);
         }
-
+    }
+    
+    public void writeReadmeFile(final String sourcePath,final String destPath){
+        try {
+            FileWriter fw = new FileWriter(destPath + File.separator 
+                    + "readme.props");
+            fw.write("inputfile=" + sourcePath + "\n");
+            fw.write("name=" 
+                    + sourcePath.replace("^.*/","").replace(".dm4$","") +"\n");
+            fw.flush();
+            fw.close();
+        }catch(Exception ex){
+            _log.log(Level.WARNING," Caught Exception: " + ex.getMessage());
+        }
     }
 
     /**
@@ -197,6 +209,11 @@ public class Dm4ToSliceConverter implements SliceConverter {
         _log.log(Level.INFO, "Generating {0} via mrc2tif took {1} seconds", 
                 new Object[]{destPng,duration / 1000});
 
+        _log.log(Level.FINE, "Deleting {0}",sourcePath);
+        //delete the input png file
+        File srcMrc = new File(sourcePath);
+        srcMrc.delete();
+        
         return destPng;
     }
 
@@ -204,8 +221,6 @@ public class Dm4ToSliceConverter implements SliceConverter {
             final String destTmpDir) throws Exception {
 
         long startTime = System.currentTimeMillis();
-
-        String destPng = destTmpDir + File.separator + "out.png";
         
         double dfactor = (1.0/(double)_downsample_factor)*100.0;
         
@@ -227,5 +242,10 @@ public class Dm4ToSliceConverter implements SliceConverter {
         _log.log(Level.FINE, "convert output: {0}", result);
 
         _log.log(Level.INFO, "convert took {0} seconds", duration / 1000);
+
+        _log.log(Level.FINE, "Deleting {0}",sourcePath);
+        //delete the input png file
+        File srcPng = new File(sourcePath);
+        srcPng.delete();
     }
 }

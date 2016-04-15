@@ -92,7 +92,8 @@ public class SliceMonitorImpl implements SliceMonitor {
         }
         
         for (int i = 0; i < sliceDirs.length; i++){
-            if (sliceDirs[i].getName().startsWith(SliceDir.SLICE_PREFIX)){
+            if (sliceDirs[i].getName().startsWith(SliceDir.SLICE_PREFIX) &&
+                !sliceDirs[i].getName().endsWith(".tmp")){
                 sliceList.add(new SliceDir(sliceDirs[i].getAbsolutePath()));
             }
         }        

@@ -34,6 +34,7 @@ import edu.ucsd.crbs.segmenter.App;
 import edu.ucsd.crbs.segmenter.processor.ImageProcessor;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -108,6 +109,8 @@ public class ImageProcessorHandler extends AbstractHandler {
         //only process images with non negative positions
         if (imageToProcess.matches("^[0-9]+-r[0-9]+_c[0-9]+\\.png$")){
             if (App.latestSlice != null && !App.latestSlice.equals("")){
+                _log.log(Level.INFO,servletRequest.getRequestURI() 
+                        + " & Latest slice is: " + App.latestSlice);
                 int slicePos = servletRequest.getRequestURI().lastIndexOf(App.latestSlice);
                 imageToProcess = servletRequest.getRequestURI().substring(slicePos);
             }

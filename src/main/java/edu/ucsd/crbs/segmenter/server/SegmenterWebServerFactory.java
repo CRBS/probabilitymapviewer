@@ -42,6 +42,7 @@ import edu.ucsd.crbs.segmenter.handler.ccdb.model.ModelDownloaderImpl;
 import edu.ucsd.crbs.segmenter.layer.CustomLayer;
 import edu.ucsd.crbs.segmenter.layer.CustomLayerFromCCDBFactory;
 import edu.ucsd.crbs.segmenter.processor.ImageProcessorFactory;
+import java.io.File;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -71,7 +72,9 @@ public class SegmenterWebServerFactory {
         // a Jetty Handler object so it is suitable for chaining with other handlers as you will see in other examples.
         ResourceHandler inputImageHandler = new ResourceHandler();
         inputImageHandler.setDirectoriesListed(true);
-        inputImageHandler.setResourceBase(props.getProperty(App.INPUT_IMAGE_ARG));
+        
+        inputImageHandler.setResourceBase(props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG));
+        
         ContextHandler imageContext = new ContextHandler("/"+App.IMAGES_CONTEXT_PATH);
         imageContext.setHandler(inputImageHandler);
         contexts.addHandler(imageContext);
