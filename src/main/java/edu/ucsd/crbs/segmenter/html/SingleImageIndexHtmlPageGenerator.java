@@ -119,7 +119,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
             props.getProperty(App.COLLECTION_MODE_ARG,"false").equals("true") ||
             props.getProperty(App.DM4_COLLECTION_MODE_ARG,"false").equals("true")){
             _collectionBlockDisplay = "inline-block;";
-            _addSegmenterDisplay = "inline-block;";
+            _addSegmenterDisplay = "none;";
         }
         else {
             _collectionBlockDisplay = "none;";
