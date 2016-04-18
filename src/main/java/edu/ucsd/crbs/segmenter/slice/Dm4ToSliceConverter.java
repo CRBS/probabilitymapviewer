@@ -231,7 +231,7 @@ public class Dm4ToSliceConverter implements SliceConverter {
         String result
                 = _runCommandLineProcess.runCommandLineProcess(_convert_cmd,
                         sourcePath,
-                        "-resize", resizePercent,"-crop",
+                        "-resize", resizePercent,"-equalize","-crop",
                         _tileSizeArgForConvert, "-set", "filename:tile",
                         _renameArgForConvert, "+repage", "+adjoin",
                         destTmpDir + File.separator

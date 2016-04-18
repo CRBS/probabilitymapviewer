@@ -321,7 +321,7 @@ public class TestDm4ToSliceConverter {
         when(mockrclp.runCommandLineProcess("mrc","-p",mrcTmpFile,pngTmpFile))
                 .thenReturn("hello2");
         when(mockrclp.runCommandLineProcess("convert",pngTmpFile,"-resize",
-                "100%","-crop","128x128","-set","filename:tile",
+                "100%","-equalize","-crop","128x128","-set","filename:tile",
                 "r%[fx:page.y/128]_c%[fx:page.x/128]","+repage","+adjoin",
                 destTmpDir + File.separator + "0-%[filename:tile].png"))
                 .thenThrow(new Exception("convertfailed"));
@@ -373,7 +373,7 @@ public class TestDm4ToSliceConverter {
         when(mockrclp.runCommandLineProcess("mrc","-p",mrcTmpFile,pngTmpFile))
                 .thenReturn("hello2");
         when(mockrclp.runCommandLineProcess("convert",pngTmpFile,"-resize",
-                "25%","-crop","128x128","-set","filename:tile",
+                "25%","-equalize","-crop","128x128","-set","filename:tile",
                 "r%[fx:page.y/128]_c%[fx:page.x/128]","+repage","+adjoin",
                 destTmpDir + File.separator + "0-%[filename:tile].png"))
                 .thenReturn("hello3");
@@ -426,7 +426,7 @@ public class TestDm4ToSliceConverter {
         when(mockrclp.runCommandLineProcess("mrc","-p",mrcTmpFile,pngTmpFile))
                 .thenReturn("hello2");
         when(mockrclp.runCommandLineProcess("convert",pngTmpFile,"-resize",
-                "12%","-crop","256x256","-set","filename:tile",
+                "12%","-equalize","-crop","256x256","-set","filename:tile",
                 "\"r%[fx:page.y/256]_c%[fx:page.x/256]\"","+repage","+adjoin",
                 destTmpDir + File.separator + "0-%[filename:tile].png"))
                 .thenReturn("hello3");

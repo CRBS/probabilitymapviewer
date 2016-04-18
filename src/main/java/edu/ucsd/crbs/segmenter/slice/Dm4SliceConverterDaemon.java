@@ -72,11 +72,24 @@ public class Dm4SliceConverterDaemon implements SliceConverterDaemon {
             if (dm4File != null){
                 if (_secondYoungestFile !=null){
                     if (dm4File.getName().equals(_secondYoungestFile.getName())){
+                        _log.log(Level.INFO,"Dm4 file {0} has same name as"
+                                + " second youngest file {1}, doing nothing",
+                                new Object[]{dm4File.getName(),
+                                    _secondYoungestFile.getName()
+                                });
                         threadSleep();
                         continue;
                     }
                     if (dm4File.lastModified() 
                         < _secondYoungestFile.lastModified()){
+                         _log.log(Level.INFO,"Dm4 file {0} ({1}) is younger then"
+                                + " second youngest file {2} ({3}),"
+                                 + " doing nothing",
+                                new Object[]{dm4File.getName(),
+                                    dm4File.lastModified(),
+                                    _secondYoungestFile.getName(),
+                                    _secondYoungestFile.lastModified()
+                                });
                         threadSleep();
                         continue;
                     }
