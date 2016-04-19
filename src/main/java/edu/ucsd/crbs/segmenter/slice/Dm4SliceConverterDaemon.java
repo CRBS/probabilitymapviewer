@@ -152,7 +152,7 @@ public class Dm4SliceConverterDaemon implements SliceConverterDaemon {
             }
             if (files[i].lastModified() > youngestAge){
                 _log.log(Level.INFO, "Current Second youngest: " 
-                        + files[i].getName());
+                        + youngestFile.getName());
 
                 secondYoungest = youngestFile;
                 
