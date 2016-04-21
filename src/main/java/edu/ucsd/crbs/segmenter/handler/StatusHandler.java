@@ -132,6 +132,16 @@ public class StatusHandler extends AbstractHandler {
         sb.append(",\"latestslice\": \"");
         sb.append(App.latestSlice);
         sb.append("\"");
+        
+        sb.append(",\"trunclatestslice\": \"");
+        if (App.latestSlice.length() > 10){
+            sb.append(App.latestSlice.substring(App.latestSlice.length() - 10));
+        }
+        else {
+            sb.append(App.latestSlice);
+        }
+        sb.append("\"");
+        
 
         sb.append(",\"collectionname\": \"");
         sb.append(App.collectionName);

@@ -403,7 +403,7 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
                       sliceAquireTimeElement.style.fontWeight='bold';
                       setTimeout(function() {currentSliceElement.style.fontWeight='normal';sliceAquireTimeElement.style.fontWeight='normal';},5000);
                     }
-                    currentSliceElement.innerHTML = myres.latestslice;
+                    currentSliceElement.innerHTML = myres.trunclatestslice;
                     collectionNameElement.innerHTML = myres.collectionname;
                     sliceAquireTimeElement.innerHTML = Number(sliceAquireTimeElement.innerHTML) + Number(@@REFRESH_INTERVAL_SECS@@);
                     cubeImageElement.src=myres.cubeimage;
