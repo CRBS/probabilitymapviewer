@@ -94,6 +94,7 @@ public class App {
     
     public static final String DM4_CONVERTED_DIR_NAME = "dm4converted";
     public static final String DM4_CONVERTED_DIR_ARG = "dm4converteddir";
+    public static final String CONVERT_EQUALIZE_ARG = "convertequalize";
     
 
     public static ConcurrentLinkedDeque<Callable> tilesToProcess
@@ -282,6 +283,11 @@ public class App {
                     accepts(DISABLE_ANALYZING_TILE_ARG, "If set app no longer "
                             + "denotes with less opaque tile which tiles are "
                             + "being processed");
+                    
+                    accepts(CONVERT_EQUALIZE_ARG, "If set, adds -equalize "
+                            + "parameter to convert command to perform "
+                            + "histogram equalization.  Used with --"
+                            + DM4_COLLECTION_MODE_ARG);
 
                     acceptsAll(helpArgs, "Show Help").forHelp();
                 }
@@ -535,6 +541,12 @@ public class App {
             props.setProperty(DM4_COLLECTION_MODE_ARG, "true");
         } else {
             props.setProperty(DM4_COLLECTION_MODE_ARG, "false");
+        }
+        
+        if (optionSet.has(CONVERT_EQUALIZE_ARG)){
+            props.setProperty(CONVERT_EQUALIZE_ARG, "true");
+        } else {
+            props.setProperty(CONVERT_EQUALIZE_ARG, "false");
         }
         
         props.setProperty(DM2MRC_ARG, (String) optionSet.valueOf(DM2MRC_ARG));

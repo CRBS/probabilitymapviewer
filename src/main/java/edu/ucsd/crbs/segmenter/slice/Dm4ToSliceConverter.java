@@ -10,6 +10,7 @@ import edu.ucsd.crbs.segmenter.util.RunCommandLineProcess;
 import edu.ucsd.crbs.segmenter.util.RunCommandLineProcessImpl;
 import java.io.File;
 import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -36,6 +37,7 @@ public class Dm4ToSliceConverter implements SliceConverter {
     private RunCommandLineProcess _runCommandLineProcess;
     private String _tileSizeArgForConvert;
     private String _renameArgForConvert;
+    private boolean _addEqualize = false;
 
     /**
      * Constructor
@@ -65,6 +67,10 @@ public class Dm4ToSliceConverter implements SliceConverter {
             throw new NullPointerException(App.CONVERT_ARG
                     + " property is null");
         }
+        
+        _addEqualize = Boolean.getBoolean(
+                _props.getProperty(App.CONVERT_EQUALIZE_ARG,
+                "false"));
 
         // need downsampling values
         _downsample_factor = 1;
@@ -228,14 +234,27 @@ public class Dm4ToSliceConverter implements SliceConverter {
 
         _log.log(Level.FINE, "Resize set to : " + resizePercent);
         
+        ArrayList<String> cmd = new ArrayList<String>();
+        cmd.add(_convert_cmd);
+        cmd.add(sourcePath);
+        cmd.add("-resize");
+        cmd.add(resizePercent);
+        if (_addEqualize == true){
+            cmd.add("-equalize");
+        }
+        cmd.add("-crop");
+        cmd.add(_tileSizeArgForConvert);
+        cmd.add("-set");
+        cmd.add("filename:tile");
+        cmd.add(_renameArgForConvert);
+        cmd.add("+repage");
+        cmd.add("+adjoin");
+        cmd.add(destTmpDir + File.separator + ZOOM + "-%[filename:tile].png");
+        
+        
         String result
-                = _runCommandLineProcess.runCommandLineProcess(_convert_cmd,
-                        sourcePath,
-                        "-resize", resizePercent,"-equalize","-crop",
-                        _tileSizeArgForConvert, "-set", "filename:tile",
-                        _renameArgForConvert, "+repage", "+adjoin",
-                        destTmpDir + File.separator
-                        + ZOOM + "-%[filename:tile].png");
+                = _runCommandLineProcess.runCommandLineProcess(
+                        cmd.toArray(new String[cmd.size()]));
 
         long duration = System.currentTimeMillis() - startTime;
 

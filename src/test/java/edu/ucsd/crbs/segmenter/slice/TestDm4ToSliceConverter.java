@@ -106,7 +106,54 @@ public class TestDm4ToSliceConverter {
                     + " property is null"));
         }
     }
+    
+    @Test
+    public void testConstructorConvertEqualizeArgNull() {
+            Properties props = new Properties();
+            props.setProperty(App.INPUT_IMAGE_ARG, "foo");
+            props.setProperty(App.MRC2TIF_ARG, "mrc");
+            props.setProperty(App.DM2MRC_ARG, "dm2");
+            props.setProperty(App.CONVERT_ARG, "convert");
+            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+    }
+    
+    @Test
+    public void testConstructorConvertEqualizeArgFalse() {
+            Properties props = new Properties();
+            props.setProperty(App.INPUT_IMAGE_ARG, "foo");
+            props.setProperty(App.MRC2TIF_ARG, "mrc");
+            props.setProperty(App.DM2MRC_ARG, "dm2");
+            props.setProperty(App.CONVERT_ARG, "convert");
+            props.setProperty(App.CONVERT_EQUALIZE_ARG, "true");
+            
+            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+    }
+    
+    @Test
+    public void testConstructorConvertEqualizeArgTrue() {
+            Properties props = new Properties();
+            props.setProperty(App.INPUT_IMAGE_ARG, "foo");
+            props.setProperty(App.MRC2TIF_ARG, "mrc");
+            props.setProperty(App.DM2MRC_ARG, "dm2");
+            props.setProperty(App.CONVERT_ARG, "convert");
+            props.setProperty(App.CONVERT_EQUALIZE_ARG, "true");
+            
+            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+    }
 
+        
+    @Test
+    public void testConstructorConvertEqualizeArgNotBoolean() {
+            Properties props = new Properties();
+            props.setProperty(App.INPUT_IMAGE_ARG, "foo");
+            props.setProperty(App.MRC2TIF_ARG, "mrc");
+            props.setProperty(App.DM2MRC_ARG, "dm2");
+            props.setProperty(App.CONVERT_ARG, "convert");
+            props.setProperty(App.CONVERT_EQUALIZE_ARG, "blah");
+            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+    }
+
+    
     @Test
     public void testConstructorNodownsampleargNull() {
         Properties props = new Properties();
@@ -321,7 +368,7 @@ public class TestDm4ToSliceConverter {
         when(mockrclp.runCommandLineProcess("mrc","-p",mrcTmpFile,pngTmpFile))
                 .thenReturn("hello2");
         when(mockrclp.runCommandLineProcess("convert",pngTmpFile,"-resize",
-                "100%","-equalize","-crop","128x128","-set","filename:tile",
+                "100%","-crop","128x128","-set","filename:tile",
                 "r%[fx:page.y/128]_c%[fx:page.x/128]","+repage","+adjoin",
                 destTmpDir + File.separator + "0-%[filename:tile].png"))
                 .thenThrow(new Exception("convertfailed"));
@@ -373,7 +420,7 @@ public class TestDm4ToSliceConverter {
         when(mockrclp.runCommandLineProcess("mrc","-p",mrcTmpFile,pngTmpFile))
                 .thenReturn("hello2");
         when(mockrclp.runCommandLineProcess("convert",pngTmpFile,"-resize",
-                "25%","-equalize","-crop","128x128","-set","filename:tile",
+                "25%","-crop","128x128","-set","filename:tile",
                 "r%[fx:page.y/128]_c%[fx:page.x/128]","+repage","+adjoin",
                 destTmpDir + File.separator + "0-%[filename:tile].png"))
                 .thenReturn("hello3");
@@ -403,6 +450,61 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.CONVERT_ARG, "convert");
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "8");
         props.setProperty(App.TILE_SIZE_ARG, "256");
+        
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        String srcFile = tempDir.getAbsolutePath() + File.separator 
+                    + "input.dm4";
+        File inputFile = new File(srcFile);
+        FileWriter fw = new FileWriter(inputFile);
+        fw.write("blah blah");
+        fw.flush();
+        fw.close();
+        
+        String destDir = tempDir.getAbsolutePath() + File.separator
+                + "foo";
+        String destTmpDir = destDir + Dm4ToSliceConverter.TMP_SUFFIX;
+        String mrcTmpFile = destTmpDir
+                + File.separator + "out.mrc";
+        String pngTmpFile = destTmpDir
+                + File.separator + "out.png";
+        RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
+         when(mockrclp.runCommandLineProcess("dm2",srcFile,mrcTmpFile))
+                .thenReturn("hello");
+        when(mockrclp.runCommandLineProcess("mrc","-p",mrcTmpFile,pngTmpFile))
+                .thenReturn("hello2");
+        when(mockrclp.runCommandLineProcess("convert",pngTmpFile,"-resize",
+                "12%","-crop","256x256","-set","filename:tile",
+                "\"r%[fx:page.y/256]_c%[fx:page.x/256]\"","+repage","+adjoin",
+                destTmpDir + File.separator + "0-%[filename:tile].png"))
+                .thenReturn("hello3");
+                
+        d.setRunCommandLineProcess(mockrclp);
+        
+        try{
+            d.convert(srcFile, destDir);
+            
+        }catch(Exception ex){
+            assertTrue(ex.getMessage().equals("Unable to rename "
+                    + destTmpDir + " to " + destDir));
+        }
+        File destDirFile = new File(destDir);
+        assertTrue(destDirFile.isDirectory());
+        
+    }
+    
+    //test successful convert
+    @Test
+    public void testConvertSuccessEqualizeEnabled() throws Exception{
+              File tempDir = _testFolder.newFolder();
+        
+        Properties props = new Properties();
+        props.setProperty(App.INPUT_IMAGE_ARG, "foo");
+        props.setProperty(App.MRC2TIF_ARG, "mrc");
+        props.setProperty(App.DM2MRC_ARG, "dm2");
+        props.setProperty(App.CONVERT_ARG, "convert");
+        props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "8");
+        props.setProperty(App.TILE_SIZE_ARG, "256");
+        props.setProperty(App.CONVERT_EQUALIZE_ARG, "true");
         
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
         String srcFile = tempDir.getAbsolutePath() + File.separator 
