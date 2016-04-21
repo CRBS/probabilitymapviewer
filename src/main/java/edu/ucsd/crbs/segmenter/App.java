@@ -32,6 +32,7 @@ import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import joptsimple.OptionException;
@@ -131,6 +132,12 @@ public class App {
             }
         });
 
+        //log everything to all handlers
+        _log.getParent().setLevel(Level.ALL);
+        for (Handler h : _log.getParent().getHandlers()){
+            h.setLevel(Level.ALL);
+        }
+        
         final String tempDirectory = System.getProperty("java.io.tmpdir")
                 + File.separator + UUID.randomUUID().toString();
 
