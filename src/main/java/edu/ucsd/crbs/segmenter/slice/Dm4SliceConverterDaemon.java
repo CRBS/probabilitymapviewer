@@ -102,64 +102,56 @@ public class Dm4SliceConverterDaemon implements SliceConverterDaemon {
     }
 
     /**
-     * Converts second youngest {@link Dm4SliceFile#DM4_EXTENSION} file found in
-     * input directory via {@link SliceConverter} set in constructor writing
-     * output to directory under {@link #getDestinationDirectory()}
-     *
-     * Should be run under a new thread. This method loops indefinitely until
+     * Invokes {@link #runOneIteration()} in loop indefinitely until
      * {@link #shutdown()} is invoked.
+     * Should be run under a new thread.
      */
     @Override
     public void run() {
         _log.log(Level.INFO, " Dm4SliceConverterDaemon, entering run loop...");
-        while (_shutdown == false) {
-            File dm4File = getSecondYoungestDm4File();
-            
-            if (dm4File == null) {
-                threadSleep();
-                continue;
-            }
-            
-            if (_secondYoungestFile != null) {
-                if (dm4File.getName().equals(_secondYoungestFile.getName())) {
-                    _log.log(Level.INFO, "Dm4 file {0} has same name as"
-                            + " second youngest file {1}, doing nothing",
-                            new Object[]{dm4File.getName(),
-                                _secondYoungestFile.getName()
-                            });
-                    threadSleep();
-                    continue;
-                }
-                if (dm4File.lastModified()
-                        < _secondYoungestFile.lastModified()) {
-                    _log.log(Level.INFO, "Dm4 file {0} ({1}) is younger then"
-                            + " second youngest file {2} ({3}),"
-                            + " doing nothing",
-                            new Object[]{dm4File.getName(),
-                                dm4File.lastModified(),
-                                _secondYoungestFile.getName(),
-                                _secondYoungestFile.lastModified()
-                            });
-                    threadSleep();
-                    continue;
-                }
-            }
-            _secondYoungestFile = dm4File;
-            _log.log(Level.INFO, "Found file to convert: "
-                    + dm4File.getAbsolutePath());
-
-            String dest = genDestinationPath(dm4File);
-            try {
-                _sliceConverter.convert(dm4File.getAbsolutePath(), dest);
-            } catch (Exception ex) {
-                _log.log(Level.WARNING, "Caught exception attempting to "
-                        + "convert file: " + dm4File.getAbsolutePath()
-                        + " to " + dest + " : " + ex.getMessage());
-            }
-
+        do {
+            runOneIteration();
             threadSleep();
-        }
+        } while (_shutdown == false);
+
         _log.log(Level.INFO, "Shutting down...");
+    }
+
+    /**
+     * Converts second youngest {@link Dm4SliceFile#DM4_EXTENSION} file found in
+     * input directory via {@link SliceConverter} set in constructor writing
+     * output to directory under {@link #getDestinationDirectory()}
+     */
+    protected void runOneIteration() {
+        File dm4File = getSecondYoungestDm4File();
+
+        if (dm4File == null) {
+            _log.log(Level.FINEST, "No work to do");
+            return;
+        }
+
+        if (_secondYoungestFile != null) {
+            if (dm4File.getName().equals(_secondYoungestFile.getName())) {
+                _log.log(Level.INFO, "Dm4 file {0} has same name as"
+                        + " second youngest file {1}, doing nothing",
+                        new Object[]{dm4File.getName(),
+                            _secondYoungestFile.getName()
+                        });
+                return;
+            }
+        }
+        _secondYoungestFile = dm4File;
+        _log.log(Level.INFO, "Found file to convert: {0}",
+                 dm4File.getAbsolutePath());
+
+        String dest = genDestinationPath(dm4File);
+        try {
+            _sliceConverter.convert(dm4File.getAbsolutePath(), dest);
+        } catch (Exception ex) {
+            _log.log(Level.WARNING, "Caught exception attempting to "
+                    + "convert file: " + dm4File.getAbsolutePath()
+                    + " to " + dest + " : " + ex.getMessage());
+        }
     }
 
     /**
@@ -184,10 +176,14 @@ public class Dm4SliceConverterDaemon implements SliceConverterDaemon {
      * {@link #getDestinationDirectory() } / {@link  SliceDir#SLICE_PREFIX} /
      * <b>dm4File</b> {@link File#getName()}
      *
-     * @param dm4File
-     * @return
+     * @param dm4File input dm4 file.
+     * @return string path for destination or null if <b>dm4File</b> is null
      */
     protected String genDestinationPath(File dm4File) {
+        if (dm4File == null) {
+            return null;
+        }
+
         Dm4SliceFile sliceFile = new Dm4SliceFile(dm4File.getAbsolutePath());
         return _destDir + File.separator + SliceDir.SLICE_PREFIX
                 + sliceFile.getSliceName();
@@ -202,7 +198,6 @@ public class Dm4SliceConverterDaemon implements SliceConverterDaemon {
      */
     protected File getSecondYoungestDm4File() {
 
-        long youngestAge = -1;
         File youngestFile = null;
         File secondYoungest = null;
 
@@ -212,24 +207,33 @@ public class Dm4SliceConverterDaemon implements SliceConverterDaemon {
                 continue;
             }
             _log.log(Level.FINEST, "Found dm4 file: " + files[i].getName());
-            if (youngestAge == -1) {
-                youngestAge = files[i].lastModified();
+            if (youngestFile == null) {
                 youngestFile = files[i];
                 _log.log(Level.FINEST, "Youngest: "
                         + youngestFile.getName());
                 continue;
             }
-            if (files[i].lastModified() > youngestAge) {
-                _log.log(Level.FINE, "New 2nd youngest: "
-                        + youngestFile.getName() + " replaces: "
-                        + secondYoungest.getName());
-
+            if (files[i].lastModified() > youngestFile.lastModified()) {
+                if (secondYoungest != null) {
+                    _log.log(Level.FINE, "New 2nd youngest: "
+                            + youngestFile.getName() + " replaces: "
+                            + secondYoungest.getName());
+                } else {
+                    _log.log(Level.FINE, "2nd file encountered so its "
+                            + "second youngest: " + youngestFile.getName());
+                }
                 secondYoungest = youngestFile;
-                youngestAge = files[i].lastModified();
                 youngestFile = files[i];
+
+            } else if (secondYoungest == null
+                    || files[i].lastModified() > secondYoungest.lastModified()) {
+                secondYoungest = files[i];
             }
         }
-        _log.log(Level.FINE, "2nd youngest: " + secondYoungest.getName());
+
+        if (secondYoungest != null) {
+            _log.log(Level.FINE, "2nd youngest: " + secondYoungest.getName());
+        }
         return secondYoungest;
     }
 }
