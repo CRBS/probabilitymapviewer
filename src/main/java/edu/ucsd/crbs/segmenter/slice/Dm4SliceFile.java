@@ -6,8 +6,6 @@
 package edu.ucsd.crbs.segmenter.slice;
 
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Represents a dm4 slice which has expected naming format of:
@@ -19,10 +17,7 @@ import java.util.logging.Logger;
  * @author churas
  */
 public class Dm4SliceFile {
-
-    private static final Logger _log
-            = Logger.getLogger(Dm4SliceFile.class.getName());
-
+  
     public static final String DM4_EXTENSION = ".dm4";
     
     private String _path;
@@ -53,5 +48,4 @@ public class Dm4SliceFile {
         return new File(_path).getName()
                 .replaceAll("\\" + DM4_EXTENSION + "$", "");
     }
-
 }
