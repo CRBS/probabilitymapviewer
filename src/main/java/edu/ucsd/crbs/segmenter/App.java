@@ -551,6 +551,8 @@ public class App {
         }
         
         if (optionSet.has(CONVERT_EQUALIZE_ARG)){
+            _log.log(Level.CONFIG, "Setting "+ CONVERT_EQUALIZE_ARG 
+                    + " to true");
             props.setProperty(CONVERT_EQUALIZE_ARG, "true");
         } else {
             props.setProperty(CONVERT_EQUALIZE_ARG, "false");
