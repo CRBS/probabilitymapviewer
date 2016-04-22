@@ -396,7 +396,7 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
                 numCoresInUseElement.innerHTML = myres.numcoresinuse;
                 
                 if (myres.latestslice != ""){ 
-                    if (currentSliceElement.innerHTML != myres.latestslice){
+                    if (currentSliceElement.innerHTML != myres.trunclatestslice){
                       updateToSlice(myres.latestslice);
                       currentSliceElement.style.fontWeight='bold';
                       sliceAquireTimeElement.innerHTML = -@@REFRESH_INTERVAL_SECS@@;
