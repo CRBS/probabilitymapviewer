@@ -68,7 +68,7 @@ public class Dm4ToSliceConverter implements SliceConverter {
                     + " property is null");
         }
         
-        _addEqualize = Boolean.getBoolean(
+        _addEqualize = Boolean.parseBoolean(
                 _props.getProperty(App.CONVERT_EQUALIZE_ARG,
                 "false"));
 
