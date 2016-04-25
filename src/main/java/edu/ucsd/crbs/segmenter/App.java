@@ -415,7 +415,7 @@ public class App {
 
                     while (!tilesToProcess.isEmpty() && size < desiredLoad) {
                         _log.log(Level.INFO, "Submitting task");
-                        futureTaskList.add(es.submit(tilesToProcess.removeFirst()));
+                        futureTaskList.add(es.submit(tilesToProcess.removeLast()));
                         size++;
                     }
                 }
