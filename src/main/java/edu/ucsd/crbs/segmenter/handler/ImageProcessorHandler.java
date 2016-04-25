@@ -109,7 +109,7 @@ public class ImageProcessorHandler extends AbstractHandler {
         //only process images with non negative positions
         if (imageToProcess.matches("^[0-9]+-r[0-9]+_c[0-9]+\\.png$")){
             if (App.latestSlice != null && !App.latestSlice.equals("")){
-                _log.log(Level.INFO,servletRequest.getRequestURI() 
+                _log.log(Level.FINE,servletRequest.getRequestURI() 
                         + " & Latest slice is: " + App.latestSlice);
                 int slicePos = servletRequest.getRequestURI().lastIndexOf(App.latestSlice);
                 imageToProcess = servletRequest.getRequestURI().substring(slicePos);
