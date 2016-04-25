@@ -22,9 +22,14 @@ public class SliceDirLastModifiedComparator implements Comparator {
      * @return -1 if <b>o1</b> {@link SliceDir#getLastModified() } is null
      * or lower 
      * then <b>o2</b> 0 if equal or both null and 1 if <b>o1</b> is larger
+     * If {@link SliceDir#getLastModified()} matches then they are sorted by
+     * via {@link String#compareTo(java.lang.String)} using 
+     * {@link SliceDir#getFullPath()} 
+     * @throws ClassCastException if either <b>o1</b> or <b>o2</b> is not of
+     * type {@link SliceDir}
      */
     @Override
-    public int compare(Object o1, Object o2) {
+    public int compare(Object o1, Object o2) throws ClassCastException{
         SliceDir one = (SliceDir)o1;
         SliceDir two = (SliceDir)o2;
         
@@ -44,7 +49,14 @@ public class SliceDirLastModifiedComparator implements Comparator {
             return -1;
         }
         if (one.getLastModified() == two.getLastModified()){
-            return 0;
+            int val = one.getFullPath().compareTo(two.getFullPath());
+            if (val < 0){
+                return -1;
+            }
+            if (val == 0){
+                return 0;
+            }
+            return 1;
         }
         return 1;
     }    
