@@ -35,11 +35,14 @@ public class Dm4SliceMonitorImpl implements SliceMonitor{
     private Comparator _comparator;
     private String _inputImage = null;
     /**
-     * Constructor
-     * @param props 
+     * Constructor that runs the <b>scd</b> passed in under a new thread in
+     * {@link Thread#setDaemon(boolean) } set to true.  In addition, code
+     * extracts path from {@link SliceConverterDaemon#getDestinationDirectory()} 
+     * from <b>scd</b> passed in which is used in {@link #getSlices()} when 
+     * looking for new slices
      * @param scd 
      */
-    public Dm4SliceMonitorImpl(Properties props, SliceConverterDaemon scd) {
+    public Dm4SliceMonitorImpl(SliceConverterDaemon scd) {
         _comparator = new SliceDirLastModifiedComparator();
         _inputImage = scd.getDestinationDirectory();
         _daemon = new Thread(scd);
@@ -50,7 +53,18 @@ public class Dm4SliceMonitorImpl implements SliceMonitor{
     }
 
     
-    
+    /**
+     * Examines destination directory obtained from 
+     * {@link SliceConverterDaemon#getDestinationDirectory()} set in constructor
+     * for directories that start with {@link SliceDir#SLICE_PREFIX} and do
+     * <b>NOT</b> end with {@link Dm4ToSliceConverter#TMP_SUFFIX} suffix to get
+     * a list of slices.
+     * @return empty list if no directories match otherwise list of 
+     * {@link SliceDir} objects sorted by age with oldest at start of list.
+     * @throws NullPointerException if destination directory to search is 
+     * <code>null</code>
+     * @throws Exception if there is an IO error examining the directory
+     */
     @Override
     public List<SliceDir> getSlices() throws Exception {
         _log.log(Level.INFO,"Request to getSlices()");
@@ -76,10 +90,14 @@ public class Dm4SliceMonitorImpl implements SliceMonitor{
                 sliceList.add(new SliceDir(sliceDirs[i].getAbsolutePath()));
             }
         }
-        
         return new ArrayList<SliceDir>(sliceList);
     }
 
+    /**
+     * Gets information about collection
+     * @return always returns <code>null</b>
+     * @throws Exception 
+     */
     @Override
     public Properties getCollectionInformation() throws Exception {
         _log.log(Level.INFO,"Request to get collection information");
