@@ -367,7 +367,7 @@ public class App {
                     .equals("true")) {
                 _log.log(Level.INFO, "Creating Dm4 slice monitor for "
                         + "collection mode");
-                sliceMonitor = new Dm4SliceMonitorImpl(props,
+                sliceMonitor = new Dm4SliceMonitorImpl(
                         new Dm4SliceConverterDaemon(props,
                                 new Dm4ToSliceConverter(props)));
             }
