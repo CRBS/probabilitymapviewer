@@ -1,5 +1,6 @@
 package edu.ucsd.crbs.segmenter;
 
+import edu.ucsd.crbs.segmenter.handler.ImageProcessorHandler;
 import edu.ucsd.crbs.segmenter.html.HtmlPageGenerator;
 import edu.ucsd.crbs.segmenter.html.SingleImageIndexHtmlPageGenerator;
 import edu.ucsd.crbs.segmenter.slice.Dm4SliceConverterDaemon;
@@ -399,7 +400,7 @@ public class App {
                 //if found update status.latestslice to this slice
                 if (iterationCounter % collectionDelay == 0) {
                     //_log.log(Level.INFO,"Checking for new slices");
-                    updateSlices(sliceMonitor, cubeProgressBar);
+                    updateSlices(sws, sliceMonitor, cubeProgressBar);
                 }
 
                 if (totalProcessedCount != prevTotalProcessedCount) {
@@ -454,7 +455,8 @@ public class App {
         }
     }
 
-    public static void updateSlices(SliceMonitor sliceMonitor,
+    public static void updateSlices(SegmenterWebServer sws, 
+            SliceMonitor sliceMonitor,
             CubeProgressBar cubeProgressBar) throws Exception {
         if (sliceMonitor == null) {
             return;
@@ -470,11 +472,22 @@ public class App {
         if (props != null) {
             App.collectionName = props.getProperty("name", "");
         }
+        
         SliceDir latestSlice = slices.get(slices.size() - 1);
+        //see if the slice changed if so update the App.### values
+        //so all the handlers know about the change.
         if (!latestSlice.getSliceName().equals(App.latestSlice)) {
+            _log.log(Level.FINE, "New image " + latestSlice.getSliceName() +
+                    " replacing " + App.latestSlice);
             App.latestSlice = latestSlice.getSliceName();
             App.tilesToProcess.clear();
             App.slicesCollected = Integer.toString(slices.size());
+            List<ImageProcessorHandler> iphlist = sws.getImageProcHandlers();
+            if (iphlist != null){
+                for (ImageProcessorHandler iph : iphlist){
+                    iph.clearProcessedImages();
+                }
+            }
             if (cubeProgressBar != null) {
                 App.cubeImage = cubeProgressBar.getCubeImage(slices.size());
             }
