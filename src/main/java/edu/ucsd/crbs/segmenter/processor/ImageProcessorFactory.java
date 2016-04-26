@@ -32,6 +32,7 @@ package edu.ucsd.crbs.segmenter.processor;
 
 import edu.ucsd.crbs.segmenter.App;
 import edu.ucsd.crbs.segmenter.layer.CustomLayer;
+import edu.ucsd.crbs.segmenter.processor.chm.ExternalImageProcessor;
 import edu.ucsd.crbs.segmenter.processor.chm.SGECHMImageProcessor;
 import edu.ucsd.crbs.segmenter.processor.chm.SGEIlastikImageProcessor;
 import edu.ucsd.crbs.segmenter.processor.chm.SimpleCHMImageProcessor;
@@ -72,7 +73,20 @@ public class ImageProcessorFactory {
             }
             return getSimpleIlastikImageProcessor(workingDir,layer);
         }
+        else if (layer.getBinary().equalsIgnoreCase("external")){
+            return getExternalImageProcessor(workingDir, layer);
+        }
         return null;
+    }
+    
+    private ImageProcessor getExternalImageProcessor(final String workingDir,
+            CustomLayer layer){
+        return new ExternalImageProcessor(
+                _props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
+                   workingDir,layer.getTrainedModelDir(),layer.getConvertColor(),
+                _props.getProperty(App.CONVERT_ARG),
+                   _props.getProperty(App.TILE_SIZE_ARG),
+                getAnalyzingTile(layer));
     }
     
     private ImageProcessor getSGECHMImageProcessor(final String workingDir,
