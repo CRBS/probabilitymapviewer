@@ -231,13 +231,24 @@ public class App {
                             .withRequiredArg().ofType(String.class)
                             .defaultsTo("mrc2tif");
 
-                    accepts(CUSTOM_ARG, "Custom Segmentation layer (comma "
+                    accepts(CUSTOM_ARG, "Custom Segmentation layer\n(comma "
                             + "delimited)\n"
                             + " *trained model - path to chm trained model\n"
+                            + "   for chm or path to script for external mode\n"
                             + " *name - Name to display in overlay menu\n"
                             + " *color - can be one of the following: red,green"
                             + ",blue,yellow,magenta,cyan\n"
-                            + " *binary - Set to 'chm' for now\n")
+                            + " *binary - Set to 'chm' to run chm OR\n"
+                            + "           'external' to run script set\n"
+                            + "           in *trained model.  This\n script"
+                            + "           needs to accept 2 arguments\n"
+                            + "           first is input png file and\n"
+                            + "           second is path to png file\n"
+                            + "           where script should write\n"
+                            + "           output.  Output image\n"
+                            + "           should be 8-bit grayscale\n"
+                            + "           image where 0 is no segmentation\n"
+                            + "           and 255 will be shown on UI\n")
                             .withRequiredArg().ofType(String.class)
                             .describedAs("trained model,name,color,binary");
                     accepts(ILASTIK_ARG, "Sets path to Ilastik directory ie "
