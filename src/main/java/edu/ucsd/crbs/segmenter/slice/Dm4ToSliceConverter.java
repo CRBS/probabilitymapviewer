@@ -33,6 +33,7 @@ public class Dm4ToSliceConverter implements SliceConverter {
     private String _dm2mrc_cmd;
     private String _mrc2tif_cmd;
     private String _convert_cmd;
+    private String _clip_cmd;
     private int _downsample_factor;
     private RunCommandLineProcess _runCommandLineProcess;
     private String _tileSizeArgForConvert;
@@ -65,6 +66,12 @@ public class Dm4ToSliceConverter implements SliceConverter {
         _convert_cmd = _props.getProperty(App.CONVERT_ARG);
         if (_convert_cmd == null) {
             throw new NullPointerException(App.CONVERT_ARG
+                    + " property is null");
+        }
+        
+        _clip_cmd = _props.getProperty(App.CLIP_ARG);
+        if (_clip_cmd == null) {
+            throw new NullPointerException(App.CLIP_ARG
                     + " property is null");
         }
         
@@ -189,6 +196,24 @@ public class Dm4ToSliceConverter implements SliceConverter {
         return destMrc;
     }
 
+    private String run_ClipStatsToGetMinMax(final String sourcePath) 
+            throws Exception{
+        
+        long startTime = System.currentTimeMillis();
+
+        String result
+                = _runCommandLineProcess.runCommandLineProcess(_clip_cmd,
+                        "stats", sourcePath);
+        
+        long duration = System.currentTimeMillis() - startTime;
+
+        _log.log(Level.FINE, "clip stats output: {0}", result);
+
+        _log.log(Level.INFO, "running clip stats took {0} seconds", 
+                duration / 1000);
+        return null;
+    }
+    
     /**
      * Converts mrc to png file using mrc2tif
      *
@@ -199,7 +224,9 @@ public class Dm4ToSliceConverter implements SliceConverter {
      */
     private String run_mrc2tif(final String sourcePath, final String destTmpDir)
             throws Exception {
-
+        
+        run_ClipStatsToGetMinMax(sourcePath);
+        
         long startTime = System.currentTimeMillis();
 
         String destPng = destTmpDir + File.separator + "out.png";

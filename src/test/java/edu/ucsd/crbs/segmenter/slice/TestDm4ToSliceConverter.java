@@ -20,17 +20,15 @@ import org.junit.Rule;
 import org.junit.rules.TemporaryFolder;
 import static org.mockito.Mockito.*;
 
-
 /**
  *
  * @author churas
  */
 public class TestDm4ToSliceConverter {
 
-    
     @Rule
     public TemporaryFolder _testFolder = new TemporaryFolder();
-    
+
     public TestDm4ToSliceConverter() {
     }
 
@@ -106,54 +104,73 @@ public class TestDm4ToSliceConverter {
                     + " property is null"));
         }
     }
-    
+
+    @Test
+    public void testConstructorClipargNull() {
+        try {
+            Properties props = new Properties();
+            props.setProperty(App.INPUT_IMAGE_ARG, "foo");
+            props.setProperty(App.MRC2TIF_ARG, "mrc");
+            props.setProperty(App.DM2MRC_ARG, "dm2");
+            props.setProperty(App.CONVERT_ARG, "convert");
+            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+            fail("Expected exception");
+        } catch (NullPointerException npe) {
+            assertTrue(npe.getMessage().equals(App.CLIP_ARG
+                    + " property is null"));
+        }
+    }
+
     @Test
     public void testConstructorConvertEqualizeArgNull() {
-            Properties props = new Properties();
-            props.setProperty(App.INPUT_IMAGE_ARG, "foo");
-            props.setProperty(App.MRC2TIF_ARG, "mrc");
-            props.setProperty(App.DM2MRC_ARG, "dm2");
-            props.setProperty(App.CONVERT_ARG, "convert");
-            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Properties props = new Properties();
+        props.setProperty(App.INPUT_IMAGE_ARG, "foo");
+        props.setProperty(App.MRC2TIF_ARG, "mrc");
+        props.setProperty(App.DM2MRC_ARG, "dm2");
+        props.setProperty(App.CONVERT_ARG, "convert");
+        props.setProperty(App.CLIP_ARG, "clip");
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
     }
-    
+
     @Test
     public void testConstructorConvertEqualizeArgFalse() {
-            Properties props = new Properties();
-            props.setProperty(App.INPUT_IMAGE_ARG, "foo");
-            props.setProperty(App.MRC2TIF_ARG, "mrc");
-            props.setProperty(App.DM2MRC_ARG, "dm2");
-            props.setProperty(App.CONVERT_ARG, "convert");
-            props.setProperty(App.CONVERT_EQUALIZE_ARG, "true");
-            
-            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Properties props = new Properties();
+        props.setProperty(App.INPUT_IMAGE_ARG, "foo");
+        props.setProperty(App.MRC2TIF_ARG, "mrc");
+        props.setProperty(App.DM2MRC_ARG, "dm2");
+        props.setProperty(App.CONVERT_ARG, "convert");
+        props.setProperty(App.CONVERT_EQUALIZE_ARG, "true");
+        props.setProperty(App.CLIP_ARG, "clip");
+
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
     }
-    
+
     @Test
     public void testConstructorConvertEqualizeArgTrue() {
-            Properties props = new Properties();
-            props.setProperty(App.INPUT_IMAGE_ARG, "foo");
-            props.setProperty(App.MRC2TIF_ARG, "mrc");
-            props.setProperty(App.DM2MRC_ARG, "dm2");
-            props.setProperty(App.CONVERT_ARG, "convert");
-            props.setProperty(App.CONVERT_EQUALIZE_ARG, "true");
-            
-            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Properties props = new Properties();
+        props.setProperty(App.INPUT_IMAGE_ARG, "foo");
+        props.setProperty(App.MRC2TIF_ARG, "mrc");
+        props.setProperty(App.DM2MRC_ARG, "dm2");
+        props.setProperty(App.CONVERT_ARG, "convert");
+        props.setProperty(App.CONVERT_EQUALIZE_ARG, "true");
+        props.setProperty(App.CLIP_ARG, "clip");
+
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
     }
 
-        
     @Test
     public void testConstructorConvertEqualizeArgNotBoolean() {
-            Properties props = new Properties();
-            props.setProperty(App.INPUT_IMAGE_ARG, "foo");
-            props.setProperty(App.MRC2TIF_ARG, "mrc");
-            props.setProperty(App.DM2MRC_ARG, "dm2");
-            props.setProperty(App.CONVERT_ARG, "convert");
-            props.setProperty(App.CONVERT_EQUALIZE_ARG, "blah");
-            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Properties props = new Properties();
+        props.setProperty(App.INPUT_IMAGE_ARG, "foo");
+        props.setProperty(App.MRC2TIF_ARG, "mrc");
+        props.setProperty(App.DM2MRC_ARG, "dm2");
+        props.setProperty(App.CONVERT_ARG, "convert");
+        props.setProperty(App.CONVERT_EQUALIZE_ARG, "blah");
+        props.setProperty(App.CLIP_ARG, "clip");
+
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
     }
 
-    
     @Test
     public void testConstructorNodownsampleargNull() {
         Properties props = new Properties();
@@ -161,6 +178,8 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.MRC2TIF_ARG, "mrc");
         props.setProperty(App.DM2MRC_ARG, "dm2");
         props.setProperty(App.CONVERT_ARG, "convert");
+        props.setProperty(App.CLIP_ARG, "clip");
+
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
         assertTrue(d.getDownsampleFactor() == 1);
     }
@@ -175,19 +194,20 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.DM2MRC_ARG, "dm2");
         props.setProperty(App.CONVERT_ARG, "convert");
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "b");
-        
+        props.setProperty(App.CLIP_ARG, "clip");
+
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
-        
+
         assertTrue(d.getDownsampleFactor() == 1);
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "-4");
-        
+
         d = new Dm4ToSliceConverter(props);
         assertTrue(d.getDownsampleFactor() == 1);
-        
+
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "3");
         d = new Dm4ToSliceConverter(props);
         assertTrue(d.getDownsampleFactor() == 3);
-        
+
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "0");
         d = new Dm4ToSliceConverter(props);
         assertTrue(d.getDownsampleFactor() == 1);
@@ -195,166 +215,173 @@ public class TestDm4ToSliceConverter {
 
     //test convert sourcepath is not a file
     @Test
-    public void testConvertSourcePathNotFile() throws Exception{
-        
+    public void testConvertSourcePathNotFile() throws Exception {
+
         File tempDir = _testFolder.newFolder();
-        
+
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, "foo");
         props.setProperty(App.MRC2TIF_ARG, "mrc");
         props.setProperty(App.DM2MRC_ARG, "dm2");
         props.setProperty(App.CONVERT_ARG, "convert");
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "3");
-        
+        props.setProperty(App.CLIP_ARG, "clip");
+
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
-        String srcFile = tempDir.getAbsolutePath() + File.separator 
-                    + "doesnotexist.dm4";
-        try{
+        String srcFile = tempDir.getAbsolutePath() + File.separator
+                + "doesnotexist.dm4";
+        try {
             d.convert(srcFile, tempDir.getAbsolutePath());
             fail("Expected exception");
-        }catch(Exception ex){
+        } catch (Exception ex) {
             assertTrue(ex.getMessage().equals("Source file " + srcFile
                     + " is not a file"));
         }
-        
+
     }
-    
+
     //test convert unable to create temp directory
     @Test
-    public void testConvertUnableToCreateTmpDir() throws Exception{
+    public void testConvertUnableToCreateTmpDir() throws Exception {
         File tempDir = _testFolder.newFolder();
-        
+
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, "foo");
         props.setProperty(App.MRC2TIF_ARG, "mrc");
         props.setProperty(App.DM2MRC_ARG, "dm2");
         props.setProperty(App.CONVERT_ARG, "convert");
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "3");
-        
+        props.setProperty(App.CLIP_ARG, "clip");
+
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
-        String srcFile = tempDir.getAbsolutePath() + File.separator 
-                    + "input.dm4";
+        String srcFile = tempDir.getAbsolutePath() + File.separator
+                + "input.dm4";
         File inputFile = new File(srcFile);
         FileWriter fw = new FileWriter(inputFile);
         fw.write("blah blah");
         fw.flush();
         fw.close();
-        
+
         String destDir = tempDir.getAbsolutePath() + File.separator
                 + "foo";
         File destTmpDir = new File(destDir + Dm4ToSliceConverter.TMP_SUFFIX);
         assertTrue(destTmpDir.mkdirs());
-        
-        try{
+
+        try {
             d.convert(srcFile, destDir);
             fail("Expected exception");
-        }catch(Exception ex){
+        } catch (Exception ex) {
             assertTrue(ex.getMessage().equals("Unable to create "
-                + destTmpDir.getAbsolutePath() + " tmp directory"));
+                    + destTmpDir.getAbsolutePath() + " tmp directory"));
         }
     }
-    
+
     //test convert dm2mrc has non zero exit code
     @Test
-    public void testConvertDm2mrcNonZeroExit() throws Exception{
+    public void testConvertDm2mrcNonZeroExit() throws Exception {
         File tempDir = _testFolder.newFolder();
-        
+
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, "foo");
         props.setProperty(App.MRC2TIF_ARG, "mrc");
         props.setProperty(App.DM2MRC_ARG, "dm2");
         props.setProperty(App.CONVERT_ARG, "convert");
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "3");
-        
+        props.setProperty(App.CLIP_ARG, "clip");
+
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
-        String srcFile = tempDir.getAbsolutePath() + File.separator 
-                    + "input.dm4";
+        String srcFile = tempDir.getAbsolutePath() + File.separator
+                + "input.dm4";
         File inputFile = new File(srcFile);
         FileWriter fw = new FileWriter(inputFile);
         fw.write("blah blah");
         fw.flush();
         fw.close();
-        
+
         String destDir = tempDir.getAbsolutePath() + File.separator
                 + "foo";
-        
+
         String destTmpFile = destDir + Dm4ToSliceConverter.TMP_SUFFIX
                 + File.separator + "out.mrc";
         RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
-        when(mockrclp.runCommandLineProcess("dm2",srcFile,destTmpFile))
+        when(mockrclp.runCommandLineProcess("dm2", srcFile, destTmpFile))
                 .thenThrow(new Exception("dm2failed"));
         d.setRunCommandLineProcess(mockrclp);
-        try{
+        try {
             d.convert(srcFile, destDir);
             fail("Expected exception");
-        }catch(Exception ex){
+        } catch (Exception ex) {
             assertTrue(ex.getMessage().equals("dm2failed"));
         }
     }
+
     //test convert mrc2tif has non zero exit code
+
     @Test
     public void testConvertMrc2tifNonZeroExit() throws Exception {
         File tempDir = _testFolder.newFolder();
-        
+
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, "foo");
         props.setProperty(App.MRC2TIF_ARG, "mrc");
         props.setProperty(App.DM2MRC_ARG, "dm2");
         props.setProperty(App.CONVERT_ARG, "convert");
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "3");
-        
+        props.setProperty(App.CLIP_ARG, "clip");
+
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
-        String srcFile = tempDir.getAbsolutePath() + File.separator 
-                    + "input.dm4";
+        String srcFile = tempDir.getAbsolutePath() + File.separator
+                + "input.dm4";
         File inputFile = new File(srcFile);
         FileWriter fw = new FileWriter(inputFile);
         fw.write("blah blah");
         fw.flush();
         fw.close();
-        
+
         String destDir = tempDir.getAbsolutePath() + File.separator
                 + "foo";
-        
+
         String mrcTmpFile = destDir + Dm4ToSliceConverter.TMP_SUFFIX
                 + File.separator + "out.mrc";
         String pngTmpFile = destDir + Dm4ToSliceConverter.TMP_SUFFIX
                 + File.separator + "out.png";
         RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
-         when(mockrclp.runCommandLineProcess("dm2",srcFile,mrcTmpFile))
+        when(mockrclp.runCommandLineProcess("dm2", srcFile, mrcTmpFile))
                 .thenReturn("hello");
-        when(mockrclp.runCommandLineProcess("mrc","-p",mrcTmpFile,pngTmpFile))
+        when(mockrclp.runCommandLineProcess("mrc", "-p", mrcTmpFile, pngTmpFile))
                 .thenThrow(new Exception("mrcfailed"));
         d.setRunCommandLineProcess(mockrclp);
-        
-        try{
+
+        try {
             d.convert(srcFile, destDir);
             fail("Expected exception");
-        }catch(Exception ex){
+        } catch (Exception ex) {
             assertTrue(ex.getMessage().equals("mrcfailed"));
         }
     }
-    
+
     //test convert convert has non zero exit code
     @Test
     public void testConvertConvertNonZeroExit() throws Exception {
         File tempDir = _testFolder.newFolder();
-        
+
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, "foo");
         props.setProperty(App.MRC2TIF_ARG, "mrc");
         props.setProperty(App.DM2MRC_ARG, "dm2");
         props.setProperty(App.CONVERT_ARG, "convert");
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "1");
-        
+        props.setProperty(App.CLIP_ARG, "clip");
+
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
-        String srcFile = tempDir.getAbsolutePath() + File.separator 
-                    + "input.dm4";
+        String srcFile = tempDir.getAbsolutePath() + File.separator
+                + "input.dm4";
         File inputFile = new File(srcFile);
         FileWriter fw = new FileWriter(inputFile);
         fw.write("blah blah");
         fw.flush();
         fw.close();
-        
+
         String destDir = tempDir.getAbsolutePath() + File.separator
                 + "foo";
         String destTmpDir = destDir + Dm4ToSliceConverter.TMP_SUFFIX;
@@ -363,48 +390,51 @@ public class TestDm4ToSliceConverter {
         String pngTmpFile = destTmpDir
                 + File.separator + "out.png";
         RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
-         when(mockrclp.runCommandLineProcess("dm2",srcFile,mrcTmpFile))
+        when(mockrclp.runCommandLineProcess("dm2", srcFile, mrcTmpFile))
                 .thenReturn("hello");
-        when(mockrclp.runCommandLineProcess("mrc","-p",mrcTmpFile,pngTmpFile))
+        when(mockrclp.runCommandLineProcess("mrc", "-p", mrcTmpFile, pngTmpFile))
                 .thenReturn("hello2");
-        when(mockrclp.runCommandLineProcess("convert",pngTmpFile,"-resize",
-                "100%","-crop","128x128","-set","filename:tile",
-                "r%[fx:page.y/128]_c%[fx:page.x/128]","+repage","+adjoin",
+        when(mockrclp.runCommandLineProcess("convert", pngTmpFile, "-resize",
+                "100%", "-crop", "128x128", "-set", "filename:tile",
+                "r%[fx:page.y/128]_c%[fx:page.x/128]", "+repage", "+adjoin",
                 destTmpDir + File.separator + "0-%[filename:tile].png"))
                 .thenThrow(new Exception("convertfailed"));
-                
+
         d.setRunCommandLineProcess(mockrclp);
-        
-        try{
+
+        try {
             d.convert(srcFile, destDir);
-            
+
             fail("Expected exception");
-        }catch(Exception ex){
+        } catch (Exception ex) {
             assertTrue(ex.getMessage().equals("convertfailed"));
         }
     }
+
     //test convert directory rename fails
+
     @Test
     public void testConvertDirectoryRenameFailsAnd4xDownsample()
             throws Exception {
         File tempDir = _testFolder.newFolder();
-        
+
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, "foo");
         props.setProperty(App.MRC2TIF_ARG, "mrc");
         props.setProperty(App.DM2MRC_ARG, "dm2");
         props.setProperty(App.CONVERT_ARG, "convert");
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "4");
-        
+        props.setProperty(App.CLIP_ARG, "clip");
+
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
-        String srcFile = tempDir.getAbsolutePath() + File.separator 
-                    + "input.dm4";
+        String srcFile = tempDir.getAbsolutePath() + File.separator
+                + "input.dm4";
         File inputFile = new File(srcFile);
         FileWriter fw = new FileWriter(inputFile);
         fw.write("blah blah");
         fw.flush();
         fw.close();
-        
+
         String destDir = tempDir.getAbsolutePath() + File.separator
                 + "foo";
         File destDirFile = new File(destDir);
@@ -415,34 +445,34 @@ public class TestDm4ToSliceConverter {
         String pngTmpFile = destTmpDir
                 + File.separator + "out.png";
         RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
-         when(mockrclp.runCommandLineProcess("dm2",srcFile,mrcTmpFile))
+        when(mockrclp.runCommandLineProcess("dm2", srcFile, mrcTmpFile))
                 .thenReturn("hello");
-        when(mockrclp.runCommandLineProcess("mrc","-p",mrcTmpFile,pngTmpFile))
+        when(mockrclp.runCommandLineProcess("mrc", "-p", mrcTmpFile, pngTmpFile))
                 .thenReturn("hello2");
-        when(mockrclp.runCommandLineProcess("convert",pngTmpFile,"-resize",
-                "25%","-crop","128x128","-set","filename:tile",
-                "r%[fx:page.y/128]_c%[fx:page.x/128]","+repage","+adjoin",
+        when(mockrclp.runCommandLineProcess("convert", pngTmpFile, "-resize",
+                "25%", "-crop", "128x128", "-set", "filename:tile",
+                "r%[fx:page.y/128]_c%[fx:page.x/128]", "+repage", "+adjoin",
                 destTmpDir + File.separator + "0-%[filename:tile].png"))
                 .thenReturn("hello3");
-                
+
         d.setRunCommandLineProcess(mockrclp);
-        
-        try{
+
+        try {
             d.convert(srcFile, destDir);
-            
+
             fail("Expected exception");
-        }catch(Exception ex){
+        } catch (Exception ex) {
             assertTrue(ex.getMessage().equals("Unable to rename "
                     + destTmpDir + " to " + destDir));
         }
-        
+
     }
-    
+
     //test successful convert
     @Test
-    public void testConvertSuccess() throws Exception{
-              File tempDir = _testFolder.newFolder();
-        
+    public void testConvertSuccess() throws Exception {
+        File tempDir = _testFolder.newFolder();
+
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, "foo");
         props.setProperty(App.MRC2TIF_ARG, "mrc");
@@ -450,16 +480,17 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.CONVERT_ARG, "convert");
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "8");
         props.setProperty(App.TILE_SIZE_ARG, "256");
-        
+        props.setProperty(App.CLIP_ARG, "clip");
+
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
-        String srcFile = tempDir.getAbsolutePath() + File.separator 
-                    + "input.dm4";
+        String srcFile = tempDir.getAbsolutePath() + File.separator
+                + "input.dm4";
         File inputFile = new File(srcFile);
         FileWriter fw = new FileWriter(inputFile);
         fw.write("blah blah");
         fw.flush();
         fw.close();
-        
+
         String destDir = tempDir.getAbsolutePath() + File.separator
                 + "foo";
         String destTmpDir = destDir + Dm4ToSliceConverter.TMP_SUFFIX;
@@ -468,35 +499,35 @@ public class TestDm4ToSliceConverter {
         String pngTmpFile = destTmpDir
                 + File.separator + "out.png";
         RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
-         when(mockrclp.runCommandLineProcess("dm2",srcFile,mrcTmpFile))
+        when(mockrclp.runCommandLineProcess("dm2", srcFile, mrcTmpFile))
                 .thenReturn("hello");
-        when(mockrclp.runCommandLineProcess("mrc","-p",mrcTmpFile,pngTmpFile))
+        when(mockrclp.runCommandLineProcess("mrc", "-p", mrcTmpFile, pngTmpFile))
                 .thenReturn("hello2");
-        when(mockrclp.runCommandLineProcess("convert",pngTmpFile,"-resize",
-                "12%","-crop","256x256","-set","filename:tile",
-                "\"r%[fx:page.y/256]_c%[fx:page.x/256]\"","+repage","+adjoin",
+        when(mockrclp.runCommandLineProcess("convert", pngTmpFile, "-resize",
+                "12%", "-crop", "256x256", "-set", "filename:tile",
+                "\"r%[fx:page.y/256]_c%[fx:page.x/256]\"", "+repage", "+adjoin",
                 destTmpDir + File.separator + "0-%[filename:tile].png"))
                 .thenReturn("hello3");
-                
+
         d.setRunCommandLineProcess(mockrclp);
-        
-        try{
+
+        try {
             d.convert(srcFile, destDir);
-            
-        }catch(Exception ex){
+
+        } catch (Exception ex) {
             assertTrue(ex.getMessage().equals("Unable to rename "
                     + destTmpDir + " to " + destDir));
         }
         File destDirFile = new File(destDir);
         assertTrue(destDirFile.isDirectory());
-        
+
     }
-    
+
     //test successful convert
     @Test
-    public void testConvertSuccessEqualizeEnabled() throws Exception{
-              File tempDir = _testFolder.newFolder();
-        
+    public void testConvertSuccessEqualizeEnabled() throws Exception {
+        File tempDir = _testFolder.newFolder();
+
         Properties props = new Properties();
         props.setProperty(App.INPUT_IMAGE_ARG, "foo");
         props.setProperty(App.MRC2TIF_ARG, "mrc");
@@ -505,16 +536,17 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "8");
         props.setProperty(App.TILE_SIZE_ARG, "256");
         props.setProperty(App.CONVERT_EQUALIZE_ARG, "true");
-        
+        props.setProperty(App.CLIP_ARG, "clip");
+
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
-        String srcFile = tempDir.getAbsolutePath() + File.separator 
-                    + "input.dm4";
+        String srcFile = tempDir.getAbsolutePath() + File.separator
+                + "input.dm4";
         File inputFile = new File(srcFile);
         FileWriter fw = new FileWriter(inputFile);
         fw.write("blah blah");
         fw.flush();
         fw.close();
-        
+
         String destDir = tempDir.getAbsolutePath() + File.separator
                 + "foo";
         String destTmpDir = destDir + Dm4ToSliceConverter.TMP_SUFFIX;
@@ -523,27 +555,27 @@ public class TestDm4ToSliceConverter {
         String pngTmpFile = destTmpDir
                 + File.separator + "out.png";
         RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
-         when(mockrclp.runCommandLineProcess("dm2",srcFile,mrcTmpFile))
+        when(mockrclp.runCommandLineProcess("dm2", srcFile, mrcTmpFile))
                 .thenReturn("hello");
-        when(mockrclp.runCommandLineProcess("mrc","-p",mrcTmpFile,pngTmpFile))
+        when(mockrclp.runCommandLineProcess("mrc", "-p", mrcTmpFile, pngTmpFile))
                 .thenReturn("hello2");
-        when(mockrclp.runCommandLineProcess("convert",pngTmpFile,"-resize",
-                "12%","-equalize","-crop","256x256","-set","filename:tile",
-                "\"r%[fx:page.y/256]_c%[fx:page.x/256]\"","+repage","+adjoin",
+        when(mockrclp.runCommandLineProcess("convert", pngTmpFile, "-resize",
+                "12%", "-equalize", "-crop", "256x256", "-set", "filename:tile",
+                "\"r%[fx:page.y/256]_c%[fx:page.x/256]\"", "+repage", "+adjoin",
                 destTmpDir + File.separator + "0-%[filename:tile].png"))
                 .thenReturn("hello3");
-                
+
         d.setRunCommandLineProcess(mockrclp);
-        
-        try{
+
+        try {
             d.convert(srcFile, destDir);
-            
-        }catch(Exception ex){
+
+        } catch (Exception ex) {
             assertTrue(ex.getMessage().equals("Unable to rename "
                     + destTmpDir + " to " + destDir));
         }
         File destDirFile = new File(destDir);
         assertTrue(destDirFile.isDirectory());
-        
+
     }
 }
