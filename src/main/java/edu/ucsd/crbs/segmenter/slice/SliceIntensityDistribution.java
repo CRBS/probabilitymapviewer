@@ -16,6 +16,7 @@ public class SliceIntensityDistribution {
     private double _maxIntensity;
     private double _standardDeviation;
     private double _meanIntensity;
+  
 
     public double getMinIntensity() {
         return _minIntensity;
@@ -48,5 +49,15 @@ public class SliceIntensityDistribution {
     public void setMeanIntensity(double _meanIntensity) {
         this._meanIntensity = _meanIntensity;
     }    
-    
+ 
+    public String getScalingLimitsAsString(){
+        double newMin = this._meanIntensity-(2*this._standardDeviation);
+        double newMax = this._meanIntensity+(2*this._standardDeviation);
+        if (newMax < newMin){
+            return Long.toString(Math.round(newMax))+","
+                    +Long.toString(Math.round(newMin));
+        }
+            return Long.toString(Math.round(newMin))+","
+                    +Long.toString(Math.round(newMax));
+    }
 }

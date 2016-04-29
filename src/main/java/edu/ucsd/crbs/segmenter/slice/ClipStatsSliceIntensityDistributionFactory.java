@@ -78,21 +78,19 @@ public class ClipStatsSliceIntensityDistributionFactory implements
         for (int i = 0; i < splitLine.length; i++){
             System.out.println("\t " + Integer.toString(i)+ " :"+splitLine[i]+":");
         }
-        System.out.println("Min="+splitLine[2]);
-        System.out.println("Max="+splitLine[4]);
-        System.out.println("Mean="+splitLine[6]);
-        System.out.println("stddev="+splitLine[7]);
         
-        SliceIntensityDistribution sid = new SliceIntensityDistribution();
-        sid.setMinIntensity(Double.parseDouble(splitLine[2]));
-        sid.setMaxIntensity(Double.parseDouble(splitLine[4]));
-        sid.setMeanIntensity(Double.parseDouble(splitLine[6]));
         if (splitLine.length != 8){
             _log.log(Level.WARNING,"Expected 7 elements got {0}",
                     splitLine.length);
             return null;
         }
-        return null;
+        SliceIntensityDistribution sid = new SliceIntensityDistribution();
+        sid.setMinIntensity(Double.parseDouble(splitLine[2]));
+        sid.setMaxIntensity(Double.parseDouble(splitLine[4]));
+        sid.setMeanIntensity(Double.parseDouble(splitLine[6]));
+        sid.setStandardDeviation(Double.parseDouble(splitLine[7]));
+        
+        return sid;
     }
     
 }

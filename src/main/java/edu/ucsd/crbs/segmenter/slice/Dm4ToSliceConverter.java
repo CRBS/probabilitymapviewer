@@ -39,17 +39,21 @@ public class Dm4ToSliceConverter implements SliceConverter {
     private String _tileSizeArgForConvert;
     private String _renameArgForConvert;
     private boolean _addEqualize = false;
+    private SliceIntensityDistributionFactory _sliceItensityFactory;
 
     /**
      * Constructor
      */
-    public Dm4ToSliceConverter(Properties props) {
+    public Dm4ToSliceConverter(Properties props,SliceIntensityDistributionFactory
+            sliceItensityFactory) {
         _props = props;
         if (_props == null) {
             throw new NullPointerException("Properties passed in constructor "
                     + "is null");
         }
-
+        
+        _sliceItensityFactory = sliceItensityFactory;
+                
         //need binary paths for convert, dm2mrc, mrc2tif
         _mrc2tif_cmd = _props.getProperty(App.MRC2TIF_ARG);
         if (_mrc2tif_cmd == null) {
@@ -196,24 +200,6 @@ public class Dm4ToSliceConverter implements SliceConverter {
         return destMrc;
     }
 
-    private String run_ClipStatsToGetMinMax(final String sourcePath) 
-            throws Exception{
-        
-        long startTime = System.currentTimeMillis();
-
-        String result
-                = _runCommandLineProcess.runCommandLineProcess(_clip_cmd,
-                        "stats", sourcePath);
-        
-        long duration = System.currentTimeMillis() - startTime;
-
-        _log.log(Level.FINE, "clip stats output: {0}", result);
-
-        _log.log(Level.INFO, "running clip stats took {0} seconds", 
-                duration / 1000);
-        return null;
-    }
-    
     /**
      * Converts mrc to png file using mrc2tif
      *
@@ -225,7 +211,12 @@ public class Dm4ToSliceConverter implements SliceConverter {
     private String run_mrc2tif(final String sourcePath, final String destTmpDir)
             throws Exception {
         
-        run_ClipStatsToGetMinMax(sourcePath);
+        SliceIntensityDistribution sid = 
+                _sliceItensityFactory.getSliceIntensityDistribution(sourcePath);
+        
+        if (sid == null){
+            throw new Exception("Unable to get slice intensity distribution");
+        }
         
         long startTime = System.currentTimeMillis();
 
@@ -233,7 +224,7 @@ public class Dm4ToSliceConverter implements SliceConverter {
 
         String result
                 = _runCommandLineProcess.runCommandLineProcess(_mrc2tif_cmd,
-                        "-p", sourcePath, destPng);
+                        "-p","-S",sid.getScalingLimitsAsString(),sourcePath, destPng);
 
         long duration = System.currentTimeMillis() - startTime;
 

@@ -52,7 +52,7 @@ public class TestDm4ToSliceConverter {
     @Test
     public void testConstructorNullProps() {
         try {
-            Dm4ToSliceConverter d = new Dm4ToSliceConverter(null);
+            Dm4ToSliceConverter d = new Dm4ToSliceConverter(null,null);
             fail("Expected exception");
         } catch (NullPointerException npe) {
             assertTrue(npe.getMessage().equals("Properties passed in "
@@ -66,7 +66,7 @@ public class TestDm4ToSliceConverter {
         try {
             Properties props = new Properties();
             props.setProperty(App.INPUT_IMAGE_ARG, "foo");
-            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
             fail("Expected exception");
         } catch (NullPointerException npe) {
             assertTrue(npe.getMessage().equals(App.MRC2TIF_ARG
@@ -81,7 +81,7 @@ public class TestDm4ToSliceConverter {
             Properties props = new Properties();
             props.setProperty(App.INPUT_IMAGE_ARG, "foo");
             props.setProperty(App.MRC2TIF_ARG, "mrc");
-            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
             fail("Expected exception");
         } catch (NullPointerException npe) {
             assertTrue(npe.getMessage().equals(App.DM2MRC_ARG
@@ -97,7 +97,7 @@ public class TestDm4ToSliceConverter {
             props.setProperty(App.INPUT_IMAGE_ARG, "foo");
             props.setProperty(App.MRC2TIF_ARG, "mrc");
             props.setProperty(App.DM2MRC_ARG, "dm2");
-            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
             fail("Expected exception");
         } catch (NullPointerException npe) {
             assertTrue(npe.getMessage().equals(App.CONVERT_ARG
@@ -113,7 +113,7 @@ public class TestDm4ToSliceConverter {
             props.setProperty(App.MRC2TIF_ARG, "mrc");
             props.setProperty(App.DM2MRC_ARG, "dm2");
             props.setProperty(App.CONVERT_ARG, "convert");
-            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+            Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
             fail("Expected exception");
         } catch (NullPointerException npe) {
             assertTrue(npe.getMessage().equals(App.CLIP_ARG
@@ -129,7 +129,7 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.DM2MRC_ARG, "dm2");
         props.setProperty(App.CONVERT_ARG, "convert");
         props.setProperty(App.CLIP_ARG, "clip");
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
     }
 
     @Test
@@ -142,7 +142,7 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.CONVERT_EQUALIZE_ARG, "true");
         props.setProperty(App.CLIP_ARG, "clip");
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
     }
 
     @Test
@@ -155,7 +155,7 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.CONVERT_EQUALIZE_ARG, "true");
         props.setProperty(App.CLIP_ARG, "clip");
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
     }
 
     @Test
@@ -168,7 +168,7 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.CONVERT_EQUALIZE_ARG, "blah");
         props.setProperty(App.CLIP_ARG, "clip");
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
     }
 
     @Test
@@ -180,7 +180,7 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.CONVERT_ARG, "convert");
         props.setProperty(App.CLIP_ARG, "clip");
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
         assertTrue(d.getDownsampleFactor() == 1);
     }
 
@@ -196,20 +196,20 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "b");
         props.setProperty(App.CLIP_ARG, "clip");
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
 
         assertTrue(d.getDownsampleFactor() == 1);
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "-4");
 
-        d = new Dm4ToSliceConverter(props);
+        d = new Dm4ToSliceConverter(props,null);
         assertTrue(d.getDownsampleFactor() == 1);
 
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "3");
-        d = new Dm4ToSliceConverter(props);
+        d = new Dm4ToSliceConverter(props,null);
         assertTrue(d.getDownsampleFactor() == 3);
 
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "0");
-        d = new Dm4ToSliceConverter(props);
+        d = new Dm4ToSliceConverter(props,null);
         assertTrue(d.getDownsampleFactor() == 1);
     }
 
@@ -227,7 +227,7 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "3");
         props.setProperty(App.CLIP_ARG, "clip");
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
         String srcFile = tempDir.getAbsolutePath() + File.separator
                 + "doesnotexist.dm4";
         try {
@@ -253,7 +253,7 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "3");
         props.setProperty(App.CLIP_ARG, "clip");
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
         String srcFile = tempDir.getAbsolutePath() + File.separator
                 + "input.dm4";
         File inputFile = new File(srcFile);
@@ -289,7 +289,7 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "3");
         props.setProperty(App.CLIP_ARG, "clip");
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
         String srcFile = tempDir.getAbsolutePath() + File.separator
                 + "input.dm4";
         File inputFile = new File(srcFile);
@@ -328,8 +328,20 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.CONVERT_ARG, "convert");
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "3");
         props.setProperty(App.CLIP_ARG, "clip");
+        
+        String destDir = tempDir.getAbsolutePath() + File.separator
+                + "foo";
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        String mrcTmpFile = destDir + Dm4ToSliceConverter.TMP_SUFFIX
+                + File.separator + "out.mrc";
+        
+        SliceIntensityDistributionFactory mfac 
+                = mock(SliceIntensityDistributionFactory.class);
+        SliceIntensityDistribution sid = new SliceIntensityDistribution();
+        sid.setMeanIntensity(10.0);
+        sid.setStandardDeviation(2.0);
+        when(mfac.getSliceIntensityDistribution(mrcTmpFile)).thenReturn(sid);
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,mfac);
         String srcFile = tempDir.getAbsolutePath() + File.separator
                 + "input.dm4";
         File inputFile = new File(srcFile);
@@ -338,17 +350,14 @@ public class TestDm4ToSliceConverter {
         fw.flush();
         fw.close();
 
-        String destDir = tempDir.getAbsolutePath() + File.separator
-                + "foo";
-
-        String mrcTmpFile = destDir + Dm4ToSliceConverter.TMP_SUFFIX
-                + File.separator + "out.mrc";
+        
         String pngTmpFile = destDir + Dm4ToSliceConverter.TMP_SUFFIX
                 + File.separator + "out.png";
         RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
         when(mockrclp.runCommandLineProcess("dm2", srcFile, mrcTmpFile))
                 .thenReturn("hello");
-        when(mockrclp.runCommandLineProcess("mrc", "-p", mrcTmpFile, pngTmpFile))
+        when(mockrclp.runCommandLineProcess("mrc", "-p","-S","6,14", 
+                mrcTmpFile, pngTmpFile))
                 .thenThrow(new Exception("mrcfailed"));
         d.setRunCommandLineProcess(mockrclp);
 
@@ -373,7 +382,20 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "1");
         props.setProperty(App.CLIP_ARG, "clip");
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+         String destDir = tempDir.getAbsolutePath() + File.separator
+                + "foo";
+        String destTmpDir = destDir + Dm4ToSliceConverter.TMP_SUFFIX;
+        String mrcTmpFile = destTmpDir
+                + File.separator + "out.mrc";
+        
+        SliceIntensityDistributionFactory mfac 
+                = mock(SliceIntensityDistributionFactory.class);
+        SliceIntensityDistribution sid = new SliceIntensityDistribution();
+        sid.setMeanIntensity(10.0);
+        sid.setStandardDeviation(2.0);
+        when(mfac.getSliceIntensityDistribution(mrcTmpFile)).thenReturn(sid);
+        
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,mfac);
         String srcFile = tempDir.getAbsolutePath() + File.separator
                 + "input.dm4";
         File inputFile = new File(srcFile);
@@ -382,17 +404,14 @@ public class TestDm4ToSliceConverter {
         fw.flush();
         fw.close();
 
-        String destDir = tempDir.getAbsolutePath() + File.separator
-                + "foo";
-        String destTmpDir = destDir + Dm4ToSliceConverter.TMP_SUFFIX;
-        String mrcTmpFile = destTmpDir
-                + File.separator + "out.mrc";
+       
         String pngTmpFile = destTmpDir
                 + File.separator + "out.png";
         RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
         when(mockrclp.runCommandLineProcess("dm2", srcFile, mrcTmpFile))
                 .thenReturn("hello");
-        when(mockrclp.runCommandLineProcess("mrc", "-p", mrcTmpFile, pngTmpFile))
+        when(mockrclp.runCommandLineProcess("mrc", "-p", "-S","6,14",
+                mrcTmpFile, pngTmpFile))
                 .thenReturn("hello2");
         when(mockrclp.runCommandLineProcess("convert", pngTmpFile, "-resize",
                 "100%", "-crop", "128x128", "-set", "filename:tile",
@@ -426,7 +445,22 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "4");
         props.setProperty(App.CLIP_ARG, "clip");
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        String destDir = tempDir.getAbsolutePath() + File.separator
+                + "foo";
+        File destDirFile = new File(destDir);
+        assertTrue(destDirFile.createNewFile());
+        String destTmpDir = destDir + Dm4ToSliceConverter.TMP_SUFFIX;
+        String mrcTmpFile = destTmpDir
+                + File.separator + "out.mrc";
+        
+        SliceIntensityDistributionFactory mfac 
+                = mock(SliceIntensityDistributionFactory.class);
+        SliceIntensityDistribution sid = new SliceIntensityDistribution();
+        sid.setMeanIntensity(10.0);
+        sid.setStandardDeviation(2.0);
+        when(mfac.getSliceIntensityDistribution(mrcTmpFile)).thenReturn(sid);
+        
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,mfac);
         String srcFile = tempDir.getAbsolutePath() + File.separator
                 + "input.dm4";
         File inputFile = new File(srcFile);
@@ -435,19 +469,14 @@ public class TestDm4ToSliceConverter {
         fw.flush();
         fw.close();
 
-        String destDir = tempDir.getAbsolutePath() + File.separator
-                + "foo";
-        File destDirFile = new File(destDir);
-        assertTrue(destDirFile.createNewFile());
-        String destTmpDir = destDir + Dm4ToSliceConverter.TMP_SUFFIX;
-        String mrcTmpFile = destTmpDir
-                + File.separator + "out.mrc";
+        
         String pngTmpFile = destTmpDir
                 + File.separator + "out.png";
         RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
         when(mockrclp.runCommandLineProcess("dm2", srcFile, mrcTmpFile))
                 .thenReturn("hello");
-        when(mockrclp.runCommandLineProcess("mrc", "-p", mrcTmpFile, pngTmpFile))
+        when(mockrclp.runCommandLineProcess("mrc", "-p", "-S","6,14",
+                mrcTmpFile, pngTmpFile))
                 .thenReturn("hello2");
         when(mockrclp.runCommandLineProcess("convert", pngTmpFile, "-resize",
                 "25%", "-crop", "128x128", "-set", "filename:tile",
@@ -482,7 +511,20 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.TILE_SIZE_ARG, "256");
         props.setProperty(App.CLIP_ARG, "clip");
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        String destDir = tempDir.getAbsolutePath() + File.separator
+                + "foo";
+        String destTmpDir = destDir + Dm4ToSliceConverter.TMP_SUFFIX;
+        String mrcTmpFile = destTmpDir
+                + File.separator + "out.mrc";
+        
+        SliceIntensityDistributionFactory mfac 
+                = mock(SliceIntensityDistributionFactory.class);
+        SliceIntensityDistribution sid = new SliceIntensityDistribution();
+        sid.setMeanIntensity(10.0);
+        sid.setStandardDeviation(2.0);
+        when(mfac.getSliceIntensityDistribution(mrcTmpFile)).thenReturn(sid);
+        
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,mfac);
         String srcFile = tempDir.getAbsolutePath() + File.separator
                 + "input.dm4";
         File inputFile = new File(srcFile);
@@ -491,17 +533,14 @@ public class TestDm4ToSliceConverter {
         fw.flush();
         fw.close();
 
-        String destDir = tempDir.getAbsolutePath() + File.separator
-                + "foo";
-        String destTmpDir = destDir + Dm4ToSliceConverter.TMP_SUFFIX;
-        String mrcTmpFile = destTmpDir
-                + File.separator + "out.mrc";
+        
         String pngTmpFile = destTmpDir
                 + File.separator + "out.png";
         RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
         when(mockrclp.runCommandLineProcess("dm2", srcFile, mrcTmpFile))
                 .thenReturn("hello");
-        when(mockrclp.runCommandLineProcess("mrc", "-p", mrcTmpFile, pngTmpFile))
+        when(mockrclp.runCommandLineProcess("mrc", "-p","-S","6,14", 
+                mrcTmpFile, pngTmpFile))
                 .thenReturn("hello2");
         when(mockrclp.runCommandLineProcess("convert", pngTmpFile, "-resize",
                 "12%", "-crop", "256x256", "-set", "filename:tile",
@@ -538,7 +577,20 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.CONVERT_EQUALIZE_ARG, "true");
         props.setProperty(App.CLIP_ARG, "clip");
 
-        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props);
+        String destDir = tempDir.getAbsolutePath() + File.separator
+                + "foo";
+        String destTmpDir = destDir + Dm4ToSliceConverter.TMP_SUFFIX;
+        String mrcTmpFile = destTmpDir
+                + File.separator + "out.mrc";
+        
+        SliceIntensityDistributionFactory mfac 
+                = mock(SliceIntensityDistributionFactory.class);
+        SliceIntensityDistribution sid = new SliceIntensityDistribution();
+        sid.setMeanIntensity(10.0);
+        sid.setStandardDeviation(2.0);
+        when(mfac.getSliceIntensityDistribution(mrcTmpFile)).thenReturn(sid);
+        
+        Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,mfac);
         String srcFile = tempDir.getAbsolutePath() + File.separator
                 + "input.dm4";
         File inputFile = new File(srcFile);
@@ -547,17 +599,14 @@ public class TestDm4ToSliceConverter {
         fw.flush();
         fw.close();
 
-        String destDir = tempDir.getAbsolutePath() + File.separator
-                + "foo";
-        String destTmpDir = destDir + Dm4ToSliceConverter.TMP_SUFFIX;
-        String mrcTmpFile = destTmpDir
-                + File.separator + "out.mrc";
+        
         String pngTmpFile = destTmpDir
                 + File.separator + "out.png";
         RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
         when(mockrclp.runCommandLineProcess("dm2", srcFile, mrcTmpFile))
                 .thenReturn("hello");
-        when(mockrclp.runCommandLineProcess("mrc", "-p", mrcTmpFile, pngTmpFile))
+        when(mockrclp.runCommandLineProcess("mrc", "-p", "-S","6,14", 
+                mrcTmpFile, pngTmpFile))
                 .thenReturn("hello2");
         when(mockrclp.runCommandLineProcess("convert", pngTmpFile, "-resize",
                 "12%", "-equalize", "-crop", "256x256", "-set", "filename:tile",

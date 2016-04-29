@@ -16,9 +16,11 @@ import edu.ucsd.crbs.segmenter.layer.CustomLayer;
 import edu.ucsd.crbs.segmenter.layer.CustomLayerFromPropertiesFactory;
 import edu.ucsd.crbs.segmenter.server.SegmenterWebServer;
 import edu.ucsd.crbs.segmenter.server.SegmenterWebServerFactory;
+import edu.ucsd.crbs.segmenter.slice.ClipStatsSliceIntensityDistributionFactory;
 import edu.ucsd.crbs.segmenter.slice.SliceDir;
 import edu.ucsd.crbs.segmenter.util.CubeProgressBar;
 import edu.ucsd.crbs.segmenter.util.CubeProgressBarImpl;
+import edu.ucsd.crbs.segmenter.util.RunCommandLineProcessImpl;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
@@ -387,7 +389,8 @@ public class App {
                         + "collection mode");
                 sliceMonitor = new Dm4SliceMonitorImpl(
                         new Dm4SliceConverterDaemon(props,
-                                new Dm4ToSliceConverter(props)));
+                                new Dm4ToSliceConverter(props,
+                                        new ClipStatsSliceIntensityDistributionFactory("clip",new RunCommandLineProcessImpl()))));
             }
 
             if (sliceMonitor != null) {
