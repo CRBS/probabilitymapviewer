@@ -91,6 +91,7 @@ public class App {
 
     public static final String DM2MRC_ARG = "dm2mrcbinary";
     public static final String MRC2TIF_ARG = "mrc2tifbinary";
+    public static final String CLIP_ARG = "clipbinary";
 
     public static final String DOWNSAMPLEFACTOR_ARG = "downsamplefactor";
     
@@ -219,6 +220,12 @@ public class App {
                             + DM4_COLLECTION_MODE_ARG + ")")
                             .withRequiredArg().ofType(String.class)
                             .defaultsTo("convert");
+                    
+                    accepts(CLIP_ARG, "Sets path to clip command (only "
+                            + "works with --" + USE_SGE_ARG + " and --"
+                            + DM4_COLLECTION_MODE_ARG + ")")
+                            .withRequiredArg().ofType(String.class)
+                            .defaultsTo("clip");
 
                     accepts(DM2MRC_ARG, "Sets path to dm2mrc command (only "
                             + "works with --" + DM4_COLLECTION_MODE_ARG + ")")
@@ -393,13 +400,16 @@ public class App {
             ExecutorService es = getExecutorService(numCores);
 
             sws = getWebServer(es, props, layers);
-
+            if (sws == null){
+              _log.log(Level.SEVERE," unable to get web server");   
+            }
+            _log.log(Level.INFO," Starting up webserver");
             sws.getServer().start();
             int desiredLoad = numCores + (int) ((double) numCores * overloadFactor);
             int prevTotalProcessedCount = -1;
             long iterationCounter = 0;
             int collectionDelay = Integer.parseInt(props.getProperty(COLLECTION_DELAY_ARG));
-
+            _log.log(Level.INFO,"Entering while loop");
             while (SIGNAL_RECEIVED == false && (sws.getServer().isStarting() || sws.getServer().isRunning())) {
                 //one idea is to have all the image processors dump to a single list
                 //and to have this loop track the completed job list and running job list
@@ -444,9 +454,11 @@ public class App {
             ex.printStackTrace();
             System.exit(1);
         } finally {
-            if (sws.getServer() != null) {
-                _log.log(Level.INFO, "Shutting down webserver");
-                sws.getServer().destroy();
+            if (sws != null){
+              if (sws.getServer() != null) {
+                  _log.log(Level.INFO, "Shutting down webserver");
+                  sws.getServer().destroy();
+              }
             }
 
             if (tempDirUsed) {
@@ -584,6 +596,7 @@ public class App {
         
         props.setProperty(DM2MRC_ARG, (String) optionSet.valueOf(DM2MRC_ARG));
         props.setProperty(MRC2TIF_ARG, (String) optionSet.valueOf(MRC2TIF_ARG));
+        props.setProperty(CLIP_ARG, (String) optionSet.valueOf(CLIP_ARG));
         props.setProperty(DOWNSAMPLEFACTOR_ARG,
                 ((Integer) optionSet.valueOf(DOWNSAMPLEFACTOR_ARG)).toString());
         props.setProperty(REFRESH_OVERLAY_DELAY_ARG,
