@@ -1,17 +1,12 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsd.crbs.segmenter.slice;
 
 import edu.ucsd.crbs.segmenter.util.RunCommandLineProcess;
-import edu.ucsd.crbs.segmenter.util.RunCommandLineProcessImpl;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
+ * Runs clip command to extract min, max, mean, and standard deviation of
+ * pixel intensities from an mrc file.
  * @author churas
  */
 public class ClipStatsSliceIntensityDistributionFactory implements 
@@ -23,21 +18,26 @@ public class ClipStatsSliceIntensityDistributionFactory implements
 
     private RunCommandLineProcess _runCommandLineProcess;
     private String _clipCmd;
-    
-    public static void main(String[] args){
-        System.out.println("Hello world");
-        RunCommandLineProcessImpl rclp = new RunCommandLineProcessImpl();
-        ClipStatsSliceIntensityDistributionFactory c 
-                = new ClipStatsSliceIntensityDistributionFactory("clip",rclp);
-        c.getSliceIntensityDistribution(args[0]);
-    }
-    
+        
     public ClipStatsSliceIntensityDistributionFactory(final String clipCmd,
             RunCommandLineProcess rclp){
         _runCommandLineProcess = rclp;
         _clipCmd = clipCmd;
     }
     
+    /**
+     * Runs clip command to get stats on image set by <b>path</b> parameter.
+     * Method assumes output from clip is in this format:
+     * <code>
+     *   slice|   min   |(   x,   y)|    max  |(      x,      y)|   mean    |  std dev.
+     *   -----|---------|-----------|---------|-----------------|-----------|----------
+     *   0    65.0000 (2019,7270) 30021.0000 (7822.01,8327.14) 29123.6884   202.0377
+     * </code>
+     * In the above example 65 is the min, 30021 is max, 29123 is mean, and
+     * 202 is standard deviation.
+     * @param path Path to image to extract image stats from
+     * @return SliceItensityDistribution object upon success or null upon error
+     */
     @Override
     public SliceIntensityDistribution 
         getSliceIntensityDistribution(final String path) {
@@ -49,7 +49,7 @@ public class ClipStatsSliceIntensityDistributionFactory implements
                             "stats", path);
          }
          catch(Exception ex){
-             _log.log(Level.WARNING,"Caughte exception running {0} : {1}",
+             _log.log(Level.WARNING,"Caught exception running {0} : {1}",
                      new Object[]{_clipCmd,ex.getMessage()});
              return null;
          }
@@ -75,13 +75,10 @@ public class ClipStatsSliceIntensityDistributionFactory implements
         }
         String splitLine[] = lines[2].split(" +");
         
-        for (int i = 0; i < splitLine.length; i++){
-            System.out.println("\t " + Integer.toString(i)+ " :"+splitLine[i]+":");
-        }
         
         if (splitLine.length != 8){
-            _log.log(Level.WARNING,"Expected 7 elements got {0}",
-                    splitLine.length);
+            _log.log(Level.WARNING,"Expected 7 elements got {0} from line {1}",
+                    new Object[]{splitLine.length,lines[2]});
             return null;
         }
         SliceIntensityDistribution sid = new SliceIntensityDistribution();
