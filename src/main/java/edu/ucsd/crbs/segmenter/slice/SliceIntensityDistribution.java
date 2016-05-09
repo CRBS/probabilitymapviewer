@@ -50,6 +50,17 @@ public class SliceIntensityDistribution {
         this._meanIntensity = _meanIntensity;
     }    
  
+    /**
+     * Generate a string of format #,# suitable for consumption
+     * by mrc2tif -S flag.  This method sets the first number
+     * to #a in #a,#b to {@link #getMeanIntensity()} minus 2 times
+     * the {@link #getStandardDeviation()} and the second number is
+     * #b is set to {@link #getMeanIntensity() } plus 2 times the 
+     * {@link #getStandardDeviation()}
+     * Method is always smart enough to ensure the #a number is always
+     * less then #b number.  
+     * @return String of format #,# that can be passed to mrc2tif -S flag
+     */
     public String getScalingLimitsAsString(){
         double newMin = this._meanIntensity-(2*this._standardDeviation);
         double newMax = this._meanIntensity+(2*this._standardDeviation);
