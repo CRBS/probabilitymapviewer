@@ -622,7 +622,6 @@ public class App {
         props.setProperty(INPUT_IMAGE_ARG, ((File) optionSet.valueOf(INPUT_IMAGE_ARG)).getAbsolutePath());
         props.setProperty(PORT_ARG, ((Integer) optionSet.valueOf(PORT_ARG)).toString());
         props.setProperty(DIR_ARG, ((File) optionSet.valueOf(DIR_ARG)).getAbsolutePath());
-
         
         if (props.getProperty(App.DM4_COLLECTION_MODE_ARG,"false").equals("true")){
             props.setProperty(App.ADJUSTED_INPUT_IMAGE_ARG,props.getProperty(DIR_ARG) + File.separator +
