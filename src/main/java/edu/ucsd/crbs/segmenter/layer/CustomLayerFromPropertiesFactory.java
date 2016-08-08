@@ -45,13 +45,7 @@ public class CustomLayerFromPropertiesFactory {
             throw new IllegalArgumentException("props is null");
         }
         ArrayList<CustomLayer> layers = new ArrayList<CustomLayer>();
-        
-        InternalCustomLayerFactory internalLayerFac = new InternalCustomLayerFactory();
-        List<CustomLayer> internalLayers = internalLayerFac.getLayers(props);
-        if (internalLayers != null){
-            layers.addAll(internalLayers);
-        }
-        
+                
         for (Object o : props.keySet()){
             String key = (String)o;
             if (!key.startsWith("custom")){
