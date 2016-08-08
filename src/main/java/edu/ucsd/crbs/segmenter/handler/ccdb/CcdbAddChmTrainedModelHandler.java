@@ -30,7 +30,6 @@
 
 package edu.ucsd.crbs.segmenter.handler.ccdb;
 
-import static com.sun.corba.se.spi.presentation.rmi.StubAdapter.request;
 import edu.ucsd.crbs.segmenter.handler.ImageProcessorHandler;
 import edu.ucsd.crbs.segmenter.handler.ccdb.model.ModelDownloader;
 import edu.ucsd.crbs.segmenter.layer.CustomLayer;
@@ -209,5 +208,4 @@ public class CcdbAddChmTrainedModelHandler extends AbstractHandler {
         
        return null; 
     }
-
 }
