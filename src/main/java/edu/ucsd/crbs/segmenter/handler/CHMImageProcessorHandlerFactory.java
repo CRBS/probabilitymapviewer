@@ -27,7 +27,6 @@
  * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR THAT THE USE OF 
  * THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS. 
  */
-
 package edu.ucsd.crbs.segmenter.handler;
 
 import edu.ucsd.crbs.segmenter.App;
@@ -47,27 +46,29 @@ import org.eclipse.jetty.server.handler.ContextHandler;
 public class CHMImageProcessorHandlerFactory {
 
     private static final Logger _log = Logger.getLogger(CHMImageProcessorHandlerFactory.class.getName());
-    
-    public List<ImageProcessorHandler> getImageProcessorHandlers(ExecutorService es,Properties props, List<CustomLayer> layers) throws Exception {
-        if (layers == null || layers.isEmpty()){
-            return null;
-        }
+
+    public List<ImageProcessorHandler> getImageProcessorHandlers(ExecutorService es, Properties props, List<CustomLayer> layers) throws Exception {
+
         ImageProcessorFactory ipf = new ImageProcessorFactory(props);
         ArrayList<ImageProcessorHandler> iHandlers = new ArrayList<ImageProcessorHandler>();
-        for (CustomLayer cl : layers){
-            
-            ImageProcessorHandler chmHandler = new ImageProcessorHandler(ipf.getImageProcessor(cl));
-            
-            String contextHandlerPath = "/"+App.LAYER_HANDLER_BASE_DIR+"/"+cl.getVarName();
-            ContextHandler chmContext = new ContextHandler(contextHandlerPath);
-            chmContext.setHandler(chmHandler);
-            chmHandler.setContextHandler(chmContext);
-            iHandlers.add(chmHandler);
+
+        if (layers != null) {
+            for (CustomLayer cl : layers) {
+
+                ImageProcessorHandler chmHandler = new ImageProcessorHandler(ipf.getImageProcessor(cl));
+
+                String contextHandlerPath = "/" + App.LAYER_HANDLER_BASE_DIR +
+                        "/" + cl.getVarName();
+                ContextHandler chmContext = new ContextHandler(contextHandlerPath);
+                chmContext.setHandler(chmHandler);
+                chmHandler.setContextHandler(chmContext);
+                iHandlers.add(chmHandler);
+            }
         }
-        
+
         EmptyImageProcessorHandlerFactory echf = new EmptyImageProcessorHandlerFactory();
         iHandlers.addAll(echf.getImageProcessorHandlers());
-        
-        return iHandlers;
+
+        return iHandlers;       
     }
 }
