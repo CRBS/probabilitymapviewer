@@ -18,9 +18,13 @@ Segmenter is designed to be run locally on a linux machine.
 Segmentation can be performed by any external command line script or by 
 [Cascaded Hierarchical Model (CHM)][chm], which is bundled with this application.
 
-Segmenter supports two modes, a single image analysis mode and microscope
-collection mode. In microscope collection mode Segmenter automatically switches
-to the latest image that appears in a user specified directory.
+[![Segmenter in Single Image Analysis Mode](docs/single.png)
+
+Segmenter supports two modes, a single image analysis mode and collection mode. 
+In collection mode Segmenter automatically switches to the latest image that 
+appears in a user specified directory.
+
+[![Segmenter in Collection Mode](docs/collection.png)
 
 
 Requirements
