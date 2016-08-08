@@ -6,9 +6,10 @@
 [java]: https://www.oracle.com/java/index.html
 [git]: https://git-scm.com/
 
-
 Segmenter
 =========
+
+[![Build Status](https://travis-ci.org/CRBS/segmenter.svg?branch=master)](https://travis-ci.org/CRBS/segmenter)
 
 Segmenter is a web application using an embedded [Jetty][jetty] web server that 
 performs image segmentation in near real time on tiled image data. 
