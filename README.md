@@ -65,7 +65,7 @@ Segmenter build requirements:
 To build segmenter assuming machine has [Git][git] command line tools installed:
 
 ```Bash
-# In leiu of git one can just download repo and unzip it
+# In lieu of git one can just download repo and unzip it
 git clone https://github.com/slash-segmentation/segmenter.git
 
 cd segmenter
