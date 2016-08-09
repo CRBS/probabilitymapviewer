@@ -13,7 +13,8 @@ Segmenter
 
 Segmenter is a web application using an embedded [Jetty][jetty] web server that 
 performs image segmentation in near real time on tiled image data. 
-Segmenter is designed to be run locally on a linux machine. 
+Segmenter is designed to be run on a linux machine with the web application
+viewable locally or remotely via a web browser.
 
 Segmentation can be performed by any external command line script or by 
 [Cascaded Hierarchical Model (CHM)][chm], which is bundled with this application.
@@ -65,9 +66,9 @@ Segmenter build requirements:
 
 * [Java 7+][java] JDK
 * [Maven][maven] 3.0 or higher **(to build)**
-* 
 
-To build segmenter assuming machine has [Git][git] command line tools installed:
+Commands build segmenter assuming machine has [Git][git] command line tools 
+installed:
 
 ```Bash
 # In lieu of git one can just download repo and unzip it
