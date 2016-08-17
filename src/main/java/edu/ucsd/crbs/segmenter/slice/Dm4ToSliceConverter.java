@@ -255,11 +255,20 @@ public class Dm4ToSliceConverter implements SliceConverter {
         ArrayList<String> cmd = new ArrayList<String>();
         cmd.add(_convert_cmd);
         cmd.add(sourcePath);
+        if (_addEqualize == true){
+            cmd.add("-set");
+            cmd.add("colorspace");
+            cmd.add("Gray");
+            cmd.add("-separate");
+            cmd.add("-average");
+            cmd.add("-auto-level");
+            cmd.add("-equalize");
+            cmd.add("-gaussian-blur");
+            cmd.add("5x2");
+        }
         cmd.add("-resize");
         cmd.add(resizePercent);
-        if (_addEqualize == true){
-            cmd.add("-equalize");
-        }
+        
         cmd.add("-crop");
         cmd.add(_tileSizeArgForConvert);
         cmd.add("-set");
