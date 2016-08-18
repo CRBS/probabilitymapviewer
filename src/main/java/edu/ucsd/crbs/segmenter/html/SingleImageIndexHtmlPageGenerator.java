@@ -79,6 +79,8 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
     
     public static final String UPDATE_TO_SLICE_GUTS_TOKEN = "@@UPDATE_TO_SLICE_GUTS@@";
     
+    public static final String TILESIZE_TOKEN = "@@TILESIZE@@";
+    
 
 
     private String _baseLayerDeclaration;
@@ -146,6 +148,7 @@ public class SingleImageIndexHtmlPageGenerator implements HtmlPageGenerator, Str
                 .replaceAll(REFRESH_INTERVAL_MILLIS_TOKEN,_refreshIntervalMillis)
                 .replaceAll(REFRESH_INTERVAL_SECS_TOKEN,_refreshIntervalSecs)
                 .replaceAll(UPDATE_TO_SLICE_GUTS_TOKEN,_updateToSliceGuts)
+                .replaceAll(TILESIZE_TOKEN, _tileSize)
                 .replaceAll(TITLE_TOKEN,_title);
     }
 

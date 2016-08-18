@@ -158,9 +158,9 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
         var northEast = L.latLng(-1, @@IMAGE_WIDTH@@);
       
         var tileBounds = L.latLngBounds(southWest, northEast);
-
+        var prevTilesProcessed = 0;
         var paddedTileBounds = tileBounds.pad(0.05);
-       
+        var tileSize = @@TILESIZE@@;
         // this should be set to initial base layer url
         // and updated in refresh to the appropriate layer
         // if the user wants to be moved to the newest layer
@@ -208,16 +208,24 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
 
             map.setView([-500, 740], 0);
 
-            var popup = L.popup();
+            var popup = L.popup({ 
+                closeButton: true
+            });
 
             function onMapClick(e) {
+                
+                var curtileyo = map.getZoom().toString() + "-r" + 
+                        Math.floor(Math.abs(e.latlng.lat)/tileSize).toString() +
+                        "_c" + Math.floor(e.latlng.lng/tileSize).toString()
                 popup
                         .setLatLng(e.latlng)
-                        .setContent("Container location: ("
-                                + e.containerPoint.toString() + ") Map Location: ("
-                                + e.layerPoint.toString() + ") LatLong: (" + e.latlng.toString() + ")")
+                        .setContent("On Tile: " + curtileyo + 
+                        "<br/><img src=\"/refresh.png\" style='display: none;' title=\"Refresh map\" id=\"refreshmap\" alt=\"Refresh map\" onmouseover=\"this.src='/refreshmouseover.png'\" onmouseout=\"this.src='/refresh.png'\" onclick='addToTrainSet(\""+curtileyo+"\")'/>")
+                
                         .openOn(map);
-
+                      //.setContent("Container location: ("
+                                //+ e.containerPoint.toString() + ") Map Location: ("
+                                //+ e.layerPoint.toString() + ") LatLong: (" + e.latlng.toString() + ")")
             }
 
             map.on('click', onMapClick);
@@ -244,6 +252,11 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
                     overlayMaps[i].redraw();
                 }
                  
+            }
+            
+            // add a tile to the training set
+            function addToTrainSet(tileName) {
+                alert("Adding tile:" + tileName)
             }
             
             function addNewLayerFromCCDB(ccdbLayerVal,ccdbLayerName,ccdbLayerColor) {
@@ -408,11 +421,13 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
                     slicesCollectedElement.innerHTML = myres.slicescollected;
                     expectedSlices.innerHTML = myres.expectedslices;
                 }
-                
+                tilesProcessedNum = Number(myres.tilesprocessed)
                 if (myres.tilestoprocess > 0 || myres.futuretasklistsize > 0 ||
-                    myres.latestslice != ""){
+                    myres.latestslice != "" || 
+                    prevTilesProcessed < tilesProcessedNum){
                    refreshOverlays();
                 }
+                prevTilesProcessed = tilesProcessedNum
             }, @@REFRESH_INTERVAL_MILLIS@@);
 
         </script>
