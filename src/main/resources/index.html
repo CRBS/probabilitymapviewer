@@ -158,9 +158,9 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
         var northEast = L.latLng(-1, @@IMAGE_WIDTH@@);
       
         var tileBounds = L.latLngBounds(southWest, northEast);
-
+        var prevTilesProcessed = 0;
         var paddedTileBounds = tileBounds.pad(0.05);
-        var tileSize = @@TILESIZE@@
+        var tileSize = @@TILESIZE@@;
         // this should be set to initial base layer url
         // and updated in refresh to the appropriate layer
         // if the user wants to be moved to the newest layer
@@ -421,11 +421,13 @@ THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS.
                     slicesCollectedElement.innerHTML = myres.slicescollected;
                     expectedSlices.innerHTML = myres.expectedslices;
                 }
-                
+                tilesProcessedNum = Number(myres.tilesprocessed)
                 if (myres.tilestoprocess > 0 || myres.futuretasklistsize > 0 ||
-                    myres.latestslice != ""){
+                    myres.latestslice != "" || 
+                    prevTilesProcessed < tilesProcessedNum){
                    refreshOverlays();
                 }
+                prevTilesProcessed = tilesProcessedNum
             }, @@REFRESH_INTERVAL_MILLIS@@);
 
         </script>
