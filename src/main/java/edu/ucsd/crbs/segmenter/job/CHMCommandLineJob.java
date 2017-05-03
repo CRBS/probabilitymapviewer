@@ -101,7 +101,7 @@ public class CHMCommandLineJob implements Callable {
         
             result = _runCommandLineProcess.runCommandLineProcess(_binary,
                     _inputImage,tempDir.getAbsolutePath(),
-                    "-b",_tileSize,"-o",_overlap,"-t","1,1","-m",_trainedModel,
+                    "-b",_tileSize,"-o",_overlap,"-t","1,1","-h","-m",_trainedModel,
                     "-M",
                     _matlabDir);
             long chmDuration = System.currentTimeMillis() - startTime;
