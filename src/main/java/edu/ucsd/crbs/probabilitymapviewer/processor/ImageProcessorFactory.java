@@ -71,56 +71,6 @@ public class ImageProcessorFactory {
                 getAnalyzingTile(layer));
     }
     
-    private ImageProcessor getSGECHMImageProcessor(final String workingDir,
-            CustomLayer layer){
-        
-        return new SGECHMImageProcessor(_props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
-                    workingDir,
-                    layer.getScript(),
-                    _props.getProperty(App.CHM_BIN_ARG)+File.separator+CHM_TEST_SH,
-                    _props.getProperty(App.MATLAB_ARG),layer.getConvertColor(),
-                    _props.getProperty(App.TILE_SIZE_ARG),
-                    _props.getProperty(App.SGE_CHM_QUEUE_ARG),
-                    _props.getProperty(App.CONVERT_ARG),
-                    getAnalyzingTile(layer));
-    }
-    
-    private ImageProcessor getSimpleCHMImageProcessor(final String workingDir,
-            CustomLayer layer){
-        return new SimpleCHMImageProcessor(_props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
-                    workingDir,
-                    layer.getScript(),
-                    _props.getProperty(App.CHM_BIN_ARG)+File.separator+CHM_TEST_SH,
-                    _props.getProperty(App.MATLAB_ARG),layer.getConvertColor(),
-                    _props.getProperty(App.TILE_SIZE_ARG),
-                    getAnalyzingTile(layer));
-    }
-    
-    private ImageProcessor getSimpleIlastikImageProcessor(final String workingDir,
-            CustomLayer layer){
-        /** @TODO Add support for analyzing tile */
-        return new SimpleIlastikImageProcessor(_props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
-                    workingDir,
-                    layer.getScript(),
-                    _props.getProperty(App.ILASTIK_ARG)+File.separator+RUN_ILASTIK_SH,
-                    _props.getProperty(App.MATLAB_ARG),layer.getConvertColor(),
-                    _props.getProperty(App.TILE_SIZE_ARG));
-        
-        
-    }
-    
-    private ImageProcessor getSGEIlastikImageProcessor(final String workingDir,
-            CustomLayer layer){
-        /** @TODO Add support for analyzing tile */
-        return new SGEIlastikImageProcessor(_props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
-                    workingDir,
-                    layer.getScript(),
-                    _props.getProperty(App.ILASTIK_ARG)+File.separator+RUN_ILASTIK_SH,
-                    layer.getConvertColor(),
-                    _props.getProperty(App.SGE_ILASTIK_QUEUE_ARG),
-                    _props.getProperty(App.CONVERT_ARG));
-    }
-    
     private String getAnalyzingTile(CustomLayer layer){
         String analyzingTile = null;
         if (_props.getProperty(App.DISABLE_ANALYZING_TILE_ARG,"true").equals("false")){
