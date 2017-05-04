@@ -55,22 +55,15 @@ public class App {
     private static final Logger _log = Logger.getLogger(App.class.getName());
 
     public static final String INPUT_IMAGE_ARG = "inputimage";
-    public static final String ADJUSTED_INPUT_IMAGE_ARG = "adjustedinputimage";
-    
-    public static final String CHM_BIN_ARG = "chmbin";
-    public static final String ILASTIK_ARG = "ilastik";
+    public static final String ADJUSTED_INPUT_IMAGE_ARG = "adjustedinputimage";    
     public static final String PORT_ARG = "port";
     public static final String DIR_ARG = "dir";
-    public static final String MATLAB_ARG = "matlab";
     public static final String NUM_CORES_ARG = "cores";
     public static final String CUSTOM_ARG = "custom";
     public static final String IMAGE_WIDTH_ARG = "imagewidth";
     public static final String IMAGE_HEIGHT_ARG = "imageheight";
-
     public static final String TITLE_ARG = "title";
-
     public static final String IMAGE_NAME_ARG = "inputimagename";
-
     public static final String OVERLAY_OPACITY_ARG = "overlayopacity";
     public static final String TILE_SIZE_ARG = "tilesize";
     public static final String TEMP_DIR_CREATED_FLAG = "TEMP_DIR_CREATED";
@@ -79,11 +72,9 @@ public class App {
     public static final String SGE_ILASTIK_QUEUE_ARG = "sgeilastikqueue";
     public static final String CONVERT_ARG = "convertbinary";
     public static final String CCDB_ARG = "ccdb";
-
     public static final String SIMULATE_COLLECTION_ARG = "simulatecollection";
     public static final String COLLECTION_MODE_ARG = "collectionmode";
     public static final String DM4_COLLECTION_MODE_ARG = "dm4collectionmode";
-
     public static final String COLLECTION_DELAY_ARG = "collectiondelay";
     public static final String EXPECTED_SLICES_ARG = "expectedslices";
     public static final String REFRESH_OVERLAY_DELAY_ARG
@@ -616,13 +607,6 @@ public class App {
                     props.getProperty(INPUT_IMAGE_ARG));
         }
         
-        
-        
-        if (optionSet.has(CHM_BIN_ARG)) {
-            props.setProperty(CHM_BIN_ARG,
-                    ((File) optionSet.valueOf(CHM_BIN_ARG)).getAbsolutePath());
-        }
-
         props.setProperty(LAYER_HANDLER_BASE_DIR, props.getProperty(DIR_ARG)
                 + File.separator + LAYER_HANDLER_BASE_DIR);
 
