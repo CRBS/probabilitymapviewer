@@ -162,7 +162,8 @@ public class App {
                             .withRequiredArg().ofType(File.class).required();
 
                     accepts(TITLE_ARG, "Title for app").withRequiredArg()
-                            .ofType(String.class).defaultsTo("Segmenter");
+                            .ofType(String.class).defaultsTo("Probability Map "
+                                    + "Viewer");
                     accepts(IMAGE_NAME_ARG, "Name of input image")
                             .withRequiredArg().ofType(String.class)
                             .defaultsTo("Base image");
@@ -175,12 +176,6 @@ public class App {
                     accepts(OVERLAY_OPACITY_ARG, "Opacity of segmentation "
                             + "layers 0-1").withRequiredArg()
                             .ofType(Double.class).defaultsTo(0.3);
-                    accepts(CHM_BIN_ARG, "Path to CHM bin directory")
-                            .withRequiredArg().ofType(File.class);
-                    accepts(MATLAB_ARG, "Path to Matlab base directory ie "
-                            + "/../matlab2013a/v81").withRequiredArg()
-                            .ofType(File.class).required();
-
                     accepts(PORT_ARG, "Port to run service").withRequiredArg()
                             .ofType(Integer.class).defaultsTo(8080);
 
@@ -197,13 +192,14 @@ public class App {
                             .ofType(String.class)
                             .defaultsTo("http://surus.crbs.ucsd.edu:8080/");
 
-                    accepts(NUM_CORES_ARG, "Number of concurrent CHM jobs to "
-                            + "run.  Each job requires 1gb ram.")
+                    accepts(NUM_CORES_ARG, "Number of concurrent probability map"
+                            + "generator scripts to run. ")
                             .withRequiredArg().ofType(Integer.class)
                             .defaultsTo(1);
 
                     accepts(USE_SGE_ARG, "Use Sun/Oracle Grid Engine (SGE) "
-                            + "to run CHM.  If used then --"
+                            + "to run probability map generator script.  "
+                            + "If used then --"
                             + DIR_ARG + " must be set to a path on a shared "
                             + "filesystem accessible to all compute nodes");
 
@@ -211,12 +207,7 @@ public class App {
                             + "  Only relevant with --" + USE_SGE_ARG)
                             .withRequiredArg().ofType(String.class)
                             .defaultsTo("all.q");
-
-                    accepts(SGE_ILASTIK_QUEUE_ARG, "Sets the SGE Ilastik queue "
-                            + "to use.  Only relevant with --" + USE_SGE_ARG)
-                            .withRequiredArg().ofType(String.class)
-                            .defaultsTo("all.q");
-
+                    
                     accepts(CONVERT_ARG, "Sets path to convert command (only "
                             + "works with --" + USE_SGE_ARG + " and --"
                             + DM4_COLLECTION_MODE_ARG + ")")
@@ -240,32 +231,23 @@ public class App {
                             .withRequiredArg().ofType(String.class)
                             .defaultsTo("mrc2tif");
 
-                    accepts(CUSTOM_ARG, "Custom Segmentation layer\n(comma "
+                    accepts(CUSTOM_ARG, "Custom probability map layer\n(comma "
                             + "delimited)\n"
-                            + " *trained model - path to chm trained model\n"
-                            + "   for chm or path to script for external mode\n"
-                            + " *name - Name to display in overlay menu\n"
-                            + " *color - can be one of the following: red,green"
-                            + ",blue,yellow,magenta,cyan\n"
-                            + " *binary - Set to 'chm' to run chm OR\n"
-                            + "           'external' to run script set\n"
-                            + "           in *trained model.  This\n script"
-                            + "           needs to accept 2 arguments\n"
+                            + " *script - path to probability map generator.\n"
+                            + "           This script needs to accept 2 "
+                            + "           arguments\n"
                             + "           first is input png file and\n"
                             + "           second is path to png file\n"
                             + "           where script should write\n"
                             + "           output.  Output image\n"
                             + "           should be 8-bit grayscale\n"
                             + "           image where 0 is no segmentation\n"
-                            + "           and 255 will be shown on UI\n")
+                            + "           and 255 will be shown on UI\n"
+                            + " *name - Name to display in overlay menu\n"
+                            + " *color - can be one of the following: red,green"
+                            + ",blue,yellow,magenta,cyan\n")
                             .withRequiredArg().ofType(String.class)
                             .describedAs("trained model,name,color,binary");
-                    accepts(ILASTIK_ARG, "Sets path to Ilastik directory ie "
-                            + "ilastik-1.1.2-Linux").withRequiredArg()
-                            .ofType(File.class)
-                            .defaultsTo(new File("/var/tmp/ilastik-1.1.2"
-                                    + "-Linux"));
-
                     accepts(COLLECTION_DELAY_ARG,
                             "Delay in seconds before loading next image for "
                             + "simluated collection and delay between "
@@ -369,8 +351,6 @@ public class App {
 
             copyOverJqueryLibrary(props);
 
-            setCHMBinDir(props);
-
             //if collection mode is enabled then set the latest slice path
             SliceMonitor sliceMonitor = null;
             CubeProgressBar cubeProgressBar = new CubeProgressBarImpl(props);
@@ -413,7 +393,8 @@ public class App {
             long iterationCounter = 0;
             int collectionDelay = Integer.parseInt(props.getProperty(COLLECTION_DELAY_ARG));
             _log.log(Level.INFO,"Entering while loop");
-            while (SIGNAL_RECEIVED == false && (sws.getServer().isStarting() || sws.getServer().isRunning())) {
+            while (SIGNAL_RECEIVED == false && (sws.getServer().isStarting() || 
+                    sws.getServer().isRunning())) {
                 //one idea is to have all the image processors dump to a single list
                 //and to have this loop track the completed job list and running job list
                 //we can then just grab the newest items from the list and pass them to the
@@ -428,8 +409,11 @@ public class App {
                 }
 
                 if (totalProcessedCount != prevTotalProcessedCount) {
-                    _log.log(Level.INFO, "Total Processed Count is {0}, Future Task List Size: {1}, and desired load is {2} and tiles to process is {3}",
-                            new Object[]{totalProcessedCount, futureTaskList.size(), desiredLoad,
+                    _log.log(Level.INFO, "Total Processed Count is {0}, Future "
+                            + "Task List Size: {1}, and desired load is {2} "
+                            + "and tiles to process is {3}",
+                            new Object[]{totalProcessedCount,
+                                futureTaskList.size(), desiredLoad,
                                 tilesToProcess.size()});
                 }
                 prevTotalProcessedCount = totalProcessedCount;
@@ -450,7 +434,8 @@ public class App {
             sws.getServer().stop();
             es.shutdownNow();
 
-            _log.log(Level.INFO, "Sleeping for 5 seconds to let things cool down");
+            _log.log(Level.INFO, "Sleeping for 5 seconds to let things cool "
+                    + "down");
             threadSleep(5000);
 
         } catch (Exception ex) {
@@ -611,7 +596,6 @@ public class App {
                 ((Integer) optionSet.valueOf(COLLECTION_DELAY_ARG)).toString());
         props.setProperty(CONVERT_ARG, (String) optionSet.valueOf(CONVERT_ARG));
         props.setProperty(SGE_CHM_QUEUE_ARG, (String) optionSet.valueOf(SGE_CHM_QUEUE_ARG));
-        props.setProperty(SGE_ILASTIK_QUEUE_ARG, (String) optionSet.valueOf(SGE_ILASTIK_QUEUE_ARG));
         props.setProperty(IMAGE_NAME_ARG, (String) optionSet.valueOf(IMAGE_NAME_ARG));
         props.setProperty(TITLE_ARG, (String) optionSet.valueOf(TITLE_ARG));
         props.setProperty(TILE_SIZE_ARG, ((Integer) optionSet.valueOf(TILE_SIZE_ARG)).toString());
@@ -639,9 +623,6 @@ public class App {
                     ((File) optionSet.valueOf(CHM_BIN_ARG)).getAbsolutePath());
         }
 
-        props.setProperty(MATLAB_ARG,
-                ((File) optionSet.valueOf(MATLAB_ARG)).getAbsolutePath());
-
         props.setProperty(LAYER_HANDLER_BASE_DIR, props.getProperty(DIR_ARG)
                 + File.separator + LAYER_HANDLER_BASE_DIR);
 
@@ -650,46 +631,8 @@ public class App {
 
         props.setProperty(CCDB_ARG, (String) optionSet.valueOf(CCDB_ARG));
 
-        props.setProperty(ILASTIK_ARG,
-                ((File) optionSet.valueOf(ILASTIK_ARG)).getAbsolutePath());
-
-        System.out.println(props.toString());
+        _log.log(Level.CONFIG, props.toString());
         return props;
-    }
-
-    public static void setCHMBinDir(Properties props) throws Exception {
-        String chm = "chm-compiled-r2013a-2.1.362";
-
-        if (!props.containsKey(CHM_BIN_ARG)) {
-            _log.log(Level.INFO, "--{0} not set using internal copy of CHM",
-                    CHM_BIN_ARG);
-
-            File workingDir = new File(props.getProperty(DIR_ARG));
-            //chm bin was not set.  Lets copy chm bin out of the resource path and into
-            //the working dir under bin
-            File workingDirBin = new File(workingDir.getAbsolutePath() + File.separator + "bin");
-            workingDirBin.mkdirs();
-
-            File chmTest = new File(workingDirBin + File.separator + "CHM_test");
-            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + chm + "/CHM_test"), chmTest);
-            chmTest.setExecutable(true);
-
-            File chmTestSh = new File(workingDirBin + File.separator + "CHM_test.sh");
-            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + chm + "/CHM_test.sh"), chmTestSh);
-            chmTestSh.setExecutable(true);
-
-            File chmTrain = new File(workingDirBin + File.separator + "CHM_train");
-            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + chm + "/CHM_train"), chmTrain);
-            chmTrain.setExecutable(true);
-
-            File chmTrainSh = new File(workingDirBin + File.separator + "CHM_train.sh");
-            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + chm + "/CHM_train.sh"), chmTrainSh);
-            chmTrainSh.setExecutable(true);
-
-            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + chm + "/LICENSE.txt"), new File(workingDirBin + File.separator + "LICENSE.txt"));
-            FileUtils.copyInputStreamToFile(Class.class.getResourceAsStream("/" + chm + "/README.txt"), new File(workingDirBin + File.separator + "README.txt"));
-            props.setProperty(CHM_BIN_ARG, workingDirBin.getAbsolutePath());
-        }
     }
 
     public static void copyOverLeafletLibrary(Properties props) throws Exception {
@@ -803,11 +746,13 @@ public class App {
 
     }
 
-    public static SegmenterWebServer getWebServer(ExecutorService es, Properties props, List<CustomLayer> layers) throws Exception {
+    public static SegmenterWebServer getWebServer(ExecutorService es, 
+            Properties props, List<CustomLayer> layers) throws Exception {
 
         SegmenterWebServerFactory serverFac = new SegmenterWebServerFactory();
 
-        SegmenterWebServer sws = serverFac.getSegmenterWebServer(es, props, layers);
+        SegmenterWebServer sws = serverFac.getSegmenterWebServer(es, props, 
+                layers);
 
         System.out.println("\n\n\tOpen a browser to this URL: http://localhost:"
                 + props.getProperty(PORT_ARG) + "\n\n");
@@ -815,7 +760,8 @@ public class App {
         return sws;
     }
 
-    public static void generateIndexHtmlPage(Properties props, List<CustomLayer> layers) throws Exception {
+    public static void generateIndexHtmlPage(Properties props, 
+            List<CustomLayer> layers) throws Exception {
 
         HtmlPageGenerator pageGenerator = new SingleImageIndexHtmlPageGenerator(props, layers);
         pageGenerator.generateHtmlPage(props.getProperty(DIR_ARG));
