@@ -45,14 +45,23 @@ public class CustomLayer {
     private String _script;
     private String _name;
     private String _color;
-    private String _binary;
+    private String _optargs;
     private String _internalDir;
     
-    public CustomLayer(final String script,final String name,
-            final String color){
+    public CustomLayer(final String name,final String color,
+            final String script,
+            final String optargs){
         _script = script;
         _name = name;
         _color = color;
+        
+        if (optargs == null){
+            _optargs = "";
+        }
+        else {
+            _optargs = optargs;
+        }
+        
         if (_name == null){
             _internalDir = "uhoh";
         }
@@ -61,6 +70,15 @@ public class CustomLayer {
         }
     }
 
+    /**
+     * Gets any optional arguments that should be passed
+     * to the script
+     * @return String with optional arguments or empty string
+     */
+    public String getOptArgs(){
+        return _optargs;
+    }
+    
     public String getScript() {
         return _script;
     }

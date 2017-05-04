@@ -38,6 +38,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.util.Map;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -72,25 +73,25 @@ public class RunCommandLineProcessImpl implements RunCommandLineProcess {
     
     
     @Override
-    public String runCommandLineProcess(String... command) throws Exception {
-        String[] mCmd;
-        int i = 0;
-        mCmd = new String[command.length];
+    public String runCommandLineProcess(String... command) throws Exception {        
+        ArrayList<String> mCmd = new ArrayList<String>();
         _lastCommand = null;
         StringBuilder lastCmdSb = new StringBuilder();
         for (String c : command) {
-            mCmd[i] = c;
+            if (c.equals("")){
+                continue;
+            }
+            mCmd.add(c);
             if (lastCmdSb.length() > 0){
                 lastCmdSb.append(" ");
             }
-            lastCmdSb.append(mCmd[i]);
-            i++;
+            lastCmdSb.append(c);
         }
         _lastCommand = lastCmdSb.toString();
         
         _log.log(Level.FINE,"Running command: " + _lastCommand);
-        
-        ProcessBuilder pb = new ProcessBuilder(mCmd);
+        String[] yo = new String[mCmd.size()];
+        ProcessBuilder pb = new ProcessBuilder(mCmd.toArray(yo));
 
         //lets caller set working directory
         if (_workingDirectory != null) {
@@ -124,7 +125,7 @@ public class RunCommandLineProcessImpl implements RunCommandLineProcess {
         int retVal = proc.waitFor();
         if (retVal != 0){
             throw new Exception("Non zero exit code ("+retVal+") received from "+
-                    mCmd[0]+": " + sb.toString());
+                    mCmd.get(0) + ": " + sb.toString());
         }
         return sb.toString();
     }

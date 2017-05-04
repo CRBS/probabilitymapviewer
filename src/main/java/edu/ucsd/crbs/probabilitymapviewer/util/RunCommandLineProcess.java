@@ -33,6 +33,7 @@
 
 package edu.ucsd.crbs.probabilitymapviewer.util;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -56,4 +57,6 @@ public interface RunCommandLineProcess {
      * @throws java.lang.Exception if there was an error invoking the process or if the process returns non zero exit code
      */
     public String runCommandLineProcess(String... command) throws Exception;
+    
+    public String runCommandLineProcess(List<String> cmdAndArgs) throws Exception;
 }

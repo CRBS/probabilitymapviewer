@@ -224,6 +224,9 @@ public class App {
 
                     accepts(CUSTOM_ARG, "Custom probability map layer\n(comma "
                             + "delimited)\n"
+                            + " *name - Name to display in overlay menu\n"
+                            + " *color - can be one of the following: red,green"
+                            + ",blue,yellow,magenta,cyan\n"
                             + " *script - path to probability map generator.\n"
                             + "           This script needs to accept 2 "
                             + "           arguments\n"
@@ -234,11 +237,11 @@ public class App {
                             + "           should be 8-bit grayscale\n"
                             + "           image where 0 is no segmentation\n"
                             + "           and 255 will be shown on UI\n"
-                            + " *name - Name to display in overlay menu\n"
-                            + " *color - can be one of the following: red,green"
-                            + ",blue,yellow,magenta,cyan\n")
+                            + " *optargs - optional arguments to pass to "
+                            + "            script after the first two"
+                            + "            arguments\n")
                             .withRequiredArg().ofType(String.class)
-                            .describedAs("trained model,name,color,binary");
+                            .describedAs("name,color,script,optargs");
                     accepts(COLLECTION_DELAY_ARG,
                             "Delay in seconds before loading next image for "
                             + "simluated collection and delay between "

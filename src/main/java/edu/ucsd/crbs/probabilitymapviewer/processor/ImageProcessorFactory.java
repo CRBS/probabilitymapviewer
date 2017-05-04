@@ -68,7 +68,8 @@ public class ImageProcessorFactory {
                    workingDir,layer.getScript(),layer.getConvertColor(),
                 _props.getProperty(App.CONVERT_ARG),
                    _props.getProperty(App.TILE_SIZE_ARG),
-                getAnalyzingTile(layer));
+                getAnalyzingTile(layer),
+                layer.getOptArgs());
     }
     
     private String getAnalyzingTile(CustomLayer layer){

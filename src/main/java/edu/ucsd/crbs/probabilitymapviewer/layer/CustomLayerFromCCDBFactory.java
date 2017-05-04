@@ -47,7 +47,7 @@ public class CustomLayerFromCCDBFactory {
             final String trainedModelDir,
             final String color){
         
-        return new CustomLayer(trainedModelDir,id,color);
+        return new CustomLayer(trainedModelDir,id,color,null);
     }
 
 }

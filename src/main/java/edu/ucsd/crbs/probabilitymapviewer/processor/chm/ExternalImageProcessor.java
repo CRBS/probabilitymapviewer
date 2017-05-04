@@ -27,19 +27,22 @@ public class ExternalImageProcessor implements ImageProcessor {
     private String _tileSize;
     private String _analyzingTile;
     private String _convert;
+    private String _optArgs;
     
     public ExternalImageProcessor(final String inputImageDir,
             final String workingDir,
             final String binary,final String colorsToZeroOut,
             final String convert,
             final String tileSize,
-            final String analyzingTile){
+            final String analyzingTile,
+            final String optArgs){
         _inputImageDir = inputImageDir;
         _workingDir = workingDir;
         _binary = binary;
         _colorsToZeroOut = colorsToZeroOut;
         _tileSize = tileSize+"x"+tileSize;
         _analyzingTile = analyzingTile;
+        _optArgs = optArgs;
         _log.log(Level.INFO,"Image Processor colors to zero out: {0}",_colorsToZeroOut);
     }
     
@@ -60,7 +63,7 @@ public class ExternalImageProcessor implements ImageProcessor {
         
         ExternalCommandLineJob job = new ExternalCommandLineJob(fileCheckPath,
                 _binary,workingDirPath,_tileSize,_colorsToZeroOut,
-        _analyzingTile);
+                _analyzingTile,_optArgs);
         _log.log(Level.INFO,"Submitting image {0} for processing and writing "
                 + "output to {1}",
                 new Object[]{image,workingDirPath});

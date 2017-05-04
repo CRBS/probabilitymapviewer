@@ -30,17 +30,20 @@ public class ExternalCommandLineJob implements Callable{
     private String _matlabDir;
     private String _colorsToZeroOut;
     private String _analyzingTile;
+    private String _optArgs;
     private RunCommandLineProcess _runCommandLineProcess;
     
     public ExternalCommandLineJob(final String inputImage,
             final String binary,final String outDir, final String tileSize,
-            final String colorsToZeroOut, final String analyzingTile){
+            final String colorsToZeroOut, final String analyzingTile,
+            final String optArgs){
          _inputImage = inputImage;
         _binary = binary;
         _outDir = outDir;
         _tileSize = tileSize;
         _colorsToZeroOut = colorsToZeroOut;
         _analyzingTile = analyzingTile;
+        _optArgs = optArgs;
         _runCommandLineProcess = new RunCommandLineProcessImpl();
     }
     
@@ -52,8 +55,8 @@ public class ExternalCommandLineJob implements Callable{
     public JobResult call() {
         _runCommandLineProcess.setWorkingDirectory(_outDir);
         String result = null;
-        _log.log(Level.INFO, "Running {0} on {1}",
-                new Object[]{_binary,_inputImage});
+        _log.log(Level.INFO, "Running {0} on {1} with optargs: {2}",
+                new Object[]{_binary,_inputImage,_optArgs});
         JobResult jobResult = new JobResult();
         try {
             int slashPos = _inputImage.lastIndexOf('/');
@@ -74,7 +77,10 @@ public class ExternalCommandLineJob implements Callable{
         
             result = _runCommandLineProcess.runCommandLineProcess(_binary,
                     _inputImage,
-                    tempDir.getAbsolutePath() + File.separator + fileName);
+                    tempDir.getAbsolutePath() + File.separator + fileName,
+                    _optArgs);
+            
+            _log.log(Level.INFO,"opt args:{0}:", new Object[]{_optArgs});
             
             long extDuration = System.currentTimeMillis() - startTime;
             _log.log(Level.FINE,"{0} output: {1}",
