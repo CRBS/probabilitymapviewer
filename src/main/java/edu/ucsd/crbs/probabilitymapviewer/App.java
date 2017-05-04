@@ -47,7 +47,7 @@ import sun.misc.Signal;
 import sun.misc.SignalHandler;
 
 /**
- * Hello world!
+ * Main entry point for Probability Map Viewer application
  *
  */
 public class App {
