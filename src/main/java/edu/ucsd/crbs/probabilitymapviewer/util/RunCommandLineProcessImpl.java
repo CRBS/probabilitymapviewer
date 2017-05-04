@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.InputStreamReader;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -70,6 +71,12 @@ public class RunCommandLineProcessImpl implements RunCommandLineProcess {
     public String getLastCommand() {
         return _lastCommand;
     }
+
+    @Override
+    public String runCommandLineProcess(List<String> cmdAndArgs) throws Exception {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
     
     
     @Override
