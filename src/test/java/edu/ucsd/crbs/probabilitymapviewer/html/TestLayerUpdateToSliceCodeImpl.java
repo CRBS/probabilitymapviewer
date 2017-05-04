@@ -70,7 +70,7 @@ public class TestLayerUpdateToSliceCodeImpl {
     }
 
     @Test public void testValidLayer(){
-        CustomLayer cl = new CustomLayer("/trainedmodel","foo","blue","chm");
+        CustomLayer cl = new CustomLayer("/trainedmodel","foo","blue");
         LayerUpdateToSliceCodeImpl updateCode = new LayerUpdateToSliceCodeImpl(cl);
         assertTrue(updateCode.getLayerUpdateToSliceCode(),
                 updateCode.getLayerUpdateToSliceCode().startsWith("foo.setUrl('layerhandlers/foo/'+sliceName+'/"+cl.getImageName()+"');"));

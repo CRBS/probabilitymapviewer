@@ -42,18 +42,17 @@ public class CustomLayer {
     
     private static final Logger _log = Logger.getLogger(CustomLayer.class.getName());
     
-    private String _trainedModelDir;
+    private String _script;
     private String _name;
     private String _color;
     private String _binary;
     private String _internalDir;
     
-    public CustomLayer(final String trainedModelDir,final String name,
-            final String color,final String binary){
-        _trainedModelDir = trainedModelDir;
+    public CustomLayer(final String script,final String name,
+            final String color){
+        _script = script;
         _name = name;
         _color = color;
-        _binary = binary;
         if (_name == null){
             _internalDir = "uhoh";
         }
@@ -62,8 +61,8 @@ public class CustomLayer {
         }
     }
 
-    public String getTrainedModelDir() {
-        return _trainedModelDir;
+    public String getScript() {
+        return _script;
     }
 
     public String getName() {
@@ -72,10 +71,6 @@ public class CustomLayer {
 
     public String getColor() {
         return _color;
-    }
-
-    public String getBinary() {
-        return _binary;
     }
     
     public String getVarName(){

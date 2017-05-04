@@ -56,34 +56,16 @@ public class ImageProcessorFactory {
     }
     
     public ImageProcessor getImageProcessor(CustomLayer layer){
-        
         String workingDir =  _props.getProperty(App.LAYER_HANDLER_BASE_DIR)
                 +File.separator+layer.getVarName();
-        if (layer.getBinary().equalsIgnoreCase("chm")){
-            if (Boolean.parseBoolean(_props.getProperty(App.USE_SGE_ARG,
-                    Boolean.FALSE.toString()))){
-                return getSGECHMImageProcessor(workingDir,layer);
-            }
-            return getSimpleCHMImageProcessor(workingDir,layer);
-        }
-        else if (layer.getBinary().equalsIgnoreCase("ilastik")){
-            if (Boolean.parseBoolean(_props.getProperty(App.USE_SGE_ARG,
-                    Boolean.FALSE.toString()))){
-                return getSGEIlastikImageProcessor(workingDir,layer);
-            }
-            return getSimpleIlastikImageProcessor(workingDir,layer);
-        }
-        else if (layer.getBinary().equalsIgnoreCase("external")){
-            return getExternalImageProcessor(workingDir, layer);
-        }
-        return null;
+        return getExternalImageProcessor(workingDir, layer);
     }
     
     private ImageProcessor getExternalImageProcessor(final String workingDir,
             CustomLayer layer){
         return new ExternalImageProcessor(
                 _props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
-                   workingDir,layer.getTrainedModelDir(),layer.getConvertColor(),
+                   workingDir,layer.getScript(),layer.getConvertColor(),
                 _props.getProperty(App.CONVERT_ARG),
                    _props.getProperty(App.TILE_SIZE_ARG),
                 getAnalyzingTile(layer));
@@ -94,7 +76,7 @@ public class ImageProcessorFactory {
         
         return new SGECHMImageProcessor(_props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
                     workingDir,
-                    layer.getTrainedModelDir(),
+                    layer.getScript(),
                     _props.getProperty(App.CHM_BIN_ARG)+File.separator+CHM_TEST_SH,
                     _props.getProperty(App.MATLAB_ARG),layer.getConvertColor(),
                     _props.getProperty(App.TILE_SIZE_ARG),
@@ -107,7 +89,7 @@ public class ImageProcessorFactory {
             CustomLayer layer){
         return new SimpleCHMImageProcessor(_props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
                     workingDir,
-                    layer.getTrainedModelDir(),
+                    layer.getScript(),
                     _props.getProperty(App.CHM_BIN_ARG)+File.separator+CHM_TEST_SH,
                     _props.getProperty(App.MATLAB_ARG),layer.getConvertColor(),
                     _props.getProperty(App.TILE_SIZE_ARG),
@@ -119,7 +101,7 @@ public class ImageProcessorFactory {
         /** @TODO Add support for analyzing tile */
         return new SimpleIlastikImageProcessor(_props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
                     workingDir,
-                    layer.getTrainedModelDir(),
+                    layer.getScript(),
                     _props.getProperty(App.ILASTIK_ARG)+File.separator+RUN_ILASTIK_SH,
                     _props.getProperty(App.MATLAB_ARG),layer.getConvertColor(),
                     _props.getProperty(App.TILE_SIZE_ARG));
@@ -132,7 +114,7 @@ public class ImageProcessorFactory {
         /** @TODO Add support for analyzing tile */
         return new SGEIlastikImageProcessor(_props.getProperty(App.ADJUSTED_INPUT_IMAGE_ARG),
                     workingDir,
-                    layer.getTrainedModelDir(),
+                    layer.getScript(),
                     _props.getProperty(App.ILASTIK_ARG)+File.separator+RUN_ILASTIK_SH,
                     layer.getConvertColor(),
                     _props.getProperty(App.SGE_ILASTIK_QUEUE_ARG),
