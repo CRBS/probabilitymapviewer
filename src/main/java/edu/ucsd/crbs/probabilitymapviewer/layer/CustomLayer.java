@@ -3,12 +3,12 @@
  * 
  * Copyright 2014 The Regents of the University of California All Rights Reserved
  * 
- * Permission to copy, modify and distribute any part of this segmenter for 
+ * Permission to copy, modify and distribute any part of this probabilitymapviewer for 
  * educational, research and non-profit purposes, without fee, and without a 
  * written agreement is hereby granted, provided that the above copyright notice, 
  * this paragraph and the following three paragraphs appear in all copies.
  * 
- * Those desiring to incorporate this segmenter into commercial products
+ * Those desiring to incorporate this probabilitymapviewer into commercial products
  * or use for commercial purposes should contact the Technology Transfer Office, 
  * University of California, San Diego, 9500 Gilman Drive, Mail Code 0910, 
  * La Jolla, CA 92093-0910, Ph: (858) 534-5815, FAX: (858) 534-7345, 
@@ -19,13 +19,13 @@
  * LOST PROFITS, ARISING OUT OF THE USE OF THIS segmenter, EVEN IF THE UNIVERSITY 
  * OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * 
- * THE segmenter PROVIDED HEREIN IS ON AN "AS IS" BASIS, AND THE UNIVERSITY 
+ * THE probabilitymapviewer PROVIDED HEREIN IS ON AN "AS IS" BASIS, AND THE UNIVERSITY 
  * OF CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, 
  * ENHANCEMENTS, OR MODIFICATIONS. THE UNIVERSITY OF CALIFORNIA MAKES NO 
  * REPRESENTATIONS AND EXTENDS NO WARRANTIES OF ANY KIND, EITHER IMPLIED OR 
  * EXPRESS, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
  * MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR THAT THE USE OF 
- * THE segmenter WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS. 
+ * THE probabilitymapviewer WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS. 
  */
 
 package edu.ucsd.crbs.probabilitymapviewer.layer;
@@ -113,6 +113,14 @@ public class CustomLayer {
         return "";
     }
     
+    /**
+     * Based on color passed into constructor 
+     * {@link CustomLayer#CustomLayer(java.lang.String, java.lang.String, 
+     * java.lang.String, java.lang.String) }
+     * This method returns tile name that matches that color.
+     * @return Name of tile matching color ie analyzing_blue_50opac.png.
+     *         if color was null then analyzing.png is returned. 
+     */
     public String getAnalyzingTile(){
         if (_color == null){
             _log.log(Level.WARNING,"No color was set");
@@ -139,6 +147,19 @@ public class CustomLayer {
         return "analyzing_red_50opac.png";
     }
     
+    /**
+     * Gets color channels that the convert command should zero
+     * out when converting probability map grayscale images into 
+     * semi-transparent colored images. The value returned is
+     * based on color value passed into constructor 
+     * {@link CustomLayer#CustomLayer(java.lang.String, java.lang.String, 
+     * java.lang.String, java.lang.String) }
+     * 
+     * @return String denoting comma delimited list of color channels 
+     *         (Red,Green,Blue) to 
+     *         gray out. For example, if green was the color this method 
+     *         will return Red, Blue
+     */
     public String getConvertColor(){
         if (_color == null){
             _log.log(Level.WARNING,"No color was set");
