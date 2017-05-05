@@ -9,7 +9,7 @@
 Probability Map Viewer
 ======================
 
-[![Build Status](https://travis-ci.org/CRBS/segmenter.svg?branch=master)](https://travis-ci.org/CRBS/segmenter)
+[![Build Status](https://travis-ci.org/CRBS/probabilitymapviewer.svg?branch=master)](https://travis-ci.org/CRBS/probabilitymapviewer)
 
 Probability Map Viewer is a web application using an embedded [Jetty][jetty] web server that 
 performs probability map generation in near real time on tiled image data. 
