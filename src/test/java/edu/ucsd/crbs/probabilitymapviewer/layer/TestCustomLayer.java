@@ -79,6 +79,9 @@ public class TestCustomLayer {
         CustomLayer cl = new CustomLayer(null, null, null, null);
         assertTrue(cl.getBackgroundColorCSS().equals(""));
         
+        cl = new CustomLayer(null, "red", null, null);
+        assertTrue(cl.getBackgroundColorCSS().equals(""));
+        
         cl = new CustomLayer(null, "yellow", null, null);
         assertTrue(cl.getBackgroundColorCSS().equals("background-color: darkgray;"));
         
