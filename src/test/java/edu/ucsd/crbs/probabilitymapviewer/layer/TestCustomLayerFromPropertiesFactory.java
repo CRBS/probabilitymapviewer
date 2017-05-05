@@ -67,6 +67,7 @@ public class TestCustomLayerFromPropertiesFactory {
     @Test
     public void testGetCustomLayersSingleWithThreeArgs() throws Exception {
         Properties props = new Properties();
+        props.put("foo", "someval");
         props.put(App.CUSTOM_ARG,"name,color,script");
         CustomLayerFromPropertiesFactory clf = new CustomLayerFromPropertiesFactory();
         List<CustomLayer> clist = clf.getCustomLayers(props);
