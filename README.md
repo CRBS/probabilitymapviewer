@@ -55,7 +55,7 @@ java -jar probabilitymapviewer-<VERSION>-jar-with-dependencies.jar -h
 
 For more information visit the wiki:
 
-### https://github.com/crbs/Probability Map Viewer/wiki
+### https://github.com/crbs/probabilitymapviewer/wiki
 
 
 Building Probability Map Viewer manually  
