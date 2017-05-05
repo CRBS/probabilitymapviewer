@@ -259,7 +259,7 @@ public class App {
                             + " directory.");
 
                     accepts(DM4_COLLECTION_MODE_ARG,
-                            "Collection mode that tells segmenter to "
+                            "Collection mode that tells probabilitymapviewer to "
                             + "search for new *.dm4 files in --"
                             + INPUT_IMAGE_ARG + " directory.");
 
