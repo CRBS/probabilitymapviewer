@@ -93,6 +93,23 @@ public class TestCubeProgressBarImpl {
     }
     
     @Test
+    public void TestSetExpectedSlices(){
+        CubeProgressBarImpl progBar = new CubeProgressBarImpl(new Properties());
+        
+        progBar.setExpectedSlices(20);
+        String cubeName = CubeProgressBarImpl.CUBES_PREFIX_PATH + "cube100.png";
+        assertTrue(progBar.getCubeImage(20),
+                   progBar.getCubeImage(20).equals(cubeName));
+        
+        // try 0 expected slices, weird case
+        progBar.setExpectedSlices(0);
+        cubeName = CubeProgressBarImpl.CUBES_PREFIX_PATH + "cube.png";
+        assertTrue(progBar.getCubeImage(20),
+                   progBar.getCubeImage(20).equals(cubeName));
+        
+    }
+    
+    @Test
     public void testPropsNotSetExpectedSliceAndVariousSliceCounts() {
         CubeProgressBarImpl progBar = new CubeProgressBarImpl(new Properties());
         assertTrue(progBar.getCubeImage(-1), progBar.getCubeImage(-1).equals(

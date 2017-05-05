@@ -35,6 +35,8 @@ package edu.ucsd.crbs.probabilitymapviewer.util;
 
 import edu.ucsd.crbs.probabilitymapviewer.util.RunCommandLineProcessImpl;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -85,6 +87,25 @@ public class TestRunCommandLineProcessImpl {
     public void tearDown() {
     }
 
+    @Test
+    public void testRunCommandLineProcessWithListOfArgs() throws Exception {
+        try{
+            RunCommandLineProcessImpl rclp = new RunCommandLineProcessImpl();
+            ArrayList<String> cmd = new ArrayList<String>();
+            cmd.add("/bin/pwd");
+            rclp.runCommandLineProcess(cmd);
+            fail("Expected exception");
+        }
+        catch(UnsupportedOperationException e){
+                
+        }
+    }
+    @Test 
+    public void testGetLastCommandWithoutCommandInvocation(){
+       RunCommandLineProcessImpl rclp = new RunCommandLineProcessImpl();
+       assertTrue(rclp.getLastCommand() == null);
+    }
+
     /**
      * This test calls the program /bin/echo and checks the output is as expected
      */
@@ -94,6 +115,45 @@ public class TestRunCommandLineProcessImpl {
        String output = rclp.runCommandLineProcess("/bin/echo","hello world");
        assertTrue("Expected hello world\nbut got: "+output,
                output.contains("hello world\n"));
+    }
+    
+     @Test
+    public void TestRunCommandLineProcessWithExtraEmptyArg() throws Exception {
+       RunCommandLineProcessImpl rclp = new RunCommandLineProcessImpl();
+       String output = rclp.runCommandLineProcess("/bin/echo","hello world", 
+                                                  "");
+       assertTrue("Expected hello world\nbut got: "+output,
+               output.contains("hello world\n"));
+    }
+    
+    @Test
+    public void TestRunCommandLineProcessWithEmptyEnvVar() throws Exception {
+       RunCommandLineProcessImpl rclp = new RunCommandLineProcessImpl();
+       HashMap<String,String> envMap = new HashMap<String,String>();
+       rclp.setEnvironmentVariables(envMap);
+       String output = rclp.runCommandLineProcess("/bin/echo", "hello world");
+       assertTrue("Couldnt find hello world in " + output.replaceAll("\n",""),
+                  output.replaceAll("\n","").contains("hello world"));
+    }
+    
+    @Test
+    public void TestRunCommandLineProcessWithEnvVar() throws Exception {
+       RunCommandLineProcessImpl rclp = new RunCommandLineProcessImpl();
+       HashMap<String,String> envMap = new HashMap<String,String>();
+       envMap.put("HI", "hello");
+       rclp.setEnvironmentVariables(envMap);
+       String output = rclp.runCommandLineProcess("/bin/env");
+       assertTrue("Couldnt find HI=hello in " + output.replaceAll("\n",""),
+                  output.replaceAll("\n","").contains("HI=hello"));
+    }
+    
+    @Test
+    public void TestRunCommandLineProcessSetWorkingDir() throws Exception {
+       RunCommandLineProcessImpl rclp = new RunCommandLineProcessImpl();
+       rclp.setWorkingDirectory(File.separator);
+       String output = rclp.runCommandLineProcess("/bin/pwd");
+       assertTrue("Couldnt find / in " + output.replaceAll("\n",""),
+                  output.replaceAll("\n","").contains("/"));
     }
     
     /**
@@ -109,8 +169,7 @@ public class TestRunCommandLineProcessImpl {
        catch(Exception ex){
            assertTrue(ex.getMessage().startsWith("Non zero exit code (1) received from "+FALSE_BINARY+": "));
        }
-    }
-    
+    } 
 
      @Test
      public void TestRunCommandLineProcessWithNonExistantCommand() throws Exception {
@@ -123,5 +182,4 @@ public class TestRunCommandLineProcessImpl {
              assertTrue("expected IOException of cannot run program",ex.getMessage().contains("Cannot run program"));
          }
      }
-
 }
