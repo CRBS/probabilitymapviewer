@@ -9,6 +9,8 @@
 Probability Map Viewer
 ======================
 
+Formerly known as  **Segmenter**
+
 [![Build Status](https://travis-ci.org/CRBS/probabilitymapviewer.svg?branch=master)](https://travis-ci.org/CRBS/probabilitymapviewer) [![Coverage Status](https://coveralls.io/repos/github/CRBS/probabilitymapviewer/badge.svg?branch=master)](https://coveralls.io/github/CRBS/probabilitymapviewer?branch=master)
 
 Probability Map Viewer is a web application using an embedded [Jetty][jetty] web server that 
@@ -16,7 +18,9 @@ performs probability map generation in near real time on tiled image data.
 Probability Map Viewer is designed to be run on a linux machine with the web application
 viewable locally or remotely via a web browser.
 
-Probability map generation can be performed by any external command line script.
+
+
+Probability map generation can be performed by an external command line script.
 
 ![Probability Map Viewer in Single Image Analysis Mode](docs/single.png)
 
