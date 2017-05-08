@@ -142,7 +142,7 @@ public class TestRunCommandLineProcessImpl {
        HashMap<String,String> envMap = new HashMap<String,String>();
        envMap.put("HI", "hello");
        rclp.setEnvironmentVariables(envMap);
-       String output = rclp.runCommandLineProcess("/bin/env");
+       String output = rclp.runCommandLineProcess("/usr/bin/env");
        assertTrue("Couldnt find HI=hello in " + output.replaceAll("\n",""),
                   output.replaceAll("\n","").contains("HI=hello"));
     }
