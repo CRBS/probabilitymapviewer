@@ -237,11 +237,11 @@ public class App {
                             + "           should be 8-bit grayscale\n"
                             + "           image where 0 is no segmentation\n"
                             + "           and 255 will be shown on UI\n"
-                            + " *optargs - optional arguments to pass to "
+                            + " *optarg - optional argument to pass to "
                             + "            script after the first two"
                             + "            arguments\n")
                             .withRequiredArg().ofType(String.class)
-                            .describedAs("name,color,script,optargs");
+                            .describedAs("name,color,script,optarg");
                     accepts(COLLECTION_DELAY_ARG,
                             "Delay in seconds before loading next image for "
                             + "simluated collection and delay between "
