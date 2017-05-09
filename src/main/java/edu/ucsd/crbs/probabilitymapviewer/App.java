@@ -597,9 +597,9 @@ public class App {
         props.setProperty(IMAGE_WIDTH_ARG, ((Integer) optionSet.valueOf(IMAGE_WIDTH_ARG)).toString());
         props.setProperty(IMAGE_HEIGHT_ARG, ((Integer) optionSet.valueOf(IMAGE_HEIGHT_ARG)).toString());
         props.setProperty(NUM_CORES_ARG, ((Integer) optionSet.valueOf(NUM_CORES_ARG)).toString());
-        props.setProperty(INPUT_IMAGE_ARG, ((File) optionSet.valueOf(INPUT_IMAGE_ARG)).getAbsolutePath());
+        props.setProperty(INPUT_IMAGE_ARG, ((File) optionSet.valueOf(INPUT_IMAGE_ARG)).getCanonicalPath());
         props.setProperty(PORT_ARG, ((Integer) optionSet.valueOf(PORT_ARG)).toString());
-        props.setProperty(DIR_ARG, ((File) optionSet.valueOf(DIR_ARG)).getAbsolutePath());
+        props.setProperty(DIR_ARG, ((File) optionSet.valueOf(DIR_ARG)).getCanonicalPath());
         
         if (props.getProperty(App.DM4_COLLECTION_MODE_ARG,"false").equals("true")){
             props.setProperty(App.ADJUSTED_INPUT_IMAGE_ARG,props.getProperty(DIR_ARG) + File.separator +
