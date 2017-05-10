@@ -26,7 +26,6 @@ import org.junit.Assert;
 
 import edu.ucsd.crbs.probabilitymapviewer.layer.CustomLayer;
 import edu.ucsd.crbs.probabilitymapviewer.processor.ImageProcessorFactory;
-import edu.ucsd.crbs.probabilitymapviewer.processor.chm.ExternalImageProcessor;
 import java.util.Properties;
 
 /**

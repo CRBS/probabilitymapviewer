@@ -1,9 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package edu.ucsd.crbs.probabilitymapviewer.processor.chm;
+package edu.ucsd.crbs.probabilitymapviewer.processor;
 
 import edu.ucsd.crbs.probabilitymapviewer.App;
 import edu.ucsd.crbs.probabilitymapviewer.job.ExternalCommandLineJob;
@@ -51,6 +46,10 @@ public class ExternalImageProcessor implements ImageProcessor {
         String fileCheckPath = _inputImageDir+File.separator+image;
         String workingDirPath = _workingDir;
 
+        if (image == null){
+            _log.log(Level.WARNING, "Image passed into process() is null");
+            return;
+        }
         
         if (App.latestSlice != null && App.latestSlice != ""){
             workingDirPath = _workingDir+File.separator+App.latestSlice;

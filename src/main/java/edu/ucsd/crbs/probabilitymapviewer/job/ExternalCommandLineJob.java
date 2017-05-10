@@ -1,13 +1,9 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package edu.ucsd.crbs.probabilitymapviewer.job;
 
 import edu.ucsd.crbs.probabilitymapviewer.util.RunCommandLineProcess;
 import edu.ucsd.crbs.probabilitymapviewer.util.RunCommandLineProcessImpl;
 import java.io.File;
+import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,11 +19,9 @@ public class ExternalCommandLineJob implements Callable{
     private static final Logger _log = 
             Logger.getLogger(ExternalCommandLineJob.class.getName());
     private String _inputImage;
-    private String _trainedModel;
     private String _binary;
     private String _tileSize;
     private String _outDir;
-    private String _matlabDir;
     private String _colorsToZeroOut;
     private String _analyzingTile;
     private String _optArgs;
@@ -36,15 +30,51 @@ public class ExternalCommandLineJob implements Callable{
     public ExternalCommandLineJob(final String inputImage,
             final String binary,final String outDir, final String tileSize,
             final String colorsToZeroOut, final String analyzingTile,
-            final String optArgs){
-         _inputImage = inputImage;
-        _binary = binary;
+            final String optArgs) {
+        _inputImage = inputImage;
+        try {
+            _binary = new File(binary).getCanonicalPath();
+        }
+        catch(IOException ex){
+            _log.log(Level.SEVERE, "Caught IOException trying to get path to "
+                    + "binary script : " + ex.getMessage());
+            _binary = binary;
+        }
+        
         _outDir = outDir;
         _tileSize = tileSize;
         _colorsToZeroOut = colorsToZeroOut;
         _analyzingTile = analyzingTile;
         _optArgs = optArgs;
         _runCommandLineProcess = new RunCommandLineProcessImpl();
+    }
+    
+    public String getInputImage(){
+        return _inputImage;
+    }
+    
+    public String getBinary(){
+        return _binary;
+    }
+    
+    public String getTileSize(){
+        return _tileSize;
+    }
+    
+    public String getColorsToZeroOut(){
+        return _colorsToZeroOut;
+    }
+    
+    public String getAnalyzingTile(){
+        return _analyzingTile;
+    }
+    
+    public String getOptArgs(){
+        return _optArgs;
+    }
+    
+    public String getOutDir(){
+        return _outDir;
     }
     
     public void setRunCommandLineProcess(RunCommandLineProcess rclp){

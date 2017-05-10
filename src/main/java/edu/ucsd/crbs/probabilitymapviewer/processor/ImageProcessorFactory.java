@@ -32,7 +32,6 @@ package edu.ucsd.crbs.probabilitymapviewer.processor;
 
 import edu.ucsd.crbs.probabilitymapviewer.App;
 import edu.ucsd.crbs.probabilitymapviewer.layer.CustomLayer;
-import edu.ucsd.crbs.probabilitymapviewer.processor.chm.ExternalImageProcessor;
 import java.io.File;
 import java.util.Properties;
 
