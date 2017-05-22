@@ -184,7 +184,7 @@ public class TestDm4ToSliceConverter {
         props.setProperty(App.CLIP_ARG, "clip");
 
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
-        assertTrue(d.getDownsampleFactor() == 1);
+        assertTrue(d.getDownsampleFactor().equals("0"));
     }
 
     //test constructor invalid DOWNSAMPLEFACTOR_ARG
@@ -201,19 +201,19 @@ public class TestDm4ToSliceConverter {
 
         Dm4ToSliceConverter d = new Dm4ToSliceConverter(props,null);
 
-        assertTrue(d.getDownsampleFactor() == 1);
+        assertTrue(d.getDownsampleFactor().equals("0"));
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "-4");
 
         d = new Dm4ToSliceConverter(props,null);
-        assertTrue(d.getDownsampleFactor() == 1);
+        assertTrue(d.getDownsampleFactor().equals("0"));
 
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "3");
         d = new Dm4ToSliceConverter(props,null);
-        assertTrue(d.getDownsampleFactor() == 3);
+        assertTrue(d.getDownsampleFactor().equals("3"));
 
         props.setProperty(App.DOWNSAMPLEFACTOR_ARG, "0");
         d = new Dm4ToSliceConverter(props,null);
-        assertTrue(d.getDownsampleFactor() == 1);
+        assertTrue(d.getDownsampleFactor().equals("0"));
     }
 
     //test convert sourcepath is not a file
@@ -410,14 +410,16 @@ public class TestDm4ToSliceConverter {
        
         String pngTmpFile = destTmpDir
                 + File.separator + "out.png";
+        String tpngTmpFile = pngTmpFile + ".tmp.png";
+        
         RunCommandLineProcess mockrclp = mock(RunCommandLineProcess.class);
         when(mockrclp.runCommandLineProcess("dm2", srcFile, mrcTmpFile))
                 .thenReturn("hello");
         when(mockrclp.runCommandLineProcess("mrc", "-p", "-S","6,14",
                 mrcTmpFile, pngTmpFile))
                 .thenReturn("hello2");
-        when(mockrclp.runCommandLineProcess("convert", pngTmpFile, "-resize",
-                "100%", "-crop", "128x128", "-set", "filename:tile",
+        when(mockrclp.runCommandLineProcess("convert", tpngTmpFile, "-crop",
+                "128x128", "-set", "filename:tile",
                 "r%[fx:page.y/128]_c%[fx:page.x/128]", "+repage", "+adjoin",
                 destTmpDir + File.separator + "0-%[filename:tile].png"))
                 .thenThrow(new Exception("convertfailed"));

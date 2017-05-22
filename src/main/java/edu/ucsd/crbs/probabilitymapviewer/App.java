@@ -71,7 +71,6 @@ public class App {
     public static final String SGE_CHM_QUEUE_ARG = "sgechmqueue";
     public static final String SGE_ILASTIK_QUEUE_ARG = "sgeilastikqueue";
     public static final String CONVERT_ARG = "convertbinary";
-    public static final String CCDB_ARG = "ccdb";
     public static final String SIMULATE_COLLECTION_ARG = "simulatecollection";
     public static final String COLLECTION_MODE_ARG = "collectionmode";
     public static final String DM4_COLLECTION_MODE_ARG = "dm4collectionmode";
@@ -177,11 +176,6 @@ public class App {
                     accepts(TILE_SIZE_ARG, "Size of tiles in pixels ie 128 "
                             + "means 128x128").withRequiredArg()
                             .ofType(Integer.class).defaultsTo(128);
-
-                    accepts(CCDB_ARG, "URL for Cell Centered Database (CCDB) "
-                            + "web services").withRequiredArg()
-                            .ofType(String.class)
-                            .defaultsTo("http://surus.crbs.ucsd.edu:8080/");
 
                     accepts(NUM_CORES_ARG, "Number of concurrent probability map"
                             + "generator scripts to run. ")
@@ -615,8 +609,6 @@ public class App {
 
         props.setProperty(LAYER_MODEL_BASE_DIR, props.getProperty(DIR_ARG)
                 + File.separator + LAYER_MODEL_BASE_DIR);
-
-        props.setProperty(CCDB_ARG, (String) optionSet.valueOf(CCDB_ARG));
 
         _log.log(Level.CONFIG, props.toString());
         return props;
