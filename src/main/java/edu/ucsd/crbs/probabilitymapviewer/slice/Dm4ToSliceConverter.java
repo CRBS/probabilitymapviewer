@@ -174,7 +174,7 @@ public class Dm4ToSliceConverter implements SliceConverter {
                     + "readme.props");
             fw.write("inputfile=" + sourcePath + "\n");
             fw.write("name=" 
-                    + sourcePath.replace("^.*/","").replace(".dm4$","") +"\n");
+                    + sourcePath.replaceAll("^.*/","").replaceAll(".dm4$","") +"\n");
             fw.flush();
             fw.close();
         }catch(Exception ex){
