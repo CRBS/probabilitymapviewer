@@ -53,10 +53,11 @@ public class ShutdownHandler extends AbstractHandler {
             HttpServletRequest servletRequest, 
             HttpServletResponse servletResponse) throws IOException, ServletException {
         
-        _log.log(Level.INFO,"Shutdown handler called with this url {0}",
+        _log.log(Level.INFO,"Shutdown handler called with this url {0},"
+                + " ignoring request",
                 request.getRequestURI());
         
-        App.SIGNAL_RECEIVED = true;
+        //App.SIGNAL_RECEIVED = true;
     }
     
     
