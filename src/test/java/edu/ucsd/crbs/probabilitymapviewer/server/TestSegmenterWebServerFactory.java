@@ -41,6 +41,7 @@ public class TestSegmenterWebServerFactory {
     @Test
     public void testWithNullExecutorServiceAndLayers() throws Exception{
         Properties props = new Properties();
+        props.setProperty(App.PORT_ARG, "8080");
         props.setProperty(App.ADJUSTED_INPUT_IMAGE_ARG, "/foo");
         props.setProperty(App.DIR_ARG,"/dir");
         props.setProperty(App.NUM_CORES_ARG, "1");
@@ -57,6 +58,7 @@ public class TestSegmenterWebServerFactory {
     @Test
     public void testWithDisableAnalyzingTileTrueAndLayers() throws Exception{
         Properties props = new Properties();
+        props.setProperty(App.PORT_ARG, "8080");
         props.setProperty(App.ADJUSTED_INPUT_IMAGE_ARG, "/foo");
         props.setProperty(App.DIR_ARG,"/dir");
         props.setProperty(App.NUM_CORES_ARG, "1");

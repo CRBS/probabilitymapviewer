@@ -21,6 +21,25 @@ import org.eclipse.jetty.server.handler.ResourceHandler;
  */
 public class SegmenterWebServerFactory {
     
+    /**
+     * Creates 
+     * {@link edu.ucsd.crbs.probabilitymapviewer.server.SegmenterWebServer} 
+     * object by parsing Properties in <b>props</b> parameter. This method
+     * requires the following properties to be set:
+     * {@link edu.ucsd.crbs.probabilitymapviewer.App.PORT_ARG}<br/>
+     * {@link edu.ucsd.crbs.probabilitymapviewer.App.ADJUSTED_INPUT_IMAGE_ARG}<br/>
+     * {@link edu.ucsd.crbs.probabilitymapviewer.App.DIR_ARG}<br/>
+     * {@link edu.ucsd.crbs.probabilitymapviewer.App.NUM_CORES_ARG}<br/>
+     * 
+     * @param es
+     * @param props Must be a {@link java.util.Properties} with the above values
+     *              set.
+     * @param layers
+     * @return SegmenterWebServer with handlers needed by probabilitymapviewer
+     * @throws IllegalArgumentException if any of the above values are not set
+     *         in <b>props</b> Properties object.
+     * 
+     */
     public SegmenterWebServer getSegmenterWebServer(ExecutorService es,Properties props,List<CustomLayer> layers) throws Exception {
         
         SegmenterWebServer sws = new SegmenterWebServer();
