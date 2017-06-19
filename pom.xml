@@ -6,7 +6,7 @@
     </prerequisites>
     <groupId>edu.ucsd.crbs.probabilitymapviewer</groupId>
     <artifactId>probabilitymapviewer</artifactId>
-    <version>2.4.1-alpha</version>
+    <version>3.0.0-alpha</version>
     <packaging>jar</packaging>
 
     <name>probabilitymapviewer</name>
