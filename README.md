@@ -5,6 +5,7 @@
 [maven]: http://maven.apache.org/
 [java]: https://www.oracle.com/java/index.html
 [git]: https://git-scm.com/
+[chmutil]: https://github.com/crbs/chmutil
 
 Probability Map Viewer
 ======================
@@ -39,6 +40,7 @@ Requirements
 * [Image Magick][imagemagick] command line programs (namely **convert**)
 * [Matlab Runtime 2013a][matlabruntime] (needed to run [CHM][chm])
 * [Maven][maven] 3.0 or higher **(to build)**
+* [chmutil][chmutil] (used when probabilitymapviewer is converting dm4 files via **--dm4collectionmode**)
 
 
 Running 
