@@ -57,7 +57,7 @@ public class TestResourceToStringImpl implements StringReplacer {
         ResourceToStringImpl rsi = new ResourceToStringImpl();
         String res = rsi.getResourceAsString("/index.html", null);
         assertTrue(res != null);
-        assertTrue(res.startsWith("<!DOCTYPE html>"));
+        assertTrue(res.startsWith("<html>"));
     }
 
     @Test
