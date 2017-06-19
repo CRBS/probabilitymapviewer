@@ -36,7 +36,7 @@ Requirements
 ============
 
 * Centos 6+, Ubuntu 12+, and most other linux distributions should work
-* [Java][java] 7+ **(jdk to build)**
+* [Java][java] 8+ **(jdk to build)**
 * [Image Magick][imagemagick] command line programs (namely **convert**)
 * [Matlab Runtime 2013a][matlabruntime] (needed to run [CHM][chm])
 * [Maven][maven] 3.0 or higher **(to build)**
