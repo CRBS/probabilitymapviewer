@@ -1,5 +1,9 @@
 package edu.ucsd.crbs.probabilitymapviewer.io;
 
+import java.io.File;
+import java.io.FileReader;
+import java.util.List;
+import org.apache.commons.io.IOUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -7,6 +11,8 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Rule;
+import org.junit.rules.TemporaryFolder;
 
 /**
  *
@@ -14,6 +20,9 @@ import static org.junit.Assert.*;
  */
 public class TestResourceToFileImpl implements StringReplacer {
 
+    @Rule
+    public TemporaryFolder _testFolder = new TemporaryFolder();
+    
     @Override
     public String replace(String line) {
         return "hi";
@@ -74,5 +83,30 @@ public class TestResourceToFileImpl implements StringReplacer {
         catch(NullPointerException npe){
         }
     }
+    
+    @Test
+    public void testValidEverythingNoReplacer() throws Exception {
+        ResourceToFileImpl rfi = new ResourceToFileImpl();
+        File tmpDir = _testFolder.newFolder();
+        String dest = tmpDir + File.separator + "foo";
+        
+        rfi.writeResourceToScript("/index.html", dest, null);
+        
+        List<String> lines = IOUtils.readLines(new FileReader(dest));
+        assertTrue(lines.get(0).equals("<html>"));
+    }
+
+    @Test
+    public void testValidEverythingWithReplacer() throws Exception {
+        ResourceToFileImpl rfi = new ResourceToFileImpl();
+        File tmpDir = _testFolder.newFolder();
+        String dest = tmpDir + File.separator + "foo";
+        
+        rfi.writeResourceToScript("/index.html", dest, this);
+        
+        List<String> lines = IOUtils.readLines(new FileReader(dest));
+        assertTrue(lines.get(0).equals("hi"));
+    }
+
 
 }
