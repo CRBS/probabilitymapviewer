@@ -6,7 +6,8 @@
 [java]: https://www.oracle.com/java/index.html
 [git]: https://git-scm.com/
 [chmutil]: https://github.com/crbs/chmutil
-[imod]: http://bio3d.colorado.edu/imod/
+[imod]: http://bio3d.colorado.edu/imod
+
 Probability Map Viewer
 ======================
 
@@ -41,7 +42,7 @@ Requirements
 * [Matlab Runtime 2013a][matlabruntime] (needed to run [CHM][chm])
 * [Maven][maven] 3.0 or higher **(to build)**
 * [chmutil][chmutil] (used when probabilitymapviewer is converting dm4 files via **--dm4collectionmode**)
-* [IMOD][imod] (used to convert dm4 files in **--dm4collectionmode**)
+* [IMOD][imod] (used to convert dm4 files via **--dm4collectionmode**)
 
 
 Running 
