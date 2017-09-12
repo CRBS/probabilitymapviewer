@@ -69,7 +69,7 @@ Building Probability Map Viewer manually
 
 Probability Map Viewer build requirements:
 
-* [Java 7+][java] JDK
+* [Java 8+][java] JDK
 * [Maven][maven] 3.0 or higher **(to build)**
 
 Commands build Probability Map Viewer assuming machine has [Git][git] command line tools 
