@@ -20,9 +20,12 @@ performs probability map generation in near real time on tiled image data.
 Probability Map Viewer is designed to be run on a linux machine with the web application
 viewable locally or remotely via a web browser.
 
-
-
 Probability map generation can be performed by an external command line script.
+
+**Publication**
+
+Churas,C. et al. (2017) Probability Map Viewer: near real-time probability map generator of serial block electron microscopy collections. Bioinformatics, 33, 3145–3147.
+
 
 ![Probability Map Viewer in Single Image Analysis Mode](docs/single.png)
 
