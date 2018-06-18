@@ -1,0 +1,245 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "AWS CloudFormation Deep3m template. Creates an EC2 ubuntu instance off of a base Ubuntu 16.04 box. This template provides ssh access to the machine created. **WARNING** This template creates an Amazon EC2 instance. You will be billed for the AWS resources used if you create a stack from this template.",
+    "Parameters": {
+        "KeyName": {
+            "Description": "Name of an existing EC2 KeyPair to enable SSH access to the instance",
+            "Type": "AWS::EC2::KeyPair::KeyName",
+            "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+        },
+        "InstanceType": {
+            "Description": "EC2 instance type",
+            "Type": "String",
+            "Default": "m5.xlarge",
+            "AllowedValues": [
+                "t2.2xlarge",
+                "m5.large",
+                "m5.xlarge",
+                "m5.4xlarge",
+                "c5.xlarge",
+                "c5.9xlarge",
+                "c5.18xlarge"
+            ],
+            "ConstraintDescription": "must be a valid EC2 instance type."
+        },
+        "DiskSize": {
+            "Description": "Size of EC2 instance disk in gigabytes",
+            "Type": "Number",
+            "Default": "100",
+            "MinValue": "50",
+            "ConstraintDescription": "must be a whole number 50 or larger"
+        },
+        "AccessLocation": {
+            "Description": "The IP address range that can be used to SSH and visit HTTP on EC2 instance",
+            "Type": "String",
+            "MinLength": "9",
+            "MaxLength": "18",
+            "Default": "0.0.0.0/0",
+            "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
+            "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+        }
+	
+    },
+    "Mappings" : {
+       "RegionMap" : {
+           "ap-south-1"   : {"AMI" : "ami-41e9c52e"},
+           "eu-west-3"   : {"AMI" : "ami-1960d164"},
+           "eu-west-2"   : {"AMI" : "ami-5daa463a"},
+           "eu-west-1"   : {"AMI" : "ami-58d7e821"},
+           "ap-northeast-2"   : {"AMI" : "ami-f030989e"},
+           "ap-northeast-1"   : {"AMI" : "ami-48a45937"},
+           "sa-east-1"   : {"AMI" : "ami-67fca30b"},
+           "ca-central-1"   : {"AMI" : "ami-7e21a11a"},
+           "ap-southeast-1"   : {"AMI" : "ami-81cefcfd"},
+           "ap-southeast-2"   : {"AMI" : "ami-963cecf4"},
+           "eu-central-1"   : {"AMI" : "ami-c7e0c82c"},
+           "us-east-1"   : {"AMI" : "ami-a4dc46db"},
+           "us-east-2"   : {"AMI" : "ami-6a003c0f"},
+           "us-west-1"   : {"AMI" : "ami-8d948ced"},
+           "us-west-2"   : {"AMI" : "ami-db710fa3"}
+       }       
+    },
+    "Resources": {
+        "PROBInstance": {
+            "Type": "AWS::EC2::Instance",
+            "Properties": {
+                "InstanceType": {
+                    "Ref": "InstanceType"
+                },
+                "SecurityGroups": [
+                    {
+                        "Ref": "InstanceSecurityGroup"
+                    }
+                ],
+                "KeyName": {
+                    "Ref": "KeyName"
+                },
+                "ImageId": {
+                    "Fn::FindInMap": [ "RegionMap",
+                        { "Ref": "AWS::Region" }, "AMI" ]
+                    
+                },
+                "BlockDeviceMappings" : [
+                    {
+                      "DeviceName" : "/dev/sda1",
+                      "Ebs" : { 
+                                 "VolumeSize" : { "Ref": "DiskSize" },
+                                 "VolumeType" : "gp2"
+                              }
+                    }
+                ],
+                "Tags" : [ 
+                    {
+                      "Key" : "Name", "Value" : { "Ref": "AWS::StackName" } 
+                    }
+                ],
+                "UserData"    : { "Fn::Base64" : { "Fn::Join" : [ "", [
+                     "#!/bin/bash\n\n",
+                     "echo 'Installing dependencies'\n",
+                     "apt-get update\n",
+                     "ecode=100\n",
+                     "while [ $ecode -ne 0 ]\n",
+                     "do\n",
+                     "  apt-get -y install git python-pip unzip default-jdk build-essential debootstrap libjpeg62 libtiff5 imagemagick screen\n",
+                     "  ecode=$?\n",
+                     "  echo 'Sleeping 1 second'\n",
+                     "  sleep 1\n",
+                     "done\n\n",
+                     "echo 'Done installing dependencies'\n",
+                     "pip install chmutil\n",
+                     "pip install https://s3.amazonaws.com/cloudformation-examples/aws-cfn-bootstrap-latest.tar.gz\n",
+                     "cd /home/ubuntu\n",
+                     "sudo -u ubuntu wget https://github.com/CRBS/probabilitymapviewer/releases/download/v3.0.0/probabilitymapviewer-3.0.0-jar-with-dependencies.jar\n",
+                     "imodfile='imod_4.9.4_RHEL7-64_CUDA6.5.sh'\n",
+                     "sudo -u ubuntu wget http://bio3d.colorado.edu/imod/AMD64-RHEL5/$imodfile\n",
+                     "chmod a+x $imodfile\n",
+                     "./$imodfile -yes\n",
+                     "rm $imodfile\n",
+                     "sudo -u ubuntu echo '. /usr/local/IMOD/IMOD-linux.sh' >> /home/ubuntu/.bashrc\n",
+                     "singy='singularity-2.3.2.tar.gz'\n",
+                     "sudo -u ubuntu wget https://github.com/singularityware/singularity/releases/download/2.3.2/$singy\n",
+                     "sudo -u ubuntu tar xvf $singy\n",
+                     "cd $singy\n",
+                     "sudo -u ubuntu ./configure --prefix=/usr/local\n",
+                     "sudo -u ubuntu make\n",
+                     "make install\n",
+                     "cd /home/ubuntu\n",
+                     "/usr/local/bin/cfn-signal --exit-code 0 -i gpu1 '", { "Ref" : "WaitHandle" }, "'\n"
+                       ]]}}
+            }, 
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "4ad8b7df-e9a7-4256-9ab2-9f548d4bb695"
+                }
+            }
+        },
+        "InstanceSecurityGroup": {
+            "Type": "AWS::EC2::SecurityGroup",
+            "Properties": {
+                "GroupDescription": "Enable SSH access via port 22",
+                "SecurityGroupIngress": [
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "22",
+                        "ToPort": "22",
+                        "CidrIp": {
+                            "Ref": "AccessLocation"
+                        }
+                    },
+                    {
+                        "IpProtocol": "tcp",
+                        "FromPort": "8080",
+                        "ToPort": "8080",
+                        "CidrIp": {
+                            "Ref": "AccessLocation"
+                        }
+                    }
+                ]
+            },
+            "Metadata": {
+                "AWS::CloudFormation::Designer": {
+                    "id": "85d8cb29-8b24-41c8-bca9-498f219d2b6e"
+                }
+            }
+        },
+        "WaitHandle" : {
+            "Type" : "AWS::CloudFormation::WaitConditionHandle",
+            "Properties" : {
+            }
+        },
+        "WaitCondition" : {
+            "Type" : "AWS::CloudFormation::WaitCondition",
+            "DependsOn" : "PROBInstance",
+            "Properties" : {
+                "Handle" : { "Ref" : "WaitHandle" },
+                "Timeout" : "4500"
+            }
+        }
+    },
+    "Outputs": {
+        "InstanceId": {
+            "Description": "InstanceId of the newly created EC2 instance",
+            "Value": {
+                "Ref": "PROBInstance"
+            }
+        },
+        "AZ": {
+            "Description": "Availability Zone of the newly created EC2 instance",
+            "Value": {
+                "Fn::GetAtt": [
+                    "PROBInstance",
+                    "AvailabilityZone"
+                ]
+            }
+        },
+        "PublicDNS": {
+            "Description": "Public DNSName of the newly created EC2 instance",
+            "Value": {
+                "Fn::GetAtt": [
+                    "PROBInstance",
+                    "PublicDnsName"
+                ]
+            }
+        },
+        "PublicIP": {
+            "Description": "Public IP address of the newly created EC2 instance",
+            "Value": {
+                "Fn::GetAtt": [
+                    "PROBInstance",
+                    "PublicIp"
+                ]
+            }
+        }
+    },
+    "Metadata": {
+        "AWS::CloudFormation::Designer": {
+            "85d8cb29-8b24-41c8-bca9-498f219d2b6e": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 60,
+                    "y": 90
+                },
+                "z": 1,
+                "embeds": []
+            },
+            "4ad8b7df-e9a7-4256-9ab2-9f548d4bb695": {
+                "size": {
+                    "width": 60,
+                    "height": 60
+                },
+                "position": {
+                    "x": 180,
+                    "y": 90
+                },
+                "z": 1,
+                "embeds": [],
+                "isassociatedwith": [
+                    "85d8cb29-8b24-41c8-bca9-498f219d2b6e"
+                ]
+            }
+        }
+    }
+}
