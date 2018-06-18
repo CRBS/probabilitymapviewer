@@ -3,7 +3,7 @@
 apt-get -y upgrade
 apt-get -y update
 apt-get -y install git python-pip unzip default-jdk build-essential debootstrap
-apt-get -y insstall libjpeg62 libtiff5
+apt-get -y install libjpeg62 libtiff5 imagemagick
 cd /tmp
 wget https://github.com/singularityware/singularity/releases/download/2.3.2/singularity-2.3.2.tar.gz
 tar xvf singularity-2.3.2.tar.gz
