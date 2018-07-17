@@ -7,7 +7,7 @@
 [git]: https://git-scm.com/
 [chmutil]: https://github.com/crbs/chmutil
 [imod]: http://bio3d.colorado.edu/imod
-
+[make]: https://www.gnu.org/software/make
 Probability Map Viewer
 ======================
 
@@ -44,6 +44,7 @@ Requirements
 * [Image Magick][imagemagick] command line programs (namely **convert**)
 * [Matlab Runtime 2013a][matlabruntime] (needed to run [CHM][chm])
 * [Maven][maven] 3.0 or higher **(to build)**
+* [Make][make] **(to build)**
 * [chmutil][chmutil] (used when probabilitymapviewer is converting dm4 files via **--dm4collectionmode**)
 * [IMOD][imod] (used to convert dm4 files via **--dm4collectionmode**)
 
@@ -59,10 +60,14 @@ For usage instructions run the following command
 (assuming the jar file is in the current working directory):
 
 ```Bash
-java -jar probabilitymapviewer-<VERSION>-jar-with-dependencies.jar -h
+java -jar probabilitymapviewer-3.0.1rc1-jar-with-dependencies.jar -h
 ```
 
-**\<VERSION\>** will be the version of the Probability Map Viewer.
+**OR**
+
+Click launch button below to spin up latest release of Probability Map Viewer on the clout (~10 minute spin up time): **(Oregon region)**
+
+[![Launch Probability Map Viewer AWS CloudFormation link](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=probabilitymapviewer-stack-3-0-1rc1&templateURL=https://s3-us-west-2.amazonaws.com/probabilitymapviewer-releases/3.0.1rc1/probabilitymapviewer_3.0.1rc1_basic_cloudformation.json)
 
 For more information visit the wiki:
 
@@ -123,3 +128,10 @@ REPRESENTATIONS AND EXTENDS NO WARRANTIES OF ANY KIND, EITHER IMPLIED OR
 EXPRESS, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF 
 MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE, OR THAT THE USE OF 
 THE Probability Map Viewer WILL NOT INFRINGE ANY PATENT, TRADEMARK OR OTHER RIGHTS. 
+
+Acknowledgements
+================
+
+* Support from NIH grants 5P41GM103412 (NCMIR) and 5P41GM103426 (NBCR).
+
+* This research benefitted from the use of credits from the National Institutes of Health (NIH) Cloud Credits Model Pilot, a component of the NIH Big Data to Knowledge (BD2K) program.
