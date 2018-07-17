@@ -68,6 +68,8 @@ Click launch button below to spin up latest release of Probability Map Viewer on
 
 [![Launch Probability Map Viewer AWS CloudFormation link](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=probabilitymapviewer-stack-3-0-1rc3&templateURL=https://s3-us-west-2.amazonaws.com/probabilitymapviewer-releases/3.0.1rc3/probabilitymapviewer_3.0.1rc3_basic_cloudformation.json)
 
+[Click here for detailed instructions on launching Probability Map Viewer via AWS CloudFormation](https://github.com/CRBS/probabilitymapviewer/wiki/Launch-Probability-Map-Viewer-via-AWS-CloudFormation)
+
 For more information visit the wiki:
 
 ### https://github.com/crbs/probabilitymapviewer/wiki
