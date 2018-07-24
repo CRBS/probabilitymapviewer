@@ -14,7 +14,8 @@ Probability Map Viewer
 
 Formerly known as  **Segmenter**
 
-[![Build Status](https://travis-ci.org/CRBS/probabilitymapviewer.svg?branch=master)](https://travis-ci.org/CRBS/probabilitymapviewer) [![Coverage Status](https://coveralls.io/repos/github/CRBS/probabilitymapviewer/badge.svg?branch=master)](https://coveralls.io/github/CRBS/probabilitymapviewer?branch=master) [![DOI](https://zenodo.org/badge/28115397.svg)](https://zenodo.org/badge/latestdoi/28115397)
+[![Build Status](https://travis-ci.org/CRBS/probabilitymapviewer.svg?branch=master)](https://travis-ci.org/CRBS/probabilitymapviewer) [![Coverage Status](https://coveralls.io/repos/github/CRBS/probabilitymapviewer/badge.svg?branch=master)](https://coveralls.io/github/CRBS/probabilitymapviewer?branch=master) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.1320449.svg)](https://doi.org/10.5281/zenodo.1320449)
+
 
 
 Probability Map Viewer is a web application using an embedded [Jetty][jetty] web server that 
