@@ -60,14 +60,14 @@ For usage instructions run the following command
 (assuming the jar file is in the current working directory):
 
 ```Bash
-java -jar probabilitymapviewer-3.0.1rc3-jar-with-dependencies.jar -h
+java -jar probabilitymapviewer-3.0.1-jar-with-dependencies.jar -h
 ```
 
 **OR**
 
 Click launch button below to spin up latest release of Probability Map Viewer on the cloud (~10 minute spin up time): **(Oregon region)**
 
-[![Launch Probability Map Viewer AWS CloudFormation link](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=probabilitymapviewer-stack-3-0-1rc3&templateURL=https://s3-us-west-2.amazonaws.com/probabilitymapviewer-releases/3.0.1rc3/probabilitymapviewer_3.0.1rc3_basic_cloudformation.json)
+[![Launch Probability Map Viewer AWS CloudFormation link](https://s3.amazonaws.com/cloudformation-examples/cloudformation-launch-stack.png)](https://console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks/new?stackName=probabilitymapviewer-stack-3-0-1&templateURL=https://s3-us-west-2.amazonaws.com/probabilitymapviewer-releases/3.0.1/probabilitymapviewer_3.0.1_basic_cloudformation.json)
 
 [Click here for detailed instructions on launching Probability Map Viewer via AWS CloudFormation](https://github.com/CRBS/probabilitymapviewer/wiki/Launch-Probability-Map-Viewer-via-AWS-CloudFormation)
 
