@@ -2,3 +2,4 @@ target/
 /nbproject/
 vagrant/*.log
 vagrant/.vagrant
+dist/
